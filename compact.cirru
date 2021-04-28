@@ -2,7 +2,7 @@
 {} (:package |respo-alerts)
   :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
-    :version |0.6.1
+    :version |0.6.2
   :files $ {}
     |respo-alerts.comp.container $ {}
       :ns $ quote
@@ -145,9 +145,9 @@
                     :input-style $ {} (:font-family ui/font-code)
                     :multiline? true
                     :validator $ fn (x)
-                      ; TODO try
-                        do (read-string x) nil
-                        catch js/Error e $ str e
+                      try
+                        do (parse-cirru x) nil
+                        fn (e) (str e)
                   fn (result d!) (println "\"finish editing!" result)
         |comp-hooks-usages $ quote
           defcomp comp-hooks-usages (states)
@@ -303,7 +303,7 @@
         |effect-fade $ quote
           defeffect effect-fade (show?) (action el at-place?)
             case action
-              :before-update $ if show? (do)
+              :before-update $ if show? nil
                 if
                   some? $ .-firstElementChild el
                   let
@@ -335,8 +335,8 @@
                       set! (.-opacity style) 1
                       set! (.-transform card-style) "\"scale(1) translate(0px,0px)"
                     , 10
-                do
-              action $ do
+                , nil
+              action nil
         |comp-alert $ quote
           defcomp comp-alert (states options on-read!)
             assert (fn? on-read!) "\"require a callback function"
@@ -567,7 +567,7 @@
                               :color $ hsl 0 0 70
                           <> title
                     list-> ({})
-                      ->> (:items options)
+                      -> (:items options)
                         map $ fn (item)
                           [] (:value item)
                             div
@@ -611,10 +611,8 @@
                     d! cursor $ assoc state :show? true
                 let
                     selected $ first
-                      filter
-                        fn (option)
-                          = selected-value $ :value option
-                        , candidates
+                      filter candidates $ fn (option)
+                        = selected-value $ :value option
                   if (some? selected)
                     <> (:display selected)
                       merge
@@ -707,7 +705,7 @@
                         :color $ hsl 0 0 70
                         :font-size 14
                       list-> ({})
-                        ->> candidates $ map-indexed
+                        -> candidates $ map-indexed
                           fn (idx candidate)
                             let
                                 value $ :value candidate
@@ -746,7 +744,7 @@
           defeffect effect-focus (query show?) (action el at-place?)
             case action
               :update $ when show? (focus-element! query)
-              action $ do
+              action nil
         |comp-confirm-modal $ quote
           defcomp comp-confirm-modal (options show? on-confirm! on-close!)
             []
@@ -794,7 +792,7 @@
           defeffect effect-select (query show?) (action el *local)
             case action
               :update $ when show? (select-element! query)
-              action $ do
+              action nil
       :proc $ quote ()
     |respo-alerts.style $ {}
       :ns $ quote
