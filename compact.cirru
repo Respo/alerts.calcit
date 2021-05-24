@@ -2,26 +2,19 @@
 {} (:package |respo-alerts)
   :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
-    :version |0.6.2
+    :version |0.7.0-a1
   :files $ {}
     |respo-alerts.comp.container $ {}
       :ns $ quote
-        ns respo-alerts.comp.container $ :require
-          [] hsl.core :refer $ [] hsl
-          [] respo-ui.core :as ui
-          [] respo.core :refer $ [] defcomp >> <> div button textarea span
-          [] respo.comp.space :refer $ [] =<
-          [] reel.comp.reel :refer $ [] comp-reel
-          [] respo-alerts.config :refer $ [] dev?
-          [] respo-alerts.core :refer $ [] comp-alert comp-confirm comp-prompt comp-select comp-modal comp-modal-menu use-alert use-confirm use-prompt use-modal use-modal-menu
-          [] respo.comp.inspect :refer $ [] comp-inspect
-          [] respo-alerts.style :as style
+        ns respo-alerts.comp.container $ :require (respo-ui.core :as ui)
+          respo.core :refer $ defcomp >> <> div button textarea span
+          respo.comp.space :refer $ =<
+          reel.comp.reel :refer $ comp-reel
+          respo-alerts.config :refer $ dev?
+          respo-alerts.core :refer $ comp-modal comp-modal-menu use-alert use-confirm use-prompt use-modal use-modal-menu
+          respo.comp.inspect :refer $ comp-inspect
+          respo-alerts.style :as style
       :defs $ {}
-        |comp-button $ quote
-          defcomp comp-button (text)
-            button
-              {} $ :style style/button
-              <> text
         |comp-container $ quote
           defcomp comp-container (reel)
             let
@@ -32,9 +25,7 @@
               div
                 {} $ :style
                   merge ui/global ui/fullscreen ui/column $ {} (:padding 20)
-                comp-stateful-actions $ >> states :stateful
                 comp-hooks-usages $ >> states :hooks
-                comp-select-actions $ >> states :select
                 comp-controlled-modals $ >> states :controlled
                 when dev? $ comp-inspect "\"states" states
                   {} $ :bottom 0
@@ -74,81 +65,6 @@
                         , d!
                   :ui demo-modal
                   :ui demo-modal-menu
-        |comp-select-actions $ quote
-          defcomp comp-select-actions (states)
-            let
-                cursor $ :cursor states
-                state $ either (:data states)
-                  {} $ :selected "\""
-              div ({})
-                div ({}) (<> "\"Select")
-                div
-                  {} $ :style
-                    {} $ :padding 16
-                  comp-select (>> states :select) (:selected state)
-                    []
-                      {} (:value "\"haskell") (:display "\"Haskell")
-                      {} (:value "\"clojure") (:display "\"Clojure")
-                      {} (:value "\"elixir") (:display "\"Elixir")
-                    {}
-                      :style-trigger $ {} (:border "\"1px solid #ddd") (:padding "\"0 8px") (:line-height "\"32px")
-                      :text "\"Select a item from:"
-                    fn (result d!) (println "\"finish selecting!" result)
-                      d! cursor $ assoc state :selected result
-        |comp-stateful-actions $ quote
-          defcomp comp-stateful-actions (states)
-            div ({})
-              div ({}) (<> "\"Components")
-              div
-                {} $ :style
-                  merge ui/row $ {} (:padding 16) (:align-items :flex-start)
-                comp-alert (>> states :alert)
-                  {}
-                    :trigger $ comp-button "\"Alert"
-                    :text "\"This would be a very long content of alerts, like some alerts..."
-                    :style $ {}
-                  fn (e d!) (println "\"message has been read.")
-                =< 8 nil
-                comp-confirm (>> states :confirm)
-                  {}
-                    :style $ {}
-                    :trigger $ comp-button "\"Confirm"
-                    :text "\"This would be a very long content of alerts, like some confirmation..."
-                  fn (e d!) (println "\"confirmed!")
-                =< 8 nil
-                comp-prompt (>> states :prompt)
-                  {}
-                    :trigger $ comp-button "\"Prompt"
-                    :text "\"This would be a very long content of alerts, like some prompt... pick number:"
-                    :initial $ str (rand-int 100)
-                    :style $ {}
-                    :placeholder "\"input demo"
-                    :button-text "\"Finish and submit"
-                  fn (result d!) (println "\"finish editing!" result)
-                =< 8 nil
-                comp-prompt (>> states :prompt-multiline)
-                  {}
-                    :trigger $ comp-button "\"Prompt multiline"
-                    :text "\"This would be a very long content of alerts, like some prompt... write multiple lines:"
-                    :initial $ str (rand-int 100)
-                    :style $ {}
-                    :input-style $ {} (:font-family ui/font-code)
-                    :multiline? true
-                  fn (result d!) (println "\"finish editing!" result)
-                =< 8 nil
-                comp-prompt (>> states :prompt-validator)
-                  {}
-                    :trigger $ comp-button "\"Prompt validator"
-                    :text "\"This would be a very long content of alerts, like some prompt... write multiple lines:"
-                    :initial $ str (rand-int 100)
-                    :style $ {}
-                    :input-style $ {} (:font-family ui/font-code)
-                    :multiline? true
-                    :validator $ fn (x)
-                      try
-                        do (parse-cirru x) nil
-                        fn (e) (str e)
-                  fn (result d!) (println "\"finish editing!" result)
         |comp-hooks-usages $ quote
           defcomp comp-hooks-usages (states)
             let
@@ -158,6 +74,22 @@
                   {} $ :title "\"demo"
                 prompt-plugin $ use-prompt (>> states :prompt)
                   {} $ :title "\"demo"
+                prompt-multilines-plugin $ use-prompt (>> states :multilines-prompt)
+                  {} (:title "\"demo multilines") (:text "\"This would be a very long content of alerts, like some prompt... write multiple lines:")
+                    :initial $ str (rand-int 100)
+                    :style $ {}
+                    :input-style $ {} (:font-family ui/font-code)
+                    :multiline? true
+                prompt-validation-plugin $ use-prompt (>> states :multilines-prompt)
+                  {} (:titl "\"validated") (:text "\"This would be a very long content of alerts, like some prompt... write multiple lines:")
+                    :initial $ str (rand-int 100)
+                    :style $ {}
+                    :input-style $ {} (:font-family ui/font-code)
+                    :multiline? true
+                    :validator $ fn (x)
+                      try
+                        do (parse-cirru x) nil
+                        fn (e) (str e)
               div ({})
                 div ({}) (<> "\"Hooks")
                 div ({})
@@ -176,9 +108,23 @@
                         :show prompt-plugin
                         , d! $ fn (text)
                           println "\"read from prompt" $ pr-str text
+                  =< 8 nil
+                  button $ {} (:inner-text "\"show multilines prompt") (:style ui/button)
+                    :on-click $ fn (e d!)
+                        :show prompt-multilines-plugin
+                        , d! $ fn (text)
+                          println "\"read from prompt" $ pr-str text
+                  =< 8 nil
+                  button $ {} (:inner-text "\"show validated prompt") (:style ui/button)
+                    :on-click $ fn (e d!)
+                        :show prompt-validation-plugin
+                        , d! $ fn (text)
+                          println "\"read from prompt" $ pr-str text
                 :ui alert-plugin
                 :ui confirm-plugin
                 :ui prompt-plugin
+                :ui prompt-multilines-plugin
+                :ui prompt-validation-plugin
       :proc $ quote ()
     |respo-alerts.config $ {}
       :ns $ quote (ns respo-alerts.config)
@@ -289,16 +235,16 @@
     |respo-alerts.core $ {}
       :ns $ quote
         ns respo-alerts.core $ :require
-          [] respo.util.format :refer $ [] hsl
-          [] respo.schema :as respo-schema
-          [] respo-ui.core :as ui
-          [] respo.core :refer $ [] defcomp defplugin list-> <> >> div button textarea span input a defeffect
-          [] respo.comp.space :refer $ [] =<
-          [] respo-alerts.config :refer $ [] dev?
-          [] respo-alerts.style :as style
-          [] respo-alerts.schema :as schema
-          [] respo-alerts.util :refer $ [] focus-element! select-element!
-          [] respo-alerts.style :as style
+          respo.util.format :refer $ hsl
+          respo.schema :as respo-schema
+          respo-ui.core :as ui
+          respo.core :refer $ defcomp defplugin list-> <> >> div button textarea span input a defeffect
+          respo.comp.space :refer $ =<
+          respo-alerts.config :refer $ dev?
+          respo-alerts.style :as style
+          respo-alerts.schema :as schema
+          respo-alerts.util :refer $ focus-element! select-element!
+          respo-alerts.style :as style
       :defs $ {}
         |effect-fade $ quote
           defeffect effect-fade (show?) (action el at-place?)
@@ -337,47 +283,7 @@
                     , 10
                 , nil
               action nil
-        |comp-alert $ quote
-          defcomp comp-alert (states options on-read!)
-            assert (fn? on-read!) "\"require a callback function"
-            let
-                trigger $ :trigger options
-                cursor $ :cursor states
-                state $ either (:data states)
-                  {} $ :show? false
-              assert "\"need to use an element as trigger" $ and (record? trigger)
-                or (relevant-record? trigger respo-schema/Component) (relevant-record? trigger respo-schema/Element)
-              span
-                {}
-                  :style $ merge
-                    {} (:cursor :pointer) (:display :inline-block)
-                    :style options
-                  :on-click $ fn (e d!)
-                    d! cursor $ assoc state :show? true
-                , trigger $ comp-alert-modal options (:show? state) on-read!
-                  fn (d!)
-                    d! cursor $ assoc state :show? false
         |*next-confirm-task $ quote (defatom *next-confirm-task nil)
-        |comp-confirm $ quote
-          defcomp comp-confirm (states options on-confirm!)
-            assert "\"require a callback function" $ fn? on-confirm!
-            let
-                trigger $ :trigger options
-                cursor $ :cursor states
-                state $ either (:data states)
-                  {} $ :show? false
-              assert "\"need to use an element as trigger" $ and (record? trigger)
-                or (relevant-record? trigger respo-schema/Component) (relevant-record? trigger respo-schema/Element)
-              span
-                {}
-                  :style $ merge
-                    {} (:cursor :pointer) (:display :inline-block)
-                    :style options
-                  :on-click $ fn (e d!)
-                    d! cursor $ assoc state :show? true
-                , trigger $ comp-confirm-modal options (:show? state) on-confirm!
-                  fn (d!)
-                    d! cursor $ assoc state :show? false
         |comp-alert-modal $ quote
           defcomp comp-alert-modal (options show? on-read! on-close!)
             []
@@ -411,26 +317,6 @@
                         {} (:style style/button) (:class-name schema/confirm-button-name)
                           :on-click $ fn (e d!) (on-read! e d!) (on-close! d!)
                         <> $ either (:button-text options) "\"Read"
-        |comp-prompt $ quote
-          defcomp comp-prompt (states options on-finish!)
-            assert "\"on-finish! a callback function" $ fn? on-finish!
-            let
-                trigger $ :trigger options
-                cursor $ :cursor states
-                state $ either (:data states)
-                  {} (:show? false) (:failure nil)
-              assert "\"need to use an element as trigger" $ and (record? trigger)
-                or (relevant-record? trigger respo-schema/Component) (relevant-record? trigger respo-schema/Element)
-              span
-                {}
-                  :style $ merge
-                    {} (:cursor :pointer) (:display :inline-block)
-                    :style options
-                  :on-click $ fn (e d!)
-                    d! cursor $ assoc state :show? true
-                , trigger $ comp-prompt-modal (>> states :modal) options (:show? state) on-finish!
-                  fn (d!)
-                    d! cursor $ assoc state :show? false
         |use-modal $ quote
           defplugin use-modal (states options)
             let
@@ -594,39 +480,6 @@
                 :show $ fn (d! next-task) (reset! *next-prompt-task next-task)
                   d! cursor $ assoc state :show? true
         |*next-prompt-task $ quote (defatom *next-prompt-task nil)
-        |comp-select $ quote
-          defcomp comp-select (states selected-value candidates options on-read!)
-            assert (fn? on-read!) "\"require a callback function"
-            assert (list? candidates) "\"candidates should be a list"
-            let
-                cursor $ :cursor states
-                state $ either (:data states)
-                  {} $ :show? false
-              span
-                {}
-                  :style $ merge
-                    {} (:cursor :pointer) (:display :inline-block)
-                    :style options
-                  :on-click $ fn (e d!)
-                    d! cursor $ assoc state :show? true
-                let
-                    selected $ first
-                      filter candidates $ fn (option)
-                        = selected-value $ :value option
-                  if (some? selected)
-                    <> (:display selected)
-                      merge
-                        {} $ :display :inline-block
-                        :style-trigger options
-                    <>
-                      either (:placeholder options) "\"Nothing"
-                      merge
-                        {} (:font-family ui/font-fancy)
-                          :color $ hsl 0 0 60
-                          :display :inline-block
-                        :style-trigger options
-                comp-select-modal candidates selected-value options (:show? state) on-read! $ fn (d!)
-                  d! cursor $ assoc state :show? false
         |style-menu-item $ quote
           def style-menu-item $ {}
             :border-top $ str "\"1px solid " (hsl 0 0 90)
@@ -669,61 +522,6 @@
                       (some? (:render-body options))
                         (:render-body options) on-close
                       true "\"TODO render body"
-        |comp-select-modal $ quote
-          defcomp comp-select-modal (candidates selected-value options show? on-read! on-close)
-            [] (effect-fade show?)
-              div ({})
-                if show? $ div
-                  {}
-                    :style $ merge ui/fullscreen ui/center style/backdrop
-                    :on-click $ fn (e d!)
-                      let
-                          event $ :event e
-                        .stopPropagation event
-                        on-read! nil d!
-                        on-close d!
-                  div
-                    {}
-                      :style $ merge ui/column ui/global style/card
-                        {} $ :line-height "\"32px"
-                      :on-click $ fn (e d!) nil
-                    div
-                      {} $ :style ui/row-parted
-                      <>
-                        either (:text options) "\"Select from list:"
-                        {} (:font-family ui/font-fancy)
-                          :color $ hsl 0 0 60
-                      a
-                        {}
-                          :style $ merge ui/link
-                            {} $ :font-family ui/font-fancy
-                          :on-click $ fn (e d!) (on-read! nil d!) (on-close d!)
-                        <> "\"Clear"
-                    =< nil 8
-                    if (empty? candidates)
-                      <> "\"No item to select" $ {} (:font-family ui/font-fancy)
-                        :color $ hsl 0 0 70
-                        :font-size 14
-                      list-> ({})
-                        -> candidates $ map-indexed
-                          fn (idx candidate)
-                            let
-                                value $ :value candidate
-                                display $ :display candidate
-                              [] (either value idx)
-                                div
-                                  {}
-                                    :style $ merge
-                                      {}
-                                        :border-bottom $ str "\"1px solid " (hsl 0 0 90)
-                                        :line-height "\"40px"
-                                        :padding "\"0 8px"
-                                      when
-                                        = selected-value $ :value candidate
-                                        {} $ :background-color (hsl 0 0 96)
-                                    :on-click $ fn (e d!) (on-read! value d!) (on-close d!)
-                                  <> $ either display "\"<default display>"
-                    =< nil 8
         |use-modal-menu $ quote
           defplugin use-modal-menu (states options)
             let
