@@ -4,7 +4,6 @@ Respo alerts library in Calcit-js
 
 > Respo web page based on calcit-js.
 
-Docs https://github.com/Respo/alerts
 Demo http://repo.respo-mvc.org/alerts.calcit/ .
 
 ### Hooks usages
@@ -17,7 +16,6 @@ respo-alerts.core :refer $ use-alert use-prompt use-confirm
 
 ```cirru
 {}
-  :trigger (comp-buttom "|trigger")
   :text "|message text",
   :style $ {}
   :card-style $ {}
@@ -35,7 +33,6 @@ let
 
 ```cirru
 {}
-  :trigger (comp-button "|trigger")
   :text "|message text"
   :style $ {}
   :card-style $ {}
@@ -54,7 +51,6 @@ let
 
 ```cirru
 {}
-  :trigger (comp-button "|trigger")
   :text "|message text"
   :style $ {}
   :input-style $ {}
