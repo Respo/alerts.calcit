@@ -26,7 +26,7 @@ let
     alert-plugin $ use-alert (>> states :alert) ({} (:title "|demo"))
   button $ {}
     :on-click $ fn (e d!)
-      (:show alert-plugin) d!
+      .show alert-plugin d!
 ```
 
 #### `use-confirm`
@@ -41,10 +41,15 @@ let
 ```cirru
 let
     confirm-plugin $ use-confirm (>> states :alert) ({} (:title "|demo"))
- button
-  {}
-    :on-click $ fn (e d!)
-      (:show confirm-plugin) d! $ fn () (println "|after confirmed")
+  button
+    {}
+      :on-click $ fn (e d!)
+        ; "open UI"
+        .show confirm-plugin d! $ fn ()
+          println "|after confirmed"
+
+  ; "render UI"
+  .render confirm-plugin
 ```
 
 #### `use-prompt`
@@ -68,10 +73,11 @@ let
     prompt-plugin $ use-prompt (>> states :prompt) ({} (:title "|demo"))
   button $ {}
     :on-click $ fn (e d!)
-      (:show prompt-plugin) d! $ fn (text)
+      .show prompt-plugin d! $ fn (text)
         println "|read from prompt" (pr-str text)
 
-  :ui prompt-plugin
+  ; "render UI"
+  .render prompt-plugin
 ```
 
 #### `use-modal`
@@ -86,7 +92,11 @@ let
         div ({})
           <> "|Place for child content"
 
-  (:show demo-modal) d!
+  ; "event handler to open menu"
+  .show demo-modal d!
+
+  ; "render UI"
+  .render demo-modal
 ```
 
 #### `use-modal-menu`
@@ -103,7 +113,11 @@ let
       :on-result $ fn (result d!)
         println "|got result" result
 
-  (:show demo-modal-menu) d!
+  ; "event handler to open menu"
+  .show demo-modal-menu d!
+
+  ; "render UI"
+  .render demo-modal-menu
 ```
 
 > No hooks API for `comp-select` yet.

@@ -2,7 +2,7 @@
 {} (:package |respo-alerts)
   :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
-    :version |0.7.0-a1
+    :version |0.8.0-a1
   :files $ {}
     |respo-alerts.comp.container $ {}
       :ns $ quote
@@ -55,16 +55,12 @@
                   {} $ :style
                     {} $ :padding "\"8px 16px"
                   button $ {} (:inner-text "\"show modal") (:style ui/button)
-                    :on-click $ fn (e d!)
-                        :show demo-modal
-                        , d!
+                    :on-click $ fn (e d!) (.show demo-modal d!)
                   =< 8 nil
                   button $ {} (:inner-text "\"show modal menu") (:style ui/button)
-                    :on-click $ fn (e d!)
-                        :show demo-modal-menu
-                        , d!
-                  :ui demo-modal
-                  :ui demo-modal-menu
+                    :on-click $ fn (e d!) (.show demo-modal-menu d!)
+                  .render demo-modal
+                  .render demo-modal-menu
         |comp-hooks-usages $ quote
           defcomp comp-hooks-usages (states)
             let
@@ -94,37 +90,31 @@
                 div ({}) (<> "\"Hooks")
                 div ({})
                   button $ {} (:inner-text "\"show alert") (:style ui/button)
-                    :on-click $ fn (e d!)
-                        :show alert-plugin
-                        , d!
+                    :on-click $ fn (e d!) (.show alert-plugin d!)
                   =< 8 nil
                   button $ {} (:inner-text "\"show confirm") (:style ui/button)
                     :on-click $ fn (e d!)
-                        :show confirm-plugin
-                        , d! $ fn () (println "\"after confirmed")
+                      .show confirm-plugin d! $ fn () (println "\"after confirmed")
                   =< 8 nil
                   button $ {} (:inner-text "\"show prompt") (:style ui/button)
                     :on-click $ fn (e d!)
-                        :show prompt-plugin
-                        , d! $ fn (text)
-                          println "\"read from prompt" $ pr-str text
+                      .show prompt-plugin d! $ fn (text)
+                        println "\"read from prompt" $ pr-str text
                   =< 8 nil
                   button $ {} (:inner-text "\"show multilines prompt") (:style ui/button)
                     :on-click $ fn (e d!)
-                        :show prompt-multilines-plugin
-                        , d! $ fn (text)
-                          println "\"read from prompt" $ pr-str text
+                      .show prompt-multilines-plugin d! $ fn (text)
+                        println "\"read from prompt" $ pr-str text
                   =< 8 nil
                   button $ {} (:inner-text "\"show validated prompt") (:style ui/button)
                     :on-click $ fn (e d!)
-                        :show prompt-validation-plugin
-                        , d! $ fn (text)
-                          println "\"read from prompt" $ pr-str text
-                :ui alert-plugin
-                :ui confirm-plugin
-                :ui prompt-plugin
-                :ui prompt-multilines-plugin
-                :ui prompt-validation-plugin
+                      .show prompt-validation-plugin d! $ fn (text)
+                        println "\"read from prompt" $ pr-str text
+                .render alert-plugin
+                .render confirm-plugin
+                .render prompt-plugin
+                .render prompt-multilines-plugin
+                .render prompt-validation-plugin
       :proc $ quote ()
     |respo-alerts.config $ {}
       :ns $ quote (ns respo-alerts.config)
@@ -318,35 +308,41 @@
                           :on-click $ fn (e d!) (on-read! e d!) (on-close! d!)
                         <> $ either (:button-text options) "\"Read"
         |use-modal $ quote
-          defplugin use-modal (states options)
+          defn use-modal (states options)
             let
                 cursor $ :cursor states
                 state $ either (:data states)
                   {} $ :show? false
-              {}
-                :ui $ comp-modal options (:show? state)
+              ::
+                %{} Modal-class
+                  :render $ fn (self) (nth self 1)
+                  :show $ fn (self d!)
+                    d! cursor $ assoc state :show? true
+                  :close $ fn (self d!)
+                    d! cursor $ assoc state :show? true
+                comp-modal options (:show? state)
                   fn (d!)
                     d! cursor $ assoc state :show? false
-                :show $ fn (d!)
-                  d! cursor $ assoc state :show? true
-                :close $ fn (d!)
-                  d! cursor $ assoc state :show? true
         |use-confirm $ quote
           defplugin use-confirm (states options)
             let
                 cursor $ :cursor states
                 state $ either (:data states)
                   {} $ :show? false
-              {}
-                :ui $ comp-confirm-modal options (:show? state)
+              ::
+                %{} Modal-class
+                  :render $ fn (self) (nth self 1)
+                  :show $ fn (self d! next-task) (reset! *next-confirm-task next-task)
+                    d! cursor $ assoc state :show? true
+                  :close $ fn (self d!)
+                    d! cursor $ assoc state :show? true
+                comp-confirm-modal options (:show? state)
                   fn (e d!)
                     if (some? @*next-confirm-task) (@*next-confirm-task)
                     reset! *next-confirm-task nil
                   fn (d!)
                     d! cursor $ assoc state :show? false
                     reset! *next-confirm-task nil
-                :show $ fn (d! next-task) (reset! *next-confirm-task next-task)
-                  d! cursor $ assoc state :show? true
         |comp-prompt-modal $ quote
           defcomp comp-prompt-modal (states options show? on-finish! on-close!)
             let
@@ -468,8 +464,14 @@
                 cursor $ :cursor states
                 state $ either (:data states)
                   {} (:show? false) (:failure nil)
-              {}
-                :ui $ comp-prompt-modal (>> states :modal) options (:show? state)
+              ::
+                %{} Modal-class
+                  :render $ fn (self) (nth self 1)
+                  :show $ fn (self d! next-task) (reset! *next-prompt-task next-task)
+                    d! cursor $ assoc state :show? true
+                  :close $ fn (self d!)
+                    d! cursor $ assoc state :show? true
+                comp-prompt-modal (>> states :modal) options (:show? state)
                   fn (text d!)
                     if (some? @*next-prompt-task) (@*next-prompt-task text)
                     reset! *next-prompt-task nil
@@ -477,8 +479,6 @@
                   fn (d!)
                     d! cursor $ assoc state :show? false
                     reset! *next-prompt-task nil
-                :show $ fn (d! next-task) (reset! *next-prompt-task next-task)
-                  d! cursor $ assoc state :show? true
         |*next-prompt-task $ quote (defatom *next-prompt-task nil)
         |style-menu-item $ quote
           def style-menu-item $ {}
@@ -523,21 +523,25 @@
                         (:render-body options) on-close
                       true "\"TODO render body"
         |use-modal-menu $ quote
-          defplugin use-modal-menu (states options)
+          defn use-modal-menu (states options)
             let
                 cursor $ :cursor states
                 state $ either (:data states)
                   {} $ :show? false
-              {}
-                :ui $ comp-modal-menu options (:show? state)
+              ::
+                %{} Modal-class
+                  :render $ fn (self) (nth self 1)
+                  :show $ fn (self d!)
+                    d! cursor $ assoc state :show? true
+                  :close $ fn (self d!)
+                    d! cursor $ assoc state :show? true
+                comp-modal-menu options (:show? state)
                   fn (d!)
                     d! cursor $ assoc state :show? false
                   fn (result d!)
                       :on-result options
                       , result d!
                     d! cursor $ assoc state :show? false
-                :show $ fn (d!)
-                  d! cursor $ assoc state :show? true
         |effect-focus $ quote
           defeffect effect-focus (query show?) (action el at-place?)
             case action
@@ -571,6 +575,7 @@
                         {} (:style style/button) (:class-name schema/confirm-button-name)
                           :on-click $ fn (e d!) (on-confirm! e d!) (on-close! d!)
                         <> $ either (:button-text options) "\"Confirm"
+        |Modal-class $ quote (defrecord Modal-class :render :show :close)
         |use-alert $ quote
           defplugin use-alert (states options)
             let
@@ -580,12 +585,15 @@
                 on-read $ either (:on-read options)
                   fn (e d!)
                     d! cursor $ assoc state :show? false
-              {}
-                :ui $ comp-alert-modal options (:show? state) on-read
-                  fn (d!)
-                    d! cursor $ assoc state :show? false
-                :show $ fn (d!)
-                  d! cursor $ assoc state :show? true
+              ::
+                %{} Modal-class
+                  :render $ fn (self) (nth self 1)
+                  :show $ fn (self d!)
+                    d! cursor $ assoc state :show? true
+                  :close $ fn (self d!)
+                    d! cursor $ assoc state :show? true
+                comp-alert-modal options (:show? state) on-read $ fn (d!)
+                  d! cursor $ assoc state :show? false
         |effect-select $ quote
           defeffect effect-select (query show?) (action el *local)
             case action
