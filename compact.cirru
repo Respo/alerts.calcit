@@ -2,7 +2,8 @@
 {} (:package |respo-alerts)
   :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
-    :version |0.8.1
+    :version |0.8.2
+  :entries $ {}
   :files $ {}
     |respo-alerts.core $ {}
       :ns $ quote
@@ -164,7 +165,7 @@
                     :on-click $ fn (e d!)
                       let
                           event $ :event e
-                        .stopPropagation event
+                        .!stopPropagation event
                         on-close d!
                   div
                     {}
@@ -188,9 +189,8 @@
         |*next-prompt-task $ quote (defatom *next-prompt-task nil)
         |effect-focus $ quote
           defeffect effect-focus (query show?) (action el at-place?)
-            case action
-              :update $ when show? (focus-element! query)
-              action nil
+            case-default action nil $ :update
+              when show? $ focus-element! query
         |comp-modal-menu $ quote
           defcomp comp-modal-menu (options show? on-close! on-select!)
             [] (effect-fade show?)
@@ -201,7 +201,7 @@
                     :on-click $ fn (e d!)
                       let
                           event $ :event e
-                        .stopPropagation event
+                        .!stopPropagation event
                         on-close! d!
                   div
                     {}
@@ -340,16 +340,16 @@
                         <> $ either (:button-text options) "\"Read"
         |effect-fade $ quote
           defeffect effect-fade (show?) (action el at-place?)
-            case action
+            case-default action nil
               :before-update $ if show? nil
                 if
                   some? $ .-firstElementChild el
                   let
                       target $ .-firstElementChild el
-                      cloned $ .cloneNode target true
+                      cloned $ .!cloneNode target true
                       style $ .-style cloned
                       card-style $ -> cloned .-firstElementChild .-style
-                    .appendChild js/document.body cloned
+                    js/document.body.appendChild cloned
                     js/setTimeout
                       fn ()
                         set! (.-opacity style) 0
@@ -357,7 +357,7 @@
                         set! (.-transform card-style) "\"scale(0.94) translate(0px,-20px)"
                       , 10
                     js/setTimeout
-                      fn () $ .remove cloned
+                      fn () $ .!remove cloned
                       , 240
               :update $ if show?
                 let
@@ -374,12 +374,10 @@
                       set! (.-transform card-style) "\"scale(1) translate(0px,0px)"
                     , 10
                 , nil
-              action nil
         |effect-select $ quote
           defeffect effect-select (query show?) (action el *local)
-            case action
-              :update $ when show? (select-element! query)
-              action nil
+            case-default action nil $ :update
+              when show? $ select-element! query
     |respo-alerts.main $ {}
       :ns $ quote
         ns respo-alerts.main $ :require
@@ -445,7 +443,7 @@
         |focus-element! $ quote
           defn focus-element! (query)
             let
-                target $ .querySelector js/document query
+                target $ js/document.querySelector query
               if (some? target) (.focus target)
         |select-element! $ quote
           defn select-element! (query)
@@ -453,20 +451,17 @@
                 target $ .querySelector js/document query
               if (some? target) (.select target)
     |respo-alerts.updater $ {}
-      :ns $ quote (ns respo-alerts.updater)
+      :ns $ quote
+        ns respo-alerts.updater $ :require
+          respo.cursor :refer $ update-states
       :defs $ {}
         |updater $ quote
           defn updater (store op op-data op-id op-time)
-            case op
-              :states $ let-sugar
-                    [] cursor new-state
-                    , op-data
-                assoc-in store
-                  concat ([] :states) cursor $ [] :data
-                  , new-state
+            case-default op
+              do (js/console.log "\"Unknown op:" op) store
+              :states $ update-states store op-data
               :content $ assoc store :content op-data
               :hydrate-storage op-data
-              op store
     |respo-alerts.config $ {}
       :ns $ quote (ns respo-alerts.config)
       :defs $ {}
@@ -492,6 +487,7 @@
           respo-alerts.core :refer $ comp-modal comp-modal-menu use-alert use-confirm use-prompt use-modal use-modal-menu
           respo.comp.inspect :refer $ comp-inspect
           respo-alerts.style :as style
+          "\"@calcit/std" :refer $ rand-int
       :defs $ {}
         |comp-container $ quote
           defcomp comp-container (reel)
