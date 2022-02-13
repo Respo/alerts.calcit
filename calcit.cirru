@@ -3886,7 +3886,7 @@
                                                 :by |rJG4IHzWf
                                               |r $ {}
                                                 :data $ {}
-                                                  |T $ {} (:text |.stopPropagation) (:type :leaf) (:at 1571768328670) (:by |rJG4IHzWf)
+                                                  |T $ {} (:text |.!stopPropagation) (:type :leaf) (:at 1644774779786) (:by |rJG4IHzWf)
                                                   |j $ {} (:text |event) (:type :leaf) (:at 1571768328670) (:by |rJG4IHzWf)
                                                 :type :expr
                                                 :at 1571768328670
@@ -4758,8 +4758,7 @@
                 :by |root
               |v $ {}
                 :data $ {}
-                  |T $ {} (:text |.setItem) (:type :leaf) (:at 1546400658917) (:by |root)
-                  |j $ {} (:text |js/localStorage) (:type :leaf) (:at 1546400658917) (:by |root)
+                  |j $ {} (:text |js/localStorage.setItem) (:type :leaf) (:at 1644774710470) (:by |rJG4IHzWf)
                   |r $ {}
                     :data $ {}
                       |T $ {} (:text |:storage-key) (:type :leaf) (:at 1546400658917) (:by |root)
@@ -4798,8 +4797,7 @@
               |j $ {} (:text |mount-target) (:type :leaf) (:at 1546400658917) (:by |root)
               |r $ {}
                 :data $ {}
-                  |T $ {} (:text |.querySelector) (:type :leaf) (:at 1546400658917) (:by |root)
-                  |j $ {} (:text |js/document) (:type :leaf) (:at 1546400658917) (:by |root)
+                  |j $ {} (:text |js/document.querySelector) (:type :leaf) (:at 1644774747768) (:by |rJG4IHzWf)
                   |r $ {} (:text ||.app) (:type :leaf) (:at 1546400658917) (:by |root)
                 :type :expr
                 :at 1546400658917
@@ -4876,8 +4874,7 @@
                 :by |root
               |yr $ {}
                 :data $ {}
-                  |T $ {} (:text |.addEventListener) (:type :leaf) (:at 1546400658917) (:by |root)
-                  |j $ {} (:text |js/window) (:type :leaf) (:at 1546400658917) (:by |root)
+                  |j $ {} (:text |js/window.addEventListener) (:type :leaf) (:at 1644774695070) (:by |rJG4IHzWf)
                   |r $ {} (:text ||beforeunload) (:type :leaf) (:at 1546400658917) (:by |root)
                   |v $ {}
                     :data $ {}
@@ -4918,8 +4915,7 @@
                           |T $ {} (:text |raw) (:type :leaf) (:at 1546400658917) (:by |root)
                           |j $ {}
                             :data $ {}
-                              |T $ {} (:text |.getItem) (:type :leaf) (:at 1546400658917) (:by |root)
-                              |j $ {} (:text |js/localStorage) (:type :leaf) (:at 1546400658917) (:by |root)
+                              |j $ {} (:text |js/localStorage.getItem) (:type :leaf) (:at 1644774700173) (:by |rJG4IHzWf)
                               |r $ {}
                                 :data $ {}
                                   |T $ {} (:text |:storage-key) (:type :leaf) (:at 1546400658917) (:by |root)
@@ -5454,8 +5450,7 @@
                           |T $ {} (:text |target) (:type :leaf) (:at 1571768989790) (:by |rJG4IHzWf)
                           |j $ {}
                             :data $ {}
-                              |T $ {} (:text |.querySelector) (:type :leaf) (:at 1571768989790) (:by |rJG4IHzWf)
-                              |j $ {} (:text |js/document) (:type :leaf) (:at 1571768989790) (:by |rJG4IHzWf)
+                              |j $ {} (:text |js/document.querySelector) (:type :leaf) (:at 1644774761908) (:by |rJG4IHzWf)
                               |r $ {} (:text |query) (:type :leaf) (:at 1571768989790) (:by |rJG4IHzWf)
                             :type :expr
                             :at 1571768989790
@@ -5478,7 +5473,7 @@
                         :by |rJG4IHzWf
                       |r $ {}
                         :data $ {}
-                          |T $ {} (:text |.select) (:type :leaf) (:at 1571768989790) (:by |rJG4IHzWf)
+                          |T $ {} (:text |.!select) (:type :leaf) (:at 1644774763589) (:by |rJG4IHzWf)
                           |j $ {} (:text |target) (:type :leaf) (:at 1571768989790) (:by |rJG4IHzWf)
                         :type :expr
                         :at 1571768989790

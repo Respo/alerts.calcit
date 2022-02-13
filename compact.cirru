@@ -319,7 +319,7 @@
                     :on-click $ fn (e d!)
                       let
                           event $ :event e
-                        .stopPropagation event
+                        .!stopPropagation event
                         on-read! e d!
                         on-close! d!
                   div
@@ -396,10 +396,10 @@
           defn render-app! () $ render! mount-target (comp-container @*reel) dispatch!
         |persist-storage! $ quote
           defn persist-storage! (? e)
-            .setItem js/localStorage (:storage-key config/site)
+            js/localStorage.setItem (:storage-key config/site)
               js/JSON.stringify $ to-cirru-edn (:store @*reel)
         |mount-target $ quote
-          def mount-target $ .querySelector js/document |.app
+          def mount-target $ js/document.querySelector |.app
         |*reel $ quote
           defatom *reel $ -> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store)
         |main! $ quote
@@ -408,10 +408,10 @@
             render-app!
             add-watch *reel :changes $ fn (reel prev) (render-app!)
             listen-devtools! |a dispatch!
-            .addEventListener js/window |beforeunload $ fn (event) (persist-storage!)
+            js/window.addEventListener |beforeunload $ fn (event) (persist-storage!)
             repeat! 60 persist-storage!
             let
-                raw $ .getItem js/localStorage (:storage-key config/site)
+                raw $ js/localStorage.getItem (:storage-key config/site)
               when (some? raw)
                 dispatch! :hydrate-storage $ extract-cirru-edn (js/JSON.parse raw)
             println "|App started."
@@ -448,8 +448,8 @@
         |select-element! $ quote
           defn select-element! (query)
             let
-                target $ .querySelector js/document query
-              if (some? target) (.select target)
+                target $ js/document.querySelector query
+              if (some? target) (.!select target)
     |respo-alerts.updater $ {}
       :ns $ quote
         ns respo-alerts.updater $ :require
