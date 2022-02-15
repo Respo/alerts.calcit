@@ -29,6 +29,12 @@ let
       .show alert-plugin d!
 ```
 
+extra argument can be added to overwrite `:text` field:
+
+```cirru
+.show alert-plugin d! "|Extra text"
+```
+
 #### `use-confirm`
 
 ```cirru

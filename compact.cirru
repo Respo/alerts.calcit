@@ -2,7 +2,7 @@
 {} (:package |respo-alerts)
   :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
-    :version |0.8.2
+    :version |0.8.3
   :entries $ {}
   :files $ {}
     |respo-alerts.core $ {}
@@ -25,19 +25,25 @@
             let
                 cursor $ :cursor states
                 state $ either (:data states)
-                  {} $ :show? false
+                  {} (:show? false)
+                    :text $ :text options
                 on-read $ either (:on-read options)
                   fn (e d!)
                     d! cursor $ assoc state :show? false
               ::
                 %{} Modal-class
                   :render $ fn (self) (nth self 1)
-                  :show $ fn (self d!)
-                    d! cursor $ assoc state :show? true
+                  :show $ fn (self d! ? text)
+                    if (some? text)
+                      d! cursor $ assoc state :show? true :text text
+                      d! cursor $ assoc state :show? true
                   :close $ fn (self d!)
                     d! cursor $ assoc state :show? true
-                comp-alert-modal options (:show? state) on-read $ fn (d!)
-                  d! cursor $ assoc state :show? false
+                comp-alert-modal
+                  assoc options :text $ :text state
+                  :show? state
+                  , on-read $ fn (d!)
+                    d! cursor $ assoc state :show? false
         |use-modal $ quote
           defn use-modal (states options)
             let
@@ -410,7 +416,7 @@
             listen-devtools! |a dispatch!
             js/window.addEventListener |beforeunload $ fn (event) (persist-storage!)
             repeat! 60 persist-storage!
-            let
+            ; let
                 raw $ js/localStorage.getItem (:storage-key config/site)
               when (some? raw)
                 dispatch! :hydrate-storage $ extract-cirru-edn (js/JSON.parse raw)
@@ -510,6 +516,8 @@
             let
                 alert-plugin $ use-alert (>> states :alert)
                   {} $ :title "\"demo"
+                alert-text-plugin $ use-alert (>> states :alert-text)
+                  {} $ :title "\"demo"
                 confirm-plugin $ use-confirm (>> states :confirm)
                   {} $ :title "\"demo"
                 prompt-plugin $ use-prompt (>> states :prompt)
@@ -536,6 +544,9 @@
                   button $ {} (:inner-text "\"show alert") (:style ui/button)
                     :on-click $ fn (e d!) (.show alert-plugin d!)
                   =< 8 nil
+                  button $ {} (:inner-text "\"show alert text") (:style ui/button)
+                    :on-click $ fn (e d!) (.show alert-text-plugin d! "\"DEMO text")
+                  =< 8 nil
                   button $ {} (:inner-text "\"show confirm") (:style ui/button)
                     :on-click $ fn (e d!)
                       .show confirm-plugin d! $ fn () (println "\"after confirmed")
@@ -559,6 +570,7 @@
                 .render prompt-plugin
                 .render prompt-multilines-plugin
                 .render prompt-validation-plugin
+                .render alert-text-plugin
         |comp-controlled-modals $ quote
           defcomp comp-controlled-modals (states)
             let
