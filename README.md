@@ -1,6 +1,4 @@
-
-Respo alerts library in Calcit-js
-----
+## Respo alerts library in Calcit-js
 
 > Respo web page based on calcit-js.
 
@@ -23,7 +21,7 @@ respo-alerts.core :refer $ use-alert use-prompt use-confirm
 
 ```cirru
 let
-    alert-plugin $ use-alert (>> states :alert) ({} (:title "|demo"))
+    alert-plugin $ use-alert (>> states :alert) ({} (:text "|demo"))
   button $ {}
     :on-click $ fn (e d!)
       .show alert-plugin d!
@@ -46,7 +44,7 @@ extra argument can be added to overwrite `:text` field:
 
 ```cirru
 let
-    confirm-plugin $ use-confirm (>> states :alert) ({} (:title "|demo"))
+    confirm-plugin $ use-confirm (>> states :alert) ({} (:text "|demo"))
   button
     {}
       :on-click $ fn (e d!)
@@ -76,7 +74,7 @@ let
 
 ```cirru
 let
-    prompt-plugin $ use-prompt (>> states :prompt) ({} (:title "|demo"))
+    prompt-plugin $ use-prompt (>> states :prompt) ({} (:text "|demo"))
   button $ {}
     :on-click $ fn (e d!)
       .show prompt-plugin d! $ fn (text)
