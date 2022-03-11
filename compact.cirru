@@ -403,7 +403,7 @@
         |persist-storage! $ quote
           defn persist-storage! (? e)
             js/localStorage.setItem (:storage-key config/site)
-              js/JSON.stringify $ to-cirru-edn (:store @*reel)
+              format-cirru-edn $ :store @*reel
         |mount-target $ quote
           def mount-target $ js/document.querySelector |.app
         |*reel $ quote
@@ -411,15 +411,16 @@
         |main! $ quote
           defn main! ()
             println "\"Running mode:" $ if config/dev? "\"dev" "\"release"
+            if config/dev? $ load-console-formatter!
             render-app!
             add-watch *reel :changes $ fn (reel prev) (render-app!)
             listen-devtools! |a dispatch!
-            js/window.addEventListener |beforeunload $ fn (event) (persist-storage!)
-            repeat! 60 persist-storage!
+            ; js/window.addEventListener |beforeunload $ fn (event) (persist-storage!)
+            ; js/setInterval persist-storage! 60000
             ; let
                 raw $ js/localStorage.getItem (:storage-key config/site)
               when (some? raw)
-                dispatch! :hydrate-storage $ extract-cirru-edn (js/JSON.parse raw)
+                dispatch! :hydrate-storage $ parse-cirru-edn raw
             println "|App started."
         |dispatch! $ quote
           defn dispatch! (op op-data)
@@ -437,12 +438,6 @@
               reset! *reel $ refresh-reel @*reel schema/store updater
               hud! "\"ok~" "\"Ok"
             hud! "\"error" build-errors
-        |repeat! $ quote
-          defn repeat! (duration cb)
-            js/setTimeout
-              fn () (cb)
-                repeat! (* 1000 duration) cb
-              * 1000 duration
     |respo-alerts.util $ {}
       :ns $ quote (ns respo-alerts.util)
       :defs $ {}
