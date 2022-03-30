@@ -14,7 +14,7 @@ respo-alerts.core :refer $ use-alert use-prompt use-confirm
 
 ```cirru
 {}
-  :text "|message text",
+  :text "|message text"
   :style $ {}
   :card-style $ {}
 ```
@@ -89,7 +89,7 @@ let
 ```cirru
 let
     demo-modal $ use-modal (>> states :modal) $ {}
-      :title "|demo",
+      :title "|demo"
       :style $ {} (:width 400)
       :container-style $ {}
       :render $ fn (on-close)
