@@ -2,7 +2,7 @@
 {} (:package |respo-alerts)
   :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
-    :version |0.8.3
+    :version |0.8.4
   :entries $ {}
   :files $ {}
     |respo-alerts.core $ {}
@@ -139,7 +139,7 @@
                   {} $ :position :absolute
                 if show? $ div
                   {}
-                    :style $ merge ui/fullscreen ui/center style/backdrop
+                    :style $ merge ui/fullscreen ui/center style/backdrop (:backdrop-style options)
                     :on-click $ fn (e d!) (on-close! d!)
                   div
                     {}
@@ -167,7 +167,7 @@
                     :container-style options
                 if show? $ div
                   {}
-                    :style $ merge ui/fullscreen ui/center style/backdrop
+                    :style $ merge ui/fullscreen ui/center style/backdrop (:backdrop-style options)
                     :on-click $ fn (e d!)
                       let
                           event $ :event e
@@ -203,7 +203,7 @@
               div ({})
                 if show? $ div
                   {}
-                    :style $ merge ui/fullscreen ui/center style/backdrop
+                    :style $ merge ui/fullscreen ui/center style/backdrop (:backdrop-style options)
                     :on-click $ fn (e d!)
                       let
                           event $ :event e
@@ -257,7 +257,7 @@
                     {} $ :position :absolute
                   if show? $ div
                     {}
-                      :style $ merge ui/fullscreen ui/global ui/center style/backdrop
+                      :style $ merge ui/fullscreen ui/global ui/center style/backdrop (:backdrop-style options)
                         {} $ :line-height "\"32px"
                       :on-click $ fn (e d!) (on-close! d!)
                         d! cursor $ -> state (assoc :text nil) (assoc :failure nil)
@@ -321,7 +321,7 @@
                   {} $ :position :absolute
                 if show? $ div
                   {}
-                    :style $ merge ui/fullscreen ui/center style/backdrop
+                    :style $ merge ui/fullscreen ui/center style/backdrop (:backdrop-style options)
                     :on-click $ fn (e d!)
                       let
                           event $ :event e
@@ -523,7 +523,7 @@
                     :style $ {}
                     :input-style $ {} (:font-family ui/font-code)
                     :multiline? true
-                prompt-validation-plugin $ use-prompt (>> states :multilines-prompt)
+                prompt-validation-plugin $ use-prompt (>> states :validation-prompt)
                   {} (:titl "\"validated") (:text "\"This would be a very long content of alerts, like some prompt... write multiple lines:")
                     :initial $ str (rand-int 100)
                     :style $ {}
@@ -573,6 +573,7 @@
                   {} (:title "\"demo")
                     :style $ {} (:width 400)
                     :container-style $ {}
+                    :backdrop-style $ {}
                     :render $ fn (on-close)
                       div ({}) (<> "\"Place for child content")
                         button $ {} (:style ui/button) (:inner-text "\"Close")
