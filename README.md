@@ -17,6 +17,7 @@ respo-alerts.core :refer $ use-alert use-prompt use-confirm
   :text "|message text"
   :style $ {}
   :card-style $ {}
+  :backdrop-style $ {}
 ```
 
 ```cirru
@@ -40,6 +41,7 @@ extra argument can be added to overwrite `:text` field:
   :text "|message text"
   :style $ {}
   :card-style $ {}
+  :backdrop-style $ {}
 ```
 
 ```cirru
@@ -64,6 +66,7 @@ let
   :style $ {}
   :input-style $ {}
   :card-style $ {}
+  :backdrop-style $ {}
   :multiline? false
   :initial "|default text"
   :placeholder "|input"
@@ -92,6 +95,7 @@ let
       :title "|demo"
       :style $ {} (:width 400)
       :container-style $ {}
+      :backdrop-style $ {}
       :render $ fn (on-close)
         div ({})
           <> "|Place for child content"
@@ -110,6 +114,7 @@ let
     demo-modal-menu $ use-modal-menu (>> states :modal-menu) $ {}
       :title "|Demo"
       :style $ {} (:width 300)
+      :backdrop-style $ {}
       :items $ []
         {} (:value "|a") (:display "|A")
         {} (:value "|b")
@@ -139,6 +144,7 @@ let
       :title "|Demo"
       :style $ {} (:width 400)
       :container-style $ {}
+      :backdrop-style $ {}
       :render $ fn (on-close)
         div ({})
           <> "|Place for child content"
@@ -149,6 +155,7 @@ let
 comp-modal-menu (:show-modal-menu? state)
   {} (:title "|Demo")
     :style $ {} (:width 300)
+    :backdrop-style $ {}
   []
     {} (:value |a) (:display "|A")
     {} (:value |b)
