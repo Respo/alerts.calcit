@@ -1,134 +1,173 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.5)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
-    :version |0.8.4
   :entries $ {}
   :files $ {}
-    |respo-alerts.core $ {}
-      :ns $ quote
-        ns respo-alerts.core $ :require
-          respo.util.format :refer $ hsl
-          respo.schema :as respo-schema
-          respo-ui.core :as ui
-          respo.core :refer $ defcomp defplugin list-> <> >> div button textarea span input a defeffect
-          respo.comp.space :refer $ =<
-          respo-alerts.config :refer $ dev?
-          respo-alerts.style :as style
-          respo-alerts.schema :as schema
-          respo-alerts.util :refer $ focus-element! select-element!
-          respo-alerts.style :as style
+    |respo-alerts.comp.container $ {}
       :defs $ {}
-        |Modal-class $ quote (defrecord Modal-class :render :show :close)
-        |use-alert $ quote
-          defplugin use-alert (states options)
+        |comp-container $ quote
+          defcomp comp-container (reel)
             let
-                cursor $ :cursor states
+                store $ :store reel
+                states $ :states store
                 state $ either (:data states)
-                  {} (:show? false)
-                    :text $ :text options
-                on-read $ either (:on-read options)
-                  fn (e d!)
-                    d! cursor $ assoc state :show? false
-              ::
-                %{} Modal-class
-                  :render $ fn (self) (nth self 1)
-                  :show $ fn (self d! ? text)
-                    if (some? text)
-                      d! cursor $ assoc state :show? true :text text
-                      d! cursor $ assoc state :show? true
-                  :close $ fn (self d!)
-                    d! cursor $ assoc state :show? true
-                comp-alert-modal
-                  assoc options :text $ :text state
-                  :show? state
-                  , on-read $ fn (d!)
-                    d! cursor $ assoc state :show? false
-        |use-modal $ quote
-          defn use-modal (states options)
+                  {} (:selected "\"") (:show-modal? false) (:show-modal-menu? false)
+              div
+                {} $ :style
+                  merge ui/global ui/fullscreen ui/column $ {} (:padding 20)
+                comp-hooks-usages $ >> states :hooks
+                =< nil 40
+                comp-controlled-modals $ >> states :controlled
+                when dev? $ comp-inspect "\"states" states
+                  {} $ :bottom 0
+                when dev? $ comp-reel (>> states :reel) reel ({})
+        |comp-controlled-modals $ quote
+          defcomp comp-controlled-modals (states)
             let
-                cursor $ :cursor states
-                state $ either (:data states)
-                  {} $ :show? false
-              ::
-                %{} Modal-class
-                  :render $ fn (self) (nth self 1)
-                  :show $ fn (self d!)
-                    d! cursor $ assoc state :show? true
-                  :close $ fn (self d!)
-                    d! cursor $ assoc state :show? true
-                comp-modal options (:show? state)
-                  fn (d!)
-                    d! cursor $ assoc state :show? false
-        |style-menu-item $ quote
-          def style-menu-item $ {}
-            :border-top $ str "\"1px solid " (hsl 0 0 90)
-            :padding "\"0 16px"
-            :cursor :pointer
-            :white-space :nowrap
-            :line-height "\"40px"
-        |use-confirm $ quote
-          defplugin use-confirm (states options)
+                demo-modal $ use-modal (>> states :modal)
+                  {} (:title "\"demo")
+                    :style $ {} (:width 400)
+                    :container-style $ {}
+                    :backdrop-style $ {}
+                    :render $ fn (on-close)
+                      div ({}) (<> "\"Place for child content")
+                        button $ {} (:style ui/button) (:inner-text "\"Close")
+                          :on-click $ fn (e d!) (on-close d!)
+                demo-modal-menu $ use-modal-menu (>> states :modal-menu)
+                  {} (:title "\"Demo")
+                    :style $ {} (:width 300)
+                    :items $ []
+                      {} (:value "\"a") (:display "\"A")
+                      {} (:value "\"b")
+                        :display $ div ({}) (<> "\"B")
+                    :on-result $ fn (result d!) (println "\"got result" result)
+              div ({})
+                div ({}) (<> "\"Modal usage")
+                div
+                  {} $ :style
+                    {} $ :padding "\"8px 0px"
+                  button $ {} (:inner-text "\"show modal") (:style ui/button)
+                    :on-click $ fn (e d!) (.show demo-modal d!)
+                  =< 8 nil
+                  button $ {} (:inner-text "\"show modal menu") (:style ui/button)
+                    :on-click $ fn (e d!) (.show demo-modal-menu d!)
+                  .render demo-modal
+                  .render demo-modal-menu
+        |comp-hooks-usages $ quote
+          defcomp comp-hooks-usages (states)
             let
-                cursor $ :cursor states
-                state $ either (:data states)
-                  {} $ :show? false
-              ::
-                %{} Modal-class
-                  :render $ fn (self) (nth self 1)
-                  :show $ fn (self d! next-task) (reset! *next-confirm-task next-task)
-                    d! cursor $ assoc state :show? true
-                  :close $ fn (self d!)
-                    d! cursor $ assoc state :show? true
-                comp-confirm-modal options (:show? state)
-                  fn (e d!)
-                    if (some? @*next-confirm-task) (@*next-confirm-task)
-                    reset! *next-confirm-task nil
-                  fn (d!)
-                    d! cursor $ assoc state :show? false
-                    reset! *next-confirm-task nil
-        |use-prompt $ quote
-          defplugin use-prompt (states options)
-            let
-                cursor $ :cursor states
-                state $ either (:data states)
-                  {} (:show? false) (:failure nil)
-              ::
-                %{} Modal-class
-                  :render $ fn (self) (nth self 1)
-                  :show $ fn (self d! next-task) (reset! *next-prompt-task next-task)
-                    d! cursor $ assoc state :show? true
-                  :close $ fn (self d!)
-                    d! cursor $ assoc state :show? true
-                comp-prompt-modal (>> states :modal) options (:show? state)
-                  fn (text d!)
-                    if (some? @*next-prompt-task) (@*next-prompt-task text)
-                    reset! *next-prompt-task nil
-                    d! cursor $ assoc state :show? false
-                  fn (d!)
-                    d! cursor $ assoc state :show? false
-                    reset! *next-prompt-task nil
+                alert-plugin $ use-alert (>> states :alert)
+                  {} $ :title "\"demo"
+                alert-text-plugin $ use-alert (>> states :alert-text)
+                  {} $ :title "\"demo"
+                confirm-plugin $ use-confirm (>> states :confirm)
+                  {} $ :title "\"demo"
+                prompt-plugin $ use-prompt (>> states :prompt)
+                  {} $ :title "\"demo"
+                prompt-multilines-plugin $ use-prompt (>> states :multilines-prompt)
+                  {} (:title "\"demo multilines") (:text "\"This would be a very long content of alerts, like some prompt... write multiple lines:")
+                    :initial $ str (rand-int 100)
+                    :style $ {}
+                    :input-style $ {} (:font-family ui/font-code)
+                    :multiline? true
+                prompt-validation-plugin $ use-prompt (>> states :validation-prompt)
+                  {} (:titl "\"validated") (:text "\"This would be a very long content of alerts, like some prompt... write multiple lines:")
+                    :initial $ str (rand-int 100)
+                    :style $ {}
+                    :input-style $ {} (:font-family ui/font-code)
+                    :multiline? true
+                    :validator $ fn (x)
+                      try
+                        do (parse-cirru x) nil
+                        fn (e) (str e)
+              div ({})
+                div ({}) (<> "\"Hooks")
+                div ({})
+                  button $ {} (:inner-text "\"show alert") (:style ui/button)
+                    :on-click $ fn (e d!) (.show alert-plugin d!)
+                  =< 8 nil
+                  button $ {} (:inner-text "\"show alert text") (:style ui/button)
+                    :on-click $ fn (e d!) (.show alert-text-plugin d! "\"DEMO text")
+                  =< 8 nil
+                  button $ {} (:inner-text "\"show confirm") (:style ui/button)
+                    :on-click $ fn (e d!)
+                      .show confirm-plugin d! $ fn () (println "\"after confirmed")
+                  =< 8 nil
+                  button $ {} (:inner-text "\"show prompt") (:style ui/button)
+                    :on-click $ fn (e d!)
+                      .show prompt-plugin d! $ fn (text)
+                        println "\"read from prompt" $ pr-str text
+                  =< 8 nil
+                  button $ {} (:inner-text "\"show multilines prompt") (:style ui/button)
+                    :on-click $ fn (e d!)
+                      .show prompt-multilines-plugin d! $ fn (text)
+                        println "\"read from prompt" $ pr-str text
+                  =< 8 nil
+                  button $ {} (:inner-text "\"show validated prompt") (:style ui/button)
+                    :on-click $ fn (e d!)
+                      .show prompt-validation-plugin d! $ fn (text)
+                        println "\"read from prompt" $ pr-str text
+                .render alert-plugin
+                .render confirm-plugin
+                .render prompt-plugin
+                .render prompt-multilines-plugin
+                .render prompt-validation-plugin
+                .render alert-text-plugin
+      :ns $ quote
+        ns respo-alerts.comp.container $ :require (respo-ui.core :as ui)
+          respo.core :refer $ defcomp >> <> div button textarea span
+          respo.comp.space :refer $ =<
+          reel.comp.reel :refer $ comp-reel
+          respo-alerts.config :refer $ dev?
+          respo-alerts.core :refer $ comp-modal comp-modal-menu use-alert use-confirm use-prompt use-modal use-modal-menu
+          respo.comp.inspect :refer $ comp-inspect
+          respo-alerts.style :as style
+          "\"@calcit/std" :refer $ rand-int
+    |respo-alerts.config $ {}
+      :defs $ {}
+        |dev? $ quote (def dev? true)
+        |site $ quote
+          def site $ {} (:dev-ui "\"http://localhost:8100/main-fonts.css") (:release-ui "\"http://cdn.tiye.me/favored-fonts/main-fonts.css") (:cdn-url "\"http://cdn.tiye.me/calcit-workflow/") (:title "\"Alerts") (:icon "\"http://cdn.tiye.me/logo/respo.png") (:storage-key "\"respo-alerts")
+      :ns $ quote (ns respo-alerts.config)
+    |respo-alerts.core $ {}
+      :defs $ {}
         |*next-confirm-task $ quote (defatom *next-confirm-task nil)
-        |use-modal-menu $ quote
-          defn use-modal-menu (states options)
-            let
-                cursor $ :cursor states
-                state $ either (:data states)
-                  {} $ :show? false
-              ::
-                %{} Modal-class
-                  :render $ fn (self) (nth self 1)
-                  :show $ fn (self d!)
-                    d! cursor $ assoc state :show? true
-                  :close $ fn (self d!)
-                    d! cursor $ assoc state :show? true
-                comp-modal-menu options (:show? state)
-                  fn (d!)
-                    d! cursor $ assoc state :show? false
-                  fn (result d!)
-                      :on-result options
-                      , result d!
-                    d! cursor $ assoc state :show? false
+        |*next-prompt-task $ quote (defatom *next-prompt-task nil)
+        |Modal-class $ quote (defrecord Modal-class :render :show :close)
+        |comp-alert-modal $ quote
+          defcomp comp-alert-modal (options show? on-read! on-close!)
+            []
+              effect-focus (str "\"." schema/confirm-button-name) show?
+              effect-fade show?
+              div
+                {} $ :style
+                  {} $ :position :absolute
+                if show? $ div
+                  {}
+                    :style $ merge ui/fullscreen ui/center style/backdrop (:backdrop-style options)
+                    :on-click $ fn (e d!)
+                      let
+                          event $ :event e
+                        .!stopPropagation event
+                        on-read! e d!
+                        on-close! d!
+                  div
+                    {}
+                      :style $ merge ui/column style/card ui/global
+                        {} $ :line-height "\"32px"
+                        :card-style options
+                      :on-click $ fn (e d!) nil
+                    div ({})
+                      <> $ either (:text options) "\"Alert!"
+                    =< nil 8
+                    div
+                      {} $ :style ui/row-parted
+                      span $ {}
+                      button
+                        {} (:style style/button) (:class-name schema/confirm-button-name)
+                          :on-click $ fn (e d!) (on-read! e d!) (on-close! d!)
+                        <> $ either (:button-text options) "\"Read"
         |comp-confirm-modal $ quote
           defcomp comp-confirm-modal (options show? on-confirm! on-close!)
             []
@@ -192,11 +231,6 @@
                       (some? (:render-body options))
                         (:render-body options) on-close
                       true "\"TODO render body"
-        |*next-prompt-task $ quote (defatom *next-prompt-task nil)
-        |effect-focus $ quote
-          defeffect effect-focus (query show?) (action el at-place?)
-            case-default action nil $ :update
-              when show? $ focus-element! query
         |comp-modal-menu $ quote
           defcomp comp-modal-menu (options show? on-close! on-select!)
             [] (effect-fade show?)
@@ -287,15 +321,23 @@
                             :placeholder $ either (:placeholder options) "\""
                         if (:multiline? options)
                           textarea $ merge props
-                            {} $ :style
-                              merge ui/textarea
+                            {}
+                              :style $ merge ui/textarea
                                 {} (:width "\"100%") (:min-height 120) (:max-height "\"50vh")
                                 :input-style options
+                              :on-keydown $ fn (e d!)
+                                if
+                                  = "\"Escape" $ :key e
+                                  on-close! d!
                           input $ merge props
-                            {} $ :style
-                              merge ui/input
+                            {}
+                              :style $ merge ui/input
                                 {} $ :width "\"100%"
                                 :input-style options
+                              :on-keydown $ fn (e d!)
+                                if
+                                  = "\"Escape" $ :key e
+                                  on-close! d!
                       =< nil 16
                       div
                         {} $ :style ui/row-parted
@@ -311,39 +353,6 @@
                           {} (:style style/button)
                             :on-click $ fn (e d!) (check-submit! d!)
                           <> $ either (:button-text options) "\"Finish"
-        |comp-alert-modal $ quote
-          defcomp comp-alert-modal (options show? on-read! on-close!)
-            []
-              effect-focus (str "\"." schema/confirm-button-name) show?
-              effect-fade show?
-              div
-                {} $ :style
-                  {} $ :position :absolute
-                if show? $ div
-                  {}
-                    :style $ merge ui/fullscreen ui/center style/backdrop (:backdrop-style options)
-                    :on-click $ fn (e d!)
-                      let
-                          event $ :event e
-                        .!stopPropagation event
-                        on-read! e d!
-                        on-close! d!
-                  div
-                    {}
-                      :style $ merge ui/column style/card ui/global
-                        {} $ :line-height "\"32px"
-                        :card-style options
-                      :on-click $ fn (e d!) nil
-                    div ({})
-                      <> $ either (:text options) "\"Alert!"
-                    =< nil 8
-                    div
-                      {} $ :style ui/row-parted
-                      span $ {}
-                      button
-                        {} (:style style/button) (:class-name schema/confirm-button-name)
-                          :on-click $ fn (e d!) (on-read! e d!) (on-close! d!)
-                        <> $ either (:button-text options) "\"Read"
         |effect-fade $ quote
           defeffect effect-fade (show?) (action el at-place?)
             case-default action nil
@@ -380,34 +389,147 @@
                       set! (.-transform card-style) "\"scale(1) translate(0px,0px)"
                     , 10
                 , nil
+        |effect-focus $ quote
+          defeffect effect-focus (query show?) (action el at-place?)
+            case-default action nil $ :update
+              when show? $ focus-element! query
         |effect-select $ quote
           defeffect effect-select (query show?) (action el *local)
             case-default action nil $ :update
               when show? $ select-element! query
-    |respo-alerts.main $ {}
+        |style-menu-item $ quote
+          def style-menu-item $ {}
+            :border-top $ str "\"1px solid " (hsl 0 0 90)
+            :padding "\"0 16px"
+            :cursor :pointer
+            :white-space :nowrap
+            :line-height "\"40px"
+        |use-alert $ quote
+          defplugin use-alert (states options)
+            let
+                cursor $ :cursor states
+                state $ either (:data states)
+                  {} (:show? false)
+                    :text $ :text options
+                on-read $ either (:on-read options)
+                  fn (e d!)
+                    d! cursor $ assoc state :show? false
+              ::
+                %{} Modal-class
+                  :render $ fn (self) (nth self 1)
+                  :show $ fn (self d! ? text)
+                    if (some? text)
+                      d! cursor $ assoc state :show? true :text text
+                      d! cursor $ assoc state :show? true
+                  :close $ fn (self d!)
+                    d! cursor $ assoc state :show? true
+                comp-alert-modal
+                  assoc options :text $ :text state
+                  :show? state
+                  , on-read $ fn (d!)
+                    d! cursor $ assoc state :show? false
+        |use-confirm $ quote
+          defplugin use-confirm (states options)
+            let
+                cursor $ :cursor states
+                state $ either (:data states)
+                  {} $ :show? false
+              ::
+                %{} Modal-class
+                  :render $ fn (self) (nth self 1)
+                  :show $ fn (self d! next-task) (reset! *next-confirm-task next-task)
+                    d! cursor $ assoc state :show? true
+                  :close $ fn (self d!)
+                    d! cursor $ assoc state :show? true
+                comp-confirm-modal options (:show? state)
+                  fn (e d!)
+                    if (some? @*next-confirm-task) (@*next-confirm-task)
+                    reset! *next-confirm-task nil
+                  fn (d!)
+                    d! cursor $ assoc state :show? false
+                    reset! *next-confirm-task nil
+        |use-modal $ quote
+          defn use-modal (states options)
+            let
+                cursor $ :cursor states
+                state $ either (:data states)
+                  {} $ :show? false
+              ::
+                %{} Modal-class
+                  :render $ fn (self) (nth self 1)
+                  :show $ fn (self d!)
+                    d! cursor $ assoc state :show? true
+                  :close $ fn (self d!)
+                    d! cursor $ assoc state :show? true
+                comp-modal options (:show? state)
+                  fn (d!)
+                    d! cursor $ assoc state :show? false
+        |use-modal-menu $ quote
+          defn use-modal-menu (states options)
+            let
+                cursor $ :cursor states
+                state $ either (:data states)
+                  {} $ :show? false
+              ::
+                %{} Modal-class
+                  :render $ fn (self) (nth self 1)
+                  :show $ fn (self d!)
+                    d! cursor $ assoc state :show? true
+                  :close $ fn (self d!)
+                    d! cursor $ assoc state :show? true
+                comp-modal-menu options (:show? state)
+                  fn (d!)
+                    d! cursor $ assoc state :show? false
+                  fn (result d!)
+                      :on-result options
+                      , result d!
+                    d! cursor $ assoc state :show? false
+        |use-prompt $ quote
+          defplugin use-prompt (states options)
+            let
+                cursor $ :cursor states
+                state $ either (:data states)
+                  {} (:show? false) (:failure nil)
+              ::
+                %{} Modal-class
+                  :render $ fn (self) (nth self 1)
+                  :show $ fn (self d! next-task) (reset! *next-prompt-task next-task)
+                    d! cursor $ assoc state :show? true
+                  :close $ fn (self d!)
+                    d! cursor $ assoc state :show? true
+                comp-prompt-modal (>> states :modal) options (:show? state)
+                  fn (text d!)
+                    if (some? @*next-prompt-task) (@*next-prompt-task text)
+                    reset! *next-prompt-task nil
+                    d! cursor $ assoc state :show? false
+                  fn (d!)
+                    d! cursor $ assoc state :show? false
+                    reset! *next-prompt-task nil
       :ns $ quote
-        ns respo-alerts.main $ :require
-          [] respo.core :refer $ [] render! clear-cache! realize-ssr!
-          [] respo-alerts.comp.container :refer $ [] comp-container
-          [] respo-alerts.updater :refer $ [] updater
-          [] respo-alerts.schema :as schema
-          [] reel.util :refer $ [] listen-devtools!
-          [] reel.core :refer $ [] reel-updater refresh-reel
-          [] reel.schema :as reel-schema
-          [] respo-alerts.config :as config
-          "\"./calcit.build-errors" :default build-errors
-          "\"bottom-tip" :default hud!
+        ns respo-alerts.core $ :require
+          respo.util.format :refer $ hsl
+          respo.schema :as respo-schema
+          respo-ui.core :as ui
+          respo.core :refer $ defcomp defplugin list-> <> >> div button textarea span input a defeffect
+          respo.comp.space :refer $ =<
+          respo-alerts.config :refer $ dev?
+          respo-alerts.style :as style
+          respo-alerts.schema :as schema
+          respo-alerts.util :refer $ focus-element! select-element!
+          respo-alerts.style :as style
+    |respo-alerts.main $ {}
       :defs $ {}
-        |render-app! $ quote
-          defn render-app! () $ render! mount-target (comp-container @*reel) dispatch!
-        |persist-storage! $ quote
-          defn persist-storage! (? e)
-            js/localStorage.setItem (:storage-key config/site)
-              format-cirru-edn $ :store @*reel
-        |mount-target $ quote
-          def mount-target $ js/document.querySelector |.app
         |*reel $ quote
           defatom *reel $ -> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store)
+        |dispatch! $ quote
+          defn dispatch! (op op-data)
+            if (list? op)
+              recur :states $ [] op op-data
+              do
+                when
+                  and config/dev? $ not= :states op
+                  println "\"Dispatch:" op
+                reset! *reel $ reel-updater updater @*reel op op-data
         |main! $ quote
           defn main! ()
             println "\"Running mode:" $ if config/dev? "\"dev" "\"release"
@@ -422,15 +544,12 @@
               when (some? raw)
                 dispatch! :hydrate-storage $ parse-cirru-edn raw
             println "|App started."
-        |dispatch! $ quote
-          defn dispatch! (op op-data)
-            if (list? op)
-              recur :states $ [] op op-data
-              do
-                when
-                  and config/dev? $ not= :states op
-                  println "\"Dispatch:" op
-                reset! *reel $ reel-updater updater @*reel op op-data
+        |mount-target $ quote
+          def mount-target $ js/document.querySelector |.app
+        |persist-storage! $ quote
+          defn persist-storage! (? e)
+            js/localStorage.setItem (:storage-key config/site)
+              format-cirru-edn $ :store @*reel
         |reload! $ quote
           defn reload! () $ if (nil? build-errors)
             do (remove-watch *reel :changes) (clear-cache!)
@@ -438,172 +557,41 @@
               reset! *reel $ refresh-reel @*reel schema/store updater
               hud! "\"ok~" "\"Ok"
             hud! "\"error" build-errors
-    |respo-alerts.util $ {}
-      :ns $ quote (ns respo-alerts.util)
-      :defs $ {}
-        |focus-element! $ quote
-          defn focus-element! (query)
-            let
-                target $ js/document.querySelector query
-              if (some? target) (.focus target)
-        |select-element! $ quote
-          defn select-element! (query)
-            let
-                target $ js/document.querySelector query
-              if (some? target) (.!select target)
-    |respo-alerts.updater $ {}
+        |render-app! $ quote
+          defn render-app! () $ render! mount-target (comp-container @*reel) dispatch!
       :ns $ quote
-        ns respo-alerts.updater $ :require
-          respo.cursor :refer $ update-states
-      :defs $ {}
-        |updater $ quote
-          defn updater (store op op-data op-id op-time)
-            case-default op
-              do (js/console.log "\"Unknown op:" op) store
-              :states $ update-states store op-data
-              :content $ assoc store :content op-data
-              :hydrate-storage op-data
-    |respo-alerts.config $ {}
-      :ns $ quote (ns respo-alerts.config)
-      :defs $ {}
-        |dev? $ quote (def dev? true)
-        |site $ quote
-          def site $ {} (:dev-ui "\"http://localhost:8100/main-fonts.css") (:release-ui "\"http://cdn.tiye.me/favored-fonts/main-fonts.css") (:cdn-url "\"http://cdn.tiye.me/calcit-workflow/") (:title "\"Alerts") (:icon "\"http://cdn.tiye.me/logo/respo.png") (:storage-key "\"respo-alerts")
+        ns respo-alerts.main $ :require
+          respo.core :refer $ render! clear-cache! realize-ssr!
+          respo-alerts.comp.container :refer $ comp-container
+          respo-alerts.updater :refer $ updater
+          respo-alerts.schema :as schema
+          reel.util :refer $ listen-devtools!
+          reel.core :refer $ reel-updater refresh-reel
+          reel.schema :as reel-schema
+          respo-alerts.config :as config
+          "\"./calcit.build-errors" :default build-errors
+          "\"bottom-tip" :default hud!
     |respo-alerts.schema $ {}
-      :ns $ quote (ns respo-alerts.schema)
       :defs $ {}
+        |confirm-button-name $ quote (def confirm-button-name "\"respo-confirm-button")
+        |input-box-name $ quote (def input-box-name "\"respo-prompt-input")
         |store $ quote
           def store $ {}
             :states $ {}
             :content |
-        |confirm-button-name $ quote (def confirm-button-name "\"respo-confirm-button")
-        |input-box-name $ quote (def input-box-name "\"respo-prompt-input")
-    |respo-alerts.comp.container $ {}
-      :ns $ quote
-        ns respo-alerts.comp.container $ :require (respo-ui.core :as ui)
-          respo.core :refer $ defcomp >> <> div button textarea span
-          respo.comp.space :refer $ =<
-          reel.comp.reel :refer $ comp-reel
-          respo-alerts.config :refer $ dev?
-          respo-alerts.core :refer $ comp-modal comp-modal-menu use-alert use-confirm use-prompt use-modal use-modal-menu
-          respo.comp.inspect :refer $ comp-inspect
-          respo-alerts.style :as style
-          "\"@calcit/std" :refer $ rand-int
-      :defs $ {}
-        |comp-container $ quote
-          defcomp comp-container (reel)
-            let
-                store $ :store reel
-                states $ :states store
-                state $ either (:data states)
-                  {} (:selected "\"") (:show-modal? false) (:show-modal-menu? false)
-              div
-                {} $ :style
-                  merge ui/global ui/fullscreen ui/column $ {} (:padding 20)
-                comp-hooks-usages $ >> states :hooks
-                =< nil 40
-                comp-controlled-modals $ >> states :controlled
-                when dev? $ comp-inspect "\"states" states
-                  {} $ :bottom 0
-                when dev? $ comp-reel (>> states :reel) reel ({})
-        |comp-hooks-usages $ quote
-          defcomp comp-hooks-usages (states)
-            let
-                alert-plugin $ use-alert (>> states :alert)
-                  {} $ :title "\"demo"
-                alert-text-plugin $ use-alert (>> states :alert-text)
-                  {} $ :title "\"demo"
-                confirm-plugin $ use-confirm (>> states :confirm)
-                  {} $ :title "\"demo"
-                prompt-plugin $ use-prompt (>> states :prompt)
-                  {} $ :title "\"demo"
-                prompt-multilines-plugin $ use-prompt (>> states :multilines-prompt)
-                  {} (:title "\"demo multilines") (:text "\"This would be a very long content of alerts, like some prompt... write multiple lines:")
-                    :initial $ str (rand-int 100)
-                    :style $ {}
-                    :input-style $ {} (:font-family ui/font-code)
-                    :multiline? true
-                prompt-validation-plugin $ use-prompt (>> states :validation-prompt)
-                  {} (:titl "\"validated") (:text "\"This would be a very long content of alerts, like some prompt... write multiple lines:")
-                    :initial $ str (rand-int 100)
-                    :style $ {}
-                    :input-style $ {} (:font-family ui/font-code)
-                    :multiline? true
-                    :validator $ fn (x)
-                      try
-                        do (parse-cirru x) nil
-                        fn (e) (str e)
-              div ({})
-                div ({}) (<> "\"Hooks")
-                div ({})
-                  button $ {} (:inner-text "\"show alert") (:style ui/button)
-                    :on-click $ fn (e d!) (.show alert-plugin d!)
-                  =< 8 nil
-                  button $ {} (:inner-text "\"show alert text") (:style ui/button)
-                    :on-click $ fn (e d!) (.show alert-text-plugin d! "\"DEMO text")
-                  =< 8 nil
-                  button $ {} (:inner-text "\"show confirm") (:style ui/button)
-                    :on-click $ fn (e d!)
-                      .show confirm-plugin d! $ fn () (println "\"after confirmed")
-                  =< 8 nil
-                  button $ {} (:inner-text "\"show prompt") (:style ui/button)
-                    :on-click $ fn (e d!)
-                      .show prompt-plugin d! $ fn (text)
-                        println "\"read from prompt" $ pr-str text
-                  =< 8 nil
-                  button $ {} (:inner-text "\"show multilines prompt") (:style ui/button)
-                    :on-click $ fn (e d!)
-                      .show prompt-multilines-plugin d! $ fn (text)
-                        println "\"read from prompt" $ pr-str text
-                  =< 8 nil
-                  button $ {} (:inner-text "\"show validated prompt") (:style ui/button)
-                    :on-click $ fn (e d!)
-                      .show prompt-validation-plugin d! $ fn (text)
-                        println "\"read from prompt" $ pr-str text
-                .render alert-plugin
-                .render confirm-plugin
-                .render prompt-plugin
-                .render prompt-multilines-plugin
-                .render prompt-validation-plugin
-                .render alert-text-plugin
-        |comp-controlled-modals $ quote
-          defcomp comp-controlled-modals (states)
-            let
-                demo-modal $ use-modal (>> states :modal)
-                  {} (:title "\"demo")
-                    :style $ {} (:width 400)
-                    :container-style $ {}
-                    :backdrop-style $ {}
-                    :render $ fn (on-close)
-                      div ({}) (<> "\"Place for child content")
-                        button $ {} (:style ui/button) (:inner-text "\"Close")
-                          :on-click $ fn (e d!) (on-close d!)
-                demo-modal-menu $ use-modal-menu (>> states :modal-menu)
-                  {} (:title "\"Demo")
-                    :style $ {} (:width 300)
-                    :items $ []
-                      {} (:value "\"a") (:display "\"A")
-                      {} (:value "\"b")
-                        :display $ div ({}) (<> "\"B")
-                    :on-result $ fn (result d!) (println "\"got result" result)
-              div ({})
-                div ({}) (<> "\"Modal usage")
-                div
-                  {} $ :style
-                    {} $ :padding "\"8px 0px"
-                  button $ {} (:inner-text "\"show modal") (:style ui/button)
-                    :on-click $ fn (e d!) (.show demo-modal d!)
-                  =< 8 nil
-                  button $ {} (:inner-text "\"show modal menu") (:style ui/button)
-                    :on-click $ fn (e d!) (.show demo-modal-menu d!)
-                  .render demo-modal
-                  .render demo-modal-menu
+      :ns $ quote (ns respo-alerts.schema)
     |respo-alerts.style $ {}
-      :ns $ quote
-        ns respo-alerts.style $ :require
-          [] respo.util.format :refer $ [] hsl
-          [] respo-ui.core :as ui
       :defs $ {}
+        |backdrop $ quote
+          def backdrop $ {}
+            :background-color $ hsl 0 30 10 0.6
+            :position :fixed
+            :z-index 999
+            :padding 16
+        |button $ quote
+          def button $ merge ui/button
+            {} (:border-radius "\"4px") (:background-color :white)
+              :border-color $ hsl 240 60 90
         |card $ quote
           def card $ {}
             :background-color $ hsl 0 0 100
@@ -615,13 +603,32 @@
             :color $ hsl 0 0 0
             :margin :auto
             :padding 16
-        |button $ quote
-          def button $ merge ui/button
-            {} (:border-radius "\"4px") (:background-color :white)
-              :border-color $ hsl 240 60 90
-        |backdrop $ quote
-          def backdrop $ {}
-            :background-color $ hsl 0 30 10 0.6
-            :position :fixed
-            :z-index 999
-            :padding 16
+      :ns $ quote
+        ns respo-alerts.style $ :require
+          respo.util.format :refer $ hsl
+          respo-ui.core :as ui
+    |respo-alerts.updater $ {}
+      :defs $ {}
+        |updater $ quote
+          defn updater (store op op-data op-id op-time)
+            case-default op
+              do (js/console.log "\"Unknown op:" op) store
+              :states $ update-states store op-data
+              :content $ assoc store :content op-data
+              :hydrate-storage op-data
+      :ns $ quote
+        ns respo-alerts.updater $ :require
+          respo.cursor :refer $ update-states
+    |respo-alerts.util $ {}
+      :defs $ {}
+        |focus-element! $ quote
+          defn focus-element! (query)
+            let
+                target $ js/document.querySelector query
+              if (some? target) (.focus target)
+        |select-element! $ quote
+          defn select-element! (query)
+            let
+                target $ js/document.querySelector query
+              if (some? target) (.!select target)
+      :ns $ quote (ns respo-alerts.util)
