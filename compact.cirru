@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.5)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.6)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -326,18 +326,20 @@
                                 {} (:width "\"100%") (:min-height 120) (:max-height "\"50vh")
                                 :input-style options
                               :on-keydown $ fn (e d!)
-                                if
-                                  = "\"Escape" $ :key e
-                                  on-close! d!
+                                case-default (:key e) nil
+                                  "\"Escape" $ on-close! d!
+                                  "\"Enter" $ if
+                                    or (:meta? e) (:ctrl? e)
+                                    check-submit! d!
                           input $ merge props
                             {}
                               :style $ merge ui/input
                                 {} $ :width "\"100%"
                                 :input-style options
                               :on-keydown $ fn (e d!)
-                                if
-                                  = "\"Escape" $ :key e
-                                  on-close! d!
+                                case-default (:key e) nil
+                                  "\"Escape" $ on-close! d!
+                                  "\"Enter" $ check-submit! d!
                       =< nil 16
                       div
                         {} $ :style ui/row-parted
