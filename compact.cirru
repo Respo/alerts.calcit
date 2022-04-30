@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.6)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.7)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -126,7 +126,8 @@
           "\"@calcit/std" :refer $ rand-int
     |respo-alerts.config $ {}
       :defs $ {}
-        |dev? $ quote (def dev? true)
+        |dev? $ quote
+          def dev? $ = "\"dev" (get-env "\"mode" "\"release")
         |site $ quote
           def site $ {} (:dev-ui "\"http://localhost:8100/main-fonts.css") (:release-ui "\"http://cdn.tiye.me/favored-fonts/main-fonts.css") (:cdn-url "\"http://cdn.tiye.me/calcit-workflow/") (:title "\"Alerts") (:icon "\"http://cdn.tiye.me/logo/respo.png") (:storage-key "\"respo-alerts")
       :ns $ quote (ns respo-alerts.config)
@@ -309,37 +310,30 @@
                             :on-input $ fn (e d!)
                               d! cursor $ assoc state :text (:value e)
                             :on-keydown $ fn (e d!)
-                              when
-                                and
-                                  not= 229 $ :keycode e
-                                  = (:key e) "\"Enter"
-                                if (:multiline? options)
-                                  when
-                                    .-metaKey $ :event e
+                              cond
+                                  and
+                                    not= 229 $ :keycode e
+                                    = (:key e) "\"Enter"
+                                  if (:multiline? options)
+                                    when
+                                      .-metaKey $ :event e
+                                      check-submit! d!
                                     check-submit! d!
-                                  check-submit! d!
+                                (= (:key e) "\"Escape")
+                                  on-close! d!
+                                true nil
                             :placeholder $ either (:placeholder options) "\""
                         if (:multiline? options)
                           textarea $ merge props
-                            {}
-                              :style $ merge ui/textarea
+                            {} $ :style
+                              merge ui/textarea
                                 {} (:width "\"100%") (:min-height 120) (:max-height "\"50vh")
                                 :input-style options
-                              :on-keydown $ fn (e d!)
-                                case-default (:key e) nil
-                                  "\"Escape" $ on-close! d!
-                                  "\"Enter" $ if
-                                    or (:meta? e) (:ctrl? e)
-                                    check-submit! d!
                           input $ merge props
-                            {}
-                              :style $ merge ui/input
+                            {} $ :style
+                              merge ui/input
                                 {} $ :width "\"100%"
                                 :input-style options
-                              :on-keydown $ fn (e d!)
-                                case-default (:key e) nil
-                                  "\"Escape" $ on-close! d!
-                                  "\"Enter" $ check-submit! d!
                       =< nil 16
                       div
                         {} $ :style ui/row-parted
