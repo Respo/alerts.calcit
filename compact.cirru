@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.7)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.8)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -418,7 +418,7 @@
                       d! cursor $ assoc state :show? true :text text
                       d! cursor $ assoc state :show? true
                   :close $ fn (self d!)
-                    d! cursor $ assoc state :show? true
+                    d! cursor $ assoc state :show? false
                 comp-alert-modal
                   assoc options :text $ :text state
                   :show? state
@@ -436,7 +436,7 @@
                   :show $ fn (self d! next-task) (reset! *next-confirm-task next-task)
                     d! cursor $ assoc state :show? true
                   :close $ fn (self d!)
-                    d! cursor $ assoc state :show? true
+                    d! cursor $ assoc state :show? false
                 comp-confirm-modal options (:show? state)
                   fn (e d!)
                     if (some? @*next-confirm-task) (@*next-confirm-task)
@@ -456,7 +456,7 @@
                   :show $ fn (self d!)
                     d! cursor $ assoc state :show? true
                   :close $ fn (self d!)
-                    d! cursor $ assoc state :show? true
+                    d! cursor $ assoc state :show? false
                 comp-modal options (:show? state)
                   fn (d!)
                     d! cursor $ assoc state :show? false
@@ -472,7 +472,7 @@
                   :show $ fn (self d!)
                     d! cursor $ assoc state :show? true
                   :close $ fn (self d!)
-                    d! cursor $ assoc state :show? true
+                    d! cursor $ assoc state :show? false
                 comp-modal-menu options (:show? state)
                   fn (d!)
                     d! cursor $ assoc state :show? false
@@ -492,7 +492,7 @@
                   :show $ fn (self d! next-task) (reset! *next-prompt-task next-task)
                     d! cursor $ assoc state :show? true
                   :close $ fn (self d!)
-                    d! cursor $ assoc state :show? true
+                    d! cursor $ assoc state :show? false
                 comp-prompt-modal (>> states :modal) options (:show? state)
                   fn (text d!)
                     if (some? @*next-prompt-task) (@*next-prompt-task text)
