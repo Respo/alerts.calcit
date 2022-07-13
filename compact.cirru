@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.8)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.9)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -14,8 +14,9 @@
                 state $ either (:data states)
                   {} (:selected "\"") (:show-modal? false) (:show-modal-menu? false)
               div
-                {} $ :style
-                  merge ui/global ui/fullscreen ui/column $ {} (:padding 20)
+                {}
+                  :class-name $ str-spaced css/global css/fullscreen css/column
+                  :style $ {} (:padding 20)
                 comp-hooks-usages $ >> states :hooks
                 =< nil 40
                 comp-controlled-modals $ >> states :controlled
@@ -32,7 +33,7 @@
                     :backdrop-style $ {}
                     :render $ fn (on-close)
                       div ({}) (<> "\"Place for child content")
-                        button $ {} (:style ui/button) (:inner-text "\"Close")
+                        button $ {} (:class-name css/button) (:inner-text "\"Close")
                           :on-click $ fn (e d!) (on-close d!)
                 demo-modal-menu $ use-modal-menu (>> states :modal-menu)
                   {} (:title "\"Demo")
@@ -47,10 +48,10 @@
                 div
                   {} $ :style
                     {} $ :padding "\"8px 0px"
-                  button $ {} (:inner-text "\"show modal") (:style ui/button)
+                  button $ {} (:inner-text "\"show modal") (:class-name css/button)
                     :on-click $ fn (e d!) (.show demo-modal d!)
                   =< 8 nil
-                  button $ {} (:inner-text "\"show modal menu") (:style ui/button)
+                  button $ {} (:inner-text "\"show modal menu") (:class-name css/button)
                     :on-click $ fn (e d!) (.show demo-modal-menu d!)
                   .render demo-modal
                   .render demo-modal-menu
@@ -84,27 +85,27 @@
               div ({})
                 div ({}) (<> "\"Hooks")
                 div ({})
-                  button $ {} (:inner-text "\"show alert") (:style ui/button)
+                  button $ {} (:inner-text "\"show alert") (:class-name css/button)
                     :on-click $ fn (e d!) (.show alert-plugin d!)
                   =< 8 nil
-                  button $ {} (:inner-text "\"show alert text") (:style ui/button)
+                  button $ {} (:inner-text "\"show alert text") (:class-name css/button)
                     :on-click $ fn (e d!) (.show alert-text-plugin d! "\"DEMO text")
                   =< 8 nil
-                  button $ {} (:inner-text "\"show confirm") (:style ui/button)
+                  button $ {} (:inner-text "\"show confirm") (:class-name css/button)
                     :on-click $ fn (e d!)
                       .show confirm-plugin d! $ fn () (println "\"after confirmed")
                   =< 8 nil
-                  button $ {} (:inner-text "\"show prompt") (:style ui/button)
+                  button $ {} (:inner-text "\"show prompt") (:class-name css/button)
                     :on-click $ fn (e d!)
                       .show prompt-plugin d! $ fn (text)
                         println "\"read from prompt" $ pr-str text
                   =< 8 nil
-                  button $ {} (:inner-text "\"show multilines prompt") (:style ui/button)
+                  button $ {} (:inner-text "\"show multilines prompt") (:class-name css/button)
                     :on-click $ fn (e d!)
                       .show prompt-multilines-plugin d! $ fn (text)
                         println "\"read from prompt" $ pr-str text
                   =< 8 nil
-                  button $ {} (:inner-text "\"show validated prompt") (:style ui/button)
+                  button $ {} (:inner-text "\"show validated prompt") (:class-name css/button)
                     :on-click $ fn (e d!)
                       .show prompt-validation-plugin d! $ fn (text)
                         println "\"read from prompt" $ pr-str text
@@ -115,7 +116,7 @@
                 .render prompt-validation-plugin
                 .render alert-text-plugin
       :ns $ quote
-        ns respo-alerts.comp.container $ :require (respo-ui.core :as ui)
+        ns respo-alerts.comp.container $ :require (respo-ui.core :as ui) (respo-ui.css :as css)
           respo.core :refer $ defcomp >> <> div button textarea span
           respo.comp.space :refer $ =<
           reel.comp.reel :refer $ comp-reel
@@ -145,8 +146,8 @@
                 {} $ :style
                   {} $ :position :absolute
                 if show? $ div
-                  {}
-                    :style $ merge ui/fullscreen ui/center style/backdrop (:backdrop-style options)
+                  {} (:class-name css-modal-backdrop)
+                    :style $ :backdrop-style options
                     :on-click $ fn (e d!)
                       let
                           event $ :event e
@@ -154,10 +155,8 @@
                         on-read! e d!
                         on-close! d!
                   div
-                    {}
-                      :style $ merge ui/column style/card ui/global
-                        {} $ :line-height "\"32px"
-                        :card-style options
+                    {} (:class-name css-modal-card)
+                      :style $ :card-style options
                       :on-click $ fn (e d!) nil
                     div ({})
                       <> $ either (:text options) "\"Alert!"
@@ -166,7 +165,8 @@
                       {} $ :style ui/row-parted
                       span $ {}
                       button
-                        {} (:style style/button) (:class-name schema/confirm-button-name)
+                        {}
+                          :class-name $ str-spaced css/button schema/confirm-button-name
                           :on-click $ fn (e d!) (on-read! e d!) (on-close! d!)
                         <> $ either (:button-text options) "\"Read"
         |comp-confirm-modal $ quote
@@ -178,14 +178,12 @@
                 {} $ :style
                   {} $ :position :absolute
                 if show? $ div
-                  {}
-                    :style $ merge ui/fullscreen ui/center style/backdrop (:backdrop-style options)
+                  {} (:class-name css-modal-backdrop)
+                    :style $ :backdrop-style options
                     :on-click $ fn (e d!) (on-close! d!)
                   div
-                    {}
-                      :style $ merge ui/column ui/global style/card
-                        {} $ :line-height "\"32px"
-                        :card-style options
+                    {} (:class-name css-modal-card)
+                      :style $ :card-style options
                       :on-click $ fn (e d!) nil
                     div ({})
                       <> $ either (:text options) "\"Confirm?"
@@ -194,7 +192,8 @@
                       {} $ :style ui/row-parted
                       span $ {}
                       button
-                        {} (:style style/button) (:class-name schema/confirm-button-name)
+                        {}
+                          :class-name $ str-spaced css/button schema/confirm-button-name
                           :on-click $ fn (e d!) (on-confirm! e d!) (on-close! d!)
                         <> $ either (:button-text options) "\"Confirm"
         |comp-modal $ quote
@@ -206,25 +205,24 @@
                     {} $ :position :absolute
                     :container-style options
                 if show? $ div
-                  {}
-                    :style $ merge ui/fullscreen ui/center style/backdrop (:backdrop-style options)
+                  {} (:class-name css-modal-backdrop)
+                    :style $ :backdrop-style options
                     :on-click $ fn (e d!)
                       let
                           event $ :event e
                         .!stopPropagation event
                         on-close d!
                   div
-                    {}
-                      :style $ merge ui/global ui/column style/card
-                        {} (:padding 0) (:line-height "\"32px")
+                    {} (:class-name css-modal-card)
+                      :style $ merge
+                        {} $ :padding 0
                         :style options
                       :on-click $ fn (e d!) nil
                     let
                         title $ :title options
                       if (some? title)
                         div
-                          {} $ :style
-                            merge ui/center $ {} (:padding "\"8px")
+                          {} $ :class-name css-modal-title
                           <> title
                     cond
                         some? $ :render options
@@ -237,17 +235,17 @@
             [] (effect-fade show?)
               div ({})
                 if show? $ div
-                  {}
-                    :style $ merge ui/fullscreen ui/center style/backdrop (:backdrop-style options)
+                  {} (:class-name css-modal-backdrop)
+                    :style $ :backdrop-style options
                     :on-click $ fn (e d!)
                       let
                           event $ :event e
                         .!stopPropagation event
                         on-close! d!
                   div
-                    {}
-                      :style $ merge ui/column ui/global style/card
-                        {} (:padding 0) (:line-height "\"32px")
+                    {} (:class-name css-modal-card)
+                      :style $ merge
+                        {} $ :padding 0
                         :style options
                       :on-click $ fn (e d!) nil
                     let
@@ -263,7 +261,7 @@
                         map $ fn (item)
                           [] (:value item)
                             div
-                              {} (:style style-menu-item)
+                              {} (:class-name css-menu-item)
                                 :on-click $ fn (e d!) (on-select! item d!)
                               let
                                   display $ :display item
@@ -291,22 +289,21 @@
                   {} $ :style
                     {} $ :position :absolute
                   if show? $ div
-                    {}
-                      :style $ merge ui/fullscreen ui/global ui/center style/backdrop (:backdrop-style options)
+                    {} (:class-name css-modal-backdrop)
+                      :style $ merge
                         {} $ :line-height "\"32px"
+                        :backdrop-style options
                       :on-click $ fn (e d!) (on-close! d!)
                         d! cursor $ -> state (assoc :text nil) (assoc :failure nil)
                     div
-                      {}
-                        :style $ merge ui/global ui/column style/card
-                          {} $ :line-height "\"32px"
-                          :card-style options
+                      {} (:class-name css-modal-card)
+                        :style $ :card-style options
                         :on-click $ fn (e d!) nil
                       div ({})
                         <> $ either (:text options) "\"Type in text"
                       =< nil 8
                       let
-                          props $ {} (:class-name schema/input-box-name) (:value text)
+                          props $ {} (:value text)
                             :on-input $ fn (e d!)
                               d! cursor $ assoc state :text (:value e)
                             :on-keydown $ fn (e d!)
@@ -325,13 +322,15 @@
                             :placeholder $ either (:placeholder options) "\""
                         if (:multiline? options)
                           textarea $ merge props
-                            {} $ :style
-                              merge ui/textarea
+                            {}
+                              :class-name $ str-spaced schema/input-box-name css/textarea
+                              :style $ merge
                                 {} (:width "\"100%") (:min-height 120) (:max-height "\"50vh")
                                 :input-style options
                           input $ merge props
-                            {} $ :style
-                              merge ui/input
+                            {}
+                              :class-name $ str-spaced schema/input-box-name css/input
+                              :style $ merge
                                 {} $ :width "\"100%"
                                 :input-style options
                       =< nil 16
@@ -346,9 +345,30 @@
                               :inner-text failure
                             span $ {}
                         button
-                          {} (:style style/button)
+                          {} (:class-name css/button)
                             :on-click $ fn (e d!) (check-submit! d!)
                           <> $ either (:button-text options) "\"Finish"
+        |css-menu-item $ quote
+          defstyle css-menu-item $ {}
+            "\"$0" $ {}
+              :border-top $ str "\"1px solid " (hsl 0 0 90)
+              :padding "\"0 16px"
+              :cursor :pointer
+              :white-space :nowrap
+              :line-height "\"40px"
+            "\"$0:hover" $ {}
+              :background-color $ hsl 0 0 97
+        |css-modal-backdrop $ quote
+          defstyle css-modal-backdrop $ {}
+            "\"$0" $ merge ui/fullscreen ui/center style/backdrop
+        |css-modal-card $ quote
+          defstyle css-modal-card $ {}
+            "\"$0" $ merge ui/column style/card ui/global
+              {} $ :line-height "\"32px"
+        |css-modal-title $ quote
+          defstyle css-modal-title $ {}
+            "\"$0" $ merge ui/center
+              {} $ :padding "\"8px"
         |effect-fade $ quote
           defeffect effect-fade (show?) (action el at-place?)
             case-default action nil
@@ -393,13 +413,6 @@
           defeffect effect-select (query show?) (action el *local)
             case-default action nil $ :update
               when show? $ select-element! query
-        |style-menu-item $ quote
-          def style-menu-item $ {}
-            :border-top $ str "\"1px solid " (hsl 0 0 90)
-            :padding "\"0 16px"
-            :cursor :pointer
-            :white-space :nowrap
-            :line-height "\"40px"
         |use-alert $ quote
           defplugin use-alert (states options)
             let
@@ -506,7 +519,9 @@
           respo.util.format :refer $ hsl
           respo.schema :as respo-schema
           respo-ui.core :as ui
+          respo-ui.css :as css
           respo.core :refer $ defcomp defplugin list-> <> >> div button textarea span input a defeffect
+          respo.css :refer $ defstyle
           respo.comp.space :refer $ =<
           respo-alerts.config :refer $ dev?
           respo-alerts.style :as style
