@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.9)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.10)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -43,6 +43,15 @@
                       {} (:value "\"b")
                         :display $ div ({}) (<> "\"B")
                     :on-result $ fn (result d!) (println "\"got result" result)
+                demo-drawer $ use-drawer (>> states :drawer)
+                  {} (:title "\"demo")
+                    :style $ {} (; :width 400)
+                    :container-style $ {}
+                    :backdrop-style $ {}
+                    :render $ fn (on-close)
+                      div ({}) (<> "\"Place for child content")
+                        button $ {} (:class-name css/button) (:inner-text "\"Close")
+                          :on-click $ fn (e d!) (on-close d!)
               div ({})
                 div ({}) (<> "\"Modal usage")
                 div
@@ -53,8 +62,12 @@
                   =< 8 nil
                   button $ {} (:inner-text "\"show modal menu") (:class-name css/button)
                     :on-click $ fn (e d!) (.show demo-modal-menu d!)
+                  =< 8 nil
+                  button $ {} (:inner-text "\"show drawer") (:class-name css/button)
+                    :on-click $ fn (e d!) (.show demo-drawer d!)
                   .render demo-modal
                   .render demo-modal-menu
+                  .render demo-drawer
         |comp-hooks-usages $ quote
           defcomp comp-hooks-usages (states)
             let
@@ -121,7 +134,7 @@
           respo.comp.space :refer $ =<
           reel.comp.reel :refer $ comp-reel
           respo-alerts.config :refer $ dev?
-          respo-alerts.core :refer $ comp-modal comp-modal-menu use-alert use-confirm use-prompt use-modal use-modal-menu
+          respo-alerts.core :refer $ comp-modal comp-modal-menu use-alert use-confirm use-prompt use-modal use-modal-menu use-drawer
           respo.comp.inspect :refer $ comp-inspect
           respo-alerts.style :as style
           "\"@calcit/std" :refer $ rand-int
@@ -196,6 +209,40 @@
                           :class-name $ str-spaced css/button schema/confirm-button-name
                           :on-click $ fn (e d!) (on-confirm! e d!) (on-close! d!)
                         <> $ either (:button-text options) "\"Confirm"
+        |comp-drawer $ quote
+          defcomp comp-drawer (options show? on-close)
+            [] (effect-slide show?)
+              div
+                {} $ :style
+                  merge
+                    {} $ :position :absolute
+                    :container-style options
+                if show? $ div
+                  {} (:class-name css-drawer-backdrop)
+                    :style $ :backdrop-style options
+                    :on-click $ fn (e d!)
+                      let
+                          event $ :event e
+                        .!stopPropagation event
+                        on-close d!
+                  div
+                    {} (:class-name css-drawer-card)
+                      :style $ merge
+                        {} $ :padding 0
+                        :style options
+                      :on-click $ fn (e d!) nil
+                    let
+                        title $ :title options
+                      if (some? title)
+                        div
+                          {} $ :class-name css-modal-title
+                          <> title
+                    cond
+                        some? $ :render options
+                        (:render options) on-close
+                      (some? (:render-body options))
+                        (:render-body options) on-close
+                      true "\"TODO render body"
         |comp-modal $ quote
           defcomp comp-modal (options show? on-close)
             [] (effect-fade show?)
@@ -348,6 +395,14 @@
                           {} (:class-name css/button)
                             :on-click $ fn (e d!) (check-submit! d!)
                           <> $ either (:button-text options) "\"Finish"
+        |css-drawer-backdrop $ quote
+          defstyle css-drawer-backdrop $ {}
+            "\"$0" $ merge ui/fullscreen style/backdrop
+              {} $ :padding 0
+        |css-drawer-card $ quote
+          defstyle css-drawer-card $ {}
+            "\"$0" $ merge ui/column style/card ui/global
+              {} (:line-height "\"32px") (:height "\"100%") (:max-height "\"100vh") (:margin-right 0) (:border-radius "\"0px") (:max-width "\"50vw") (:width "\"24vw") (:min-width 360)
         |css-menu-item $ quote
           defstyle css-menu-item $ {}
             "\"$0" $ {}
@@ -413,6 +468,42 @@
           defeffect effect-select (query show?) (action el *local)
             case-default action nil $ :update
               when show? $ select-element! query
+        |effect-slide $ quote
+          defeffect effect-slide (show?) (action el at-place?)
+            case-default action nil
+              :before-update $ if show? nil
+                if
+                  some? $ .-firstElementChild el
+                  let
+                      target $ .-firstElementChild el
+                      cloned $ .!cloneNode target true
+                      style $ .-style cloned
+                      card-style $ -> cloned .-firstElementChild .-style
+                    js/document.body.appendChild cloned
+                    js/setTimeout
+                      fn ()
+                        set! (.-opacity style) 0
+                        set! (.-transitionDuration card-style) "\"240ms"
+                        set! (.-transform card-style) "\"translate(40px,0px)"
+                      , 10
+                    js/setTimeout
+                      fn () $ .!remove cloned
+                      , 240
+              :update $ if show?
+                let
+                    target $ .-firstElementChild el
+                    card-style $ -> target .-firstElementChild .-style
+                    style $ .-style target
+                  set! (.-opacity style) 0
+                  set! (.-transform card-style) "\"translate(40px,0px)"
+                  js/setTimeout
+                    fn ()
+                      set! (.-transitionDuration style) "\"240ms"
+                      set! (.-transitionDuration card-style) "\"240ms"
+                      set! (.-opacity style) 1
+                      set! (.-transform card-style) "\"translate(0px,0px)"
+                    , 10
+                , nil
         |use-alert $ quote
           defplugin use-alert (states options)
             let
@@ -457,6 +548,22 @@
                   fn (d!)
                     d! cursor $ assoc state :show? false
                     reset! *next-confirm-task nil
+        |use-drawer $ quote
+          defn use-drawer (states options)
+            let
+                cursor $ :cursor states
+                state $ either (:data states)
+                  {} $ :show? false
+              ::
+                %{} Modal-class
+                  :render $ fn (self) (nth self 1)
+                  :show $ fn (self d!)
+                    d! cursor $ assoc state :show? true
+                  :close $ fn (self d!)
+                    d! cursor $ assoc state :show? false
+                comp-drawer options (:show? state)
+                  fn (d!)
+                    d! cursor $ assoc state :show? false
         |use-modal $ quote
           defn use-modal (states options)
             let

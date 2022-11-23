@@ -129,6 +129,26 @@ let
   .render demo-modal-menu
 ```
 
+#### `use-drawer`
+
+```cirru
+let
+    demo-drawer $ use-drawer (>> states :drawer) $ {}
+      :title "|demo"
+      :style $ {} (:width 400)
+      :container-style $ {}
+      :backdrop-style $ {}
+      :render $ fn (on-close)
+        div ({})
+          <> "|Place for child content"
+
+  ; "event handler to open menu"
+  .show demo-drawer d!
+
+  ; "render UI"
+  .render demo-drawer
+```
+
 > No hooks API for `comp-select` yet.
 
 ### Components
