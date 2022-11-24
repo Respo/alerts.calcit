@@ -1,5 +1,5 @@
 {
-  "version": "0.8.10",
+  "version": "0.8.11",
   "devDependencies": {
     "@calcit/std": "^0.0.2",
     "bottom-tip": "^0.1.3",

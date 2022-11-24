@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.10)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.11)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -402,7 +402,7 @@
         |css-drawer-card $ quote
           defstyle css-drawer-card $ {}
             "\"$0" $ merge ui/column style/card ui/global
-              {} (:line-height "\"32px") (:height "\"100%") (:max-height "\"100vh") (:margin-right 0) (:border-radius "\"0px") (:max-width "\"50vw") (:width "\"24vw") (:min-width 360)
+              {} (:line-height "\"32px") (:height "\"100%") (:max-height "\"100vh") (:margin-right 0) (:border-radius "\"0px") (:max-width "\"50vw") (:width "\"24vw") (:min-width 360) (:box-shadow "\"-2px 0px 24px 2px hsla(0,0%,0%,0.2)") (:transition-property "\"opacity,transform")
         |css-menu-item $ quote
           defstyle css-menu-item $ {}
             "\"$0" $ {}
@@ -419,11 +419,11 @@
         |css-modal-card $ quote
           defstyle css-modal-card $ {}
             "\"$0" $ merge ui/column style/card ui/global
-              {} $ :line-height "\"32px"
+              {} (:line-height "\"32px") (:box-shadow "\"0px 2px 24px 0px hsl(0,0%,0%,0.2)") (:transition-property "\"opacity,transform")
         |css-modal-title $ quote
           defstyle css-modal-title $ {}
             "\"$0" $ merge ui/center
-              {} $ :padding "\"8px"
+              {} (:padding "\"8px") (:font-family ui/font-fancy)
         |effect-fade $ quote
           defeffect effect-fade (show?) (action el at-place?)
             case-default action nil
@@ -484,7 +484,7 @@
                       fn ()
                         set! (.-opacity style) 0
                         set! (.-transitionDuration card-style) "\"240ms"
-                        set! (.-transform card-style) "\"translate(40px,0px)"
+                        set! (.-transform card-style) "\"translate(100%,0px)"
                       , 10
                     js/setTimeout
                       fn () $ .!remove cloned
@@ -495,7 +495,7 @@
                     card-style $ -> target .-firstElementChild .-style
                     style $ .-style target
                   set! (.-opacity style) 0
-                  set! (.-transform card-style) "\"translate(40px,0px)"
+                  set! (.-transform card-style) "\"translate(100%,0px)"
                   js/setTimeout
                     fn ()
                       set! (.-transitionDuration style) "\"240ms"
