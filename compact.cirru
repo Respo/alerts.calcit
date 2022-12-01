@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.11)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.12)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -300,9 +300,12 @@
                       if (some? title)
                         div
                           {} $ :style
-                            merge ui/center $ {} (:padding "\"4px") (:font-family ui/font-fancy)
+                            merge ui/row-parted $ {} (:padding "\"4px 8px") (:font-family ui/font-fancy)
                               :color $ hsl 0 0 70
+                          span nil
                           <> title
+                          span $ {} (:inner-text "\"Clear") (:class-name css-clear)
+                            :on-click $ fn (e d!) (on-select! nil d!)
                     list-> ({})
                       -> (:items options)
                         map $ fn (item)
@@ -395,6 +398,12 @@
                           {} (:class-name css/button)
                             :on-click $ fn (e d!) (check-submit! d!)
                           <> $ either (:button-text options) "\"Finish"
+        |css-clear $ quote
+          defstyle css-clear $ {}
+            "\"$0" $ {} (:font-size 10) (:cursor :pointer)
+              :color $ hsl 270 80 70
+              :opacity 0.6
+            "\"$0:hover" $ {} (:opacity 1)
         |css-drawer-backdrop $ quote
           defstyle css-drawer-backdrop $ {}
             "\"$0" $ merge ui/fullscreen style/backdrop
