@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.12)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.13)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -182,6 +182,7 @@
                           :class-name $ str-spaced css/button schema/confirm-button-name
                           :on-click $ fn (e d!) (on-read! e d!) (on-close! d!)
                         <> $ either (:button-text options) "\"Read"
+                  comp-esc-listener show? on-close!
         |comp-confirm-modal $ quote
           defcomp comp-confirm-modal (options show? on-confirm! on-close!)
             []
@@ -209,6 +210,7 @@
                           :class-name $ str-spaced css/button schema/confirm-button-name
                           :on-click $ fn (e d!) (on-confirm! e d!) (on-close! d!)
                         <> $ either (:button-text options) "\"Confirm"
+                  comp-esc-listener show? on-close!
         |comp-drawer $ quote
           defcomp comp-drawer (options show? on-close)
             [] (effect-slide show?)
@@ -243,6 +245,13 @@
                       (some? (:render-body options))
                         (:render-body options) on-close
                       true "\"TODO render body"
+                  comp-esc-listener show? on-close
+        |comp-esc-listener $ quote
+          defcomp comp-esc-listener (show? on-close!)
+            [] (effect-keydown)
+              div $ {}
+                :style $ {} (:position :absolute)
+                :on-keydown $ fn (e d!) (on-close! d!)
         |comp-modal $ quote
           defcomp comp-modal (options show? on-close)
             [] (effect-fade show?)
@@ -277,6 +286,7 @@
                       (some? (:render-body options))
                         (:render-body options) on-close
                       true "\"TODO render body"
+                  comp-esc-listener show? on-close
         |comp-modal-menu $ quote
           defcomp comp-modal-menu (options show? on-close! on-select!)
             [] (effect-fade show?)
@@ -316,6 +326,7 @@
                               let
                                   display $ :display item
                                 if (string? display) (<> display) display
+                  comp-esc-listener show? on-close!
         |comp-prompt-modal $ quote
           defcomp comp-prompt-modal (states options show? on-finish! on-close!)
             let
@@ -398,6 +409,7 @@
                           {} (:class-name css/button)
                             :on-click $ fn (e d!) (check-submit! d!)
                           <> $ either (:button-text options) "\"Finish"
+                    comp-esc-listener show? on-close!
         |css-clear $ quote
           defstyle css-clear $ {}
             "\"$0" $ {} (:font-size 10) (:cursor :pointer)
@@ -473,6 +485,20 @@
           defeffect effect-focus (query show?) (action el at-place?)
             case-default action nil $ :update
               when show? $ focus-element! query
+        |effect-keydown $ quote
+          defeffect effect-keydown () (action el at?)
+            case-default action nil
+              :mount $ let
+                  f $ fn (event)
+                    let
+                        new-event $ new js/MouseEvent (.-type event) event
+                      .!dispatchEvent el new-event
+                js/window.addEventListener "\"keydown" f
+                aset el "\"_listener" f
+              :unmount $ let
+                  f $ aget el "\"_listener"
+                js/window.removeEventListener "\"keydown" f
+                aset el "\"_listener" nil
         |effect-select $ quote
           defeffect effect-select (query show?) (action el *local)
             case-default action nil $ :update
