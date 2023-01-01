@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.13)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.14)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -490,9 +490,11 @@
             case-default action nil
               :mount $ let
                   f $ fn (event)
-                    let
-                        new-event $ new js/MouseEvent (.-type event) event
-                      .!dispatchEvent el new-event
+                    if
+                      = (.-key event) "\"Escape"
+                      let
+                          new-event $ new js/MouseEvent (.-type event) event
+                        .!dispatchEvent el new-event
                 js/window.addEventListener "\"keydown" f
                 aset el "\"_listener" f
               :unmount $ let
