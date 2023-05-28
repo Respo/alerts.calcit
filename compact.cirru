@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.15)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.16)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -608,17 +608,16 @@
                 cursor $ :cursor states
                 state $ either (:data states)
                   {} $ :show? false
-              w-js-log $ %::
+              %::
                 %{} Modal-class
                   :render $ fn (self) (nth self 1)
                   :show $ fn (self d!)
                     d! cursor $ assoc state :show? true
                   :close $ fn (self d!)
                     d! cursor $ assoc state :show? false
-                , :use-modal
-                  comp-modal options (:show? state)
-                    fn (d!)
-                      d! cursor $ assoc state :show? false
+                , :use-modal $ comp-modal options (:show? state)
+                  fn (d!)
+                    d! cursor $ assoc state :show? false
         |use-modal-menu $ quote
           defn use-modal-menu (states options)
             let
