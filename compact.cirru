@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.14)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.16)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -551,7 +551,7 @@
                 on-read $ either (:on-read options)
                   fn (e d!)
                     d! cursor $ assoc state :show? false
-              ::
+              %::
                 %{} Modal-class
                   :render $ fn (self) (nth self 1)
                   :show $ fn (self d! ? text)
@@ -560,25 +560,26 @@
                       d! cursor $ assoc state :show? true
                   :close $ fn (self d!)
                     d! cursor $ assoc state :show? false
-                comp-alert-modal
+                , :alert-modal $ comp-alert-modal
                   assoc options :text $ :text state
                   :show? state
-                  , on-read $ fn (d!)
-                    d! cursor $ assoc state :show? false
+                  , on-read
+                    fn (d!)
+                      d! cursor $ assoc state :show? false
         |use-confirm $ quote
           defplugin use-confirm (states options)
             let
                 cursor $ :cursor states
                 state $ either (:data states)
                   {} $ :show? false
-              ::
+              %::
                 %{} Modal-class
                   :render $ fn (self) (nth self 1)
                   :show $ fn (self d! next-task) (reset! *next-confirm-task next-task)
                     d! cursor $ assoc state :show? true
                   :close $ fn (self d!)
                     d! cursor $ assoc state :show? false
-                comp-confirm-modal options (:show? state)
+                , :use-confirm $ comp-confirm-modal options (:show? state)
                   fn (e d!)
                     if (some? @*next-confirm-task) (@*next-confirm-task)
                     reset! *next-confirm-task nil
@@ -591,14 +592,14 @@
                 cursor $ :cursor states
                 state $ either (:data states)
                   {} $ :show? false
-              ::
+              %::
                 %{} Modal-class
                   :render $ fn (self) (nth self 1)
                   :show $ fn (self d!)
                     d! cursor $ assoc state :show? true
                   :close $ fn (self d!)
                     d! cursor $ assoc state :show? false
-                comp-drawer options (:show? state)
+                , :use-drawer $ comp-drawer options (:show? state)
                   fn (d!)
                     d! cursor $ assoc state :show? false
         |use-modal $ quote
@@ -607,14 +608,14 @@
                 cursor $ :cursor states
                 state $ either (:data states)
                   {} $ :show? false
-              ::
+              %::
                 %{} Modal-class
                   :render $ fn (self) (nth self 1)
                   :show $ fn (self d!)
                     d! cursor $ assoc state :show? true
                   :close $ fn (self d!)
                     d! cursor $ assoc state :show? false
-                comp-modal options (:show? state)
+                , :use-modal $ comp-modal options (:show? state)
                   fn (d!)
                     d! cursor $ assoc state :show? false
         |use-modal-menu $ quote
@@ -623,14 +624,14 @@
                 cursor $ :cursor states
                 state $ either (:data states)
                   {} $ :show? false
-              ::
+              %::
                 %{} Modal-class
                   :render $ fn (self) (nth self 1)
                   :show $ fn (self d!)
                     d! cursor $ assoc state :show? true
                   :close $ fn (self d!)
                     d! cursor $ assoc state :show? false
-                comp-modal-menu options (:show? state)
+                , :use-modal-menu $ comp-modal-menu options (:show? state)
                   fn (d!)
                     d! cursor $ assoc state :show? false
                   fn (result d!)
@@ -643,14 +644,14 @@
                 cursor $ :cursor states
                 state $ either (:data states)
                   {} (:show? false) (:failure nil)
-              ::
+              %::
                 %{} Modal-class
                   :render $ fn (self) (nth self 1)
                   :show $ fn (self d! next-task) (reset! *next-prompt-task next-task)
                     d! cursor $ assoc state :show? true
                   :close $ fn (self d!)
                     d! cursor $ assoc state :show? false
-                comp-prompt-modal (>> states :modal) options (:show? state)
+                , :use-prompt $ comp-prompt-modal (>> states :modal) options (:show? state)
                   fn (text d!)
                     if (some? @*next-prompt-task) (@*next-prompt-task text)
                     reset! *next-prompt-task nil
