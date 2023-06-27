@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.16)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.8.17)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -678,14 +678,14 @@
         |*reel $ quote
           defatom *reel $ -> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store)
         |dispatch! $ quote
-          defn dispatch! (op op-data)
+          defn dispatch! (op ? op-data)
             if (list? op)
-              recur :states $ [] op op-data
+              recur $ :: :state op op-data
               do
                 when
                   and config/dev? $ not= :states op
                   println "\"Dispatch:" op
-                reset! *reel $ reel-updater updater @*reel op op-data
+                reset! *reel $ reel-updater updater @*reel op
         |main! $ quote
           defn main! ()
             println "\"Running mode:" $ if config/dev? "\"dev" "\"release"
@@ -766,15 +766,17 @@
     |respo-alerts.updater $ {}
       :defs $ {}
         |updater $ quote
-          defn updater (store op op-data op-id op-time)
-            case-default op
-              do (js/console.log "\"Unknown op:" op) store
-              :states $ update-states store op-data
-              :content $ assoc store :content op-data
-              :hydrate-storage op-data
+          defn updater (store op op-id op-time)
+            tag-match op
+                :states cursor s
+                update-states store cursor s
+              (:content c) (assoc store :content c)
+              (:hydrate-storage d) d
+              _ $ do (js/console.log "\"Unknown op:" op) store
       :ns $ quote
         ns respo-alerts.updater $ :require
           respo.cursor :refer $ update-states
+          respo-alerts.config :refer $ dev?
     |respo-alerts.util $ {}
       :defs $ {}
         |focus-element! $ quote
