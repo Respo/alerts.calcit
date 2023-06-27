@@ -14,20 +14,20 @@ jobs:
 
     - uses: actions/setup-node@v3
       with:
-        node-version: 16
+        node-version: 18
         cache: yarn
 
     - uses: supplypike/setup-bin@v3
       with:
-        uri: 'https://github.com/calcit-lang/calcit/releases/download/0.7.0-a3/cr'
+        uri: 'https://github.com/calcit-lang/calcit/releases/download/0.7.2/cr'
         name: 'cr'
-        version: '0.7.0-a3'
+        version: '0.7.2'
 
     - uses: supplypike/setup-bin@v3
       with:
-        uri: 'https://github.com/calcit-lang/calcit/releases/download/0.7.0-a3/caps'
+        uri: 'https://github.com/calcit-lang/calcit/releases/download/0.7.2/caps'
         name: 'caps'
-        version: '0.7.0-a3'
+        version: '0.7.2'
 
     - name: "compiles to js"
       run: >
