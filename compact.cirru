@@ -678,14 +678,12 @@
         |*reel $ quote
           defatom *reel $ -> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store)
         |dispatch! $ quote
-          defn dispatch! (op ? op-data)
-            if (list? op)
-              recur $ :: :state op op-data
-              do
-                when
-                  and config/dev? $ not= :states op
-                  println "\"Dispatch:" op
-                reset! *reel $ reel-updater updater @*reel op
+          defn dispatch! (op)
+            do
+              when
+                and config/dev? $ not= :states op
+                println "\"Dispatch:" op
+              reset! *reel $ reel-updater updater @*reel op
         |main! $ quote
           defn main! ()
             println "\"Running mode:" $ if config/dev? "\"dev" "\"release"
@@ -772,7 +770,7 @@
                 update-states store cursor s
               (:content c) (assoc store :content c)
               (:hydrate-storage d) d
-              _ $ do (js/console.log "\"Unknown op:" op) store
+              _ $ do (js/console.warn "\"Unknown op:" op) store
       :ns $ quote
         ns respo-alerts.updater $ :require
           respo.cursor :refer $ update-states
