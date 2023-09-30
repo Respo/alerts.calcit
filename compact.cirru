@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.9.0-a2)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.9.1)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -154,15 +154,104 @@
         :code $ quote (ns respo-alerts.config)
     |respo-alerts.core $ %{} :FileEntry
       :defs $ {}
+        |%alert-actions $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defrecord! %alert-actions
+              :render $ fn (self)
+                tag-match self $ 
+                  :plugin node cursor state
+                  , node
+              :show $ fn (self d! ? text)
+                tag-match self $ 
+                  :plugin node cursor state
+                  if (some? text)
+                    d! cursor $ assoc state :show? true :text text
+                    d! cursor $ assoc state :show? true
+              :close $ fn (self d!)
+                tag-match self $ 
+                  :plugin node cursor state
+                  d! cursor $ assoc state :show? false
+        |%confirm-actions $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defrecord! %confirm-actions
+              :render $ fn (self)
+                tag-match self $ 
+                  :plugin node cursor state
+                  , node
+              :show $ fn (self d! next-task)
+                tag-match self $ 
+                  :plugin node cursor state
+                  do (reset! *next-confirm-task next-task)
+                    d! cursor $ assoc state :show? true
+              :close $ fn (self d!)
+                tag-match self $ 
+                  :plugin node cursor state
+                  d! cursor $ assoc state :show? false
+        |%drawer-actions $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defrecord! %drawer-actions
+              :render $ fn (self)
+                tag-match self $ 
+                  :plugin node cursor state
+                  , node
+              :show $ fn (self d!)
+                tag-match self $ 
+                  :plugin node cursor state
+                  d! cursor $ assoc state :show? true
+              :close $ fn (self d!)
+                tag-match self $ 
+                  :plugin node cursor state
+                  d! cursor $ assoc state :show? false
+        |%modal-actions $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defrecord! %modal-actions
+              :render $ fn (self)
+                tag-match self $ 
+                  :plugin node cursor state
+                  , node
+              :show $ fn (self d!)
+                tag-match self $ 
+                  :plugin node cursor state
+                  d! cursor $ assoc state :show? true
+              :close $ fn (self d!)
+                tag-match self $ 
+                  :plugin node cursor state
+                  d! cursor $ assoc state :show? false
+        |%modal-menu-actions $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defrecord! %modal-menu-actions
+              :render $ fn (self)
+                tag-match self $ 
+                  :plugin node cursor state
+                  , node
+              :show $ fn (self d!)
+                tag-match self $ 
+                  :plugin node cursor state
+                  d! cursor $ assoc state :show? true
+              :close $ fn (self d!)
+                tag-match self $ 
+                  :plugin node cursor state
+                  d! cursor $ assoc state :show? false
+        |%prompt-actions $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defrecord! %prompt-actions
+              :render $ fn (self)
+                tag-match self $ 
+                  :plugin node cursor state
+                  , node
+              :show $ fn (self d! next-task)
+                tag-match self $ 
+                  :plugin node cursor state
+                  do (reset! *next-prompt-task next-task)
+                    d! cursor $ assoc state :show? true
+              :close $ fn (self d!)
+                tag-match self $ 
+                  :plugin node cursor state
+                  d! cursor $ assoc state :show? false
         |*next-confirm-task $ %{} :CodeEntry (:doc |)
           :code $ quote (defatom *next-confirm-task nil)
         |*next-prompt-task $ %{} :CodeEntry (:doc |)
           :code $ quote (defatom *next-prompt-task nil)
-        |ModalShape $ %{} :CodeEntry (:doc |)
-          :code $ quote (defrecord ModalShape :render :show :close)
-        |PluginShape $ %{} :CodeEntry (:doc |)
-          :code $ quote
-            def PluginShape $ new-record :Plugin :name :node
         |comp-alert-modal $ %{} :CodeEntry (:doc |)
           :code $ quote
             defcomp comp-alert-modal (options show? on-read! on-close!)
@@ -584,23 +673,13 @@
                   on-read $ either (:on-read options)
                     fn (e d!)
                       d! cursor $ assoc state :show? false
-                  klass $ %{} ModalShape
-                    :render $ fn (self) (:node self)
-                    :show $ fn (self d! ? text)
-                      if (some? text)
-                        d! cursor $ assoc state :show? true :text text
-                        d! cursor $ assoc state :show? true
-                    :close $ fn (self d!)
-                      d! cursor $ assoc state :show? false
-                &record:with-class
-                  %{} PluginShape (:name :alert-modal)
-                    :node $ comp-alert-modal
-                      assoc options :text $ :text state
-                      :show? state
-                      , on-read
-                        fn (d!)
-                          d! cursor $ assoc state :show? false
-                  , klass
+                  node $ comp-alert-modal
+                    assoc options :text $ :text state
+                    :show? state
+                    , on-read
+                      fn (d!)
+                        d! cursor $ assoc state :show? false
+                %:: %alert-actions :plugin node cursor state
         |use-confirm $ %{} :CodeEntry (:doc |)
           :code $ quote
             defplugin use-confirm (states options)
@@ -608,22 +687,14 @@
                   cursor $ :cursor states
                   state $ either (:data states)
                     {} $ :show? false
-                  klass $ %{} ModalShape
-                    :render $ fn (self) (:node self)
-                    :show $ fn (self d! next-task) (reset! *next-confirm-task next-task)
-                      d! cursor $ assoc state :show? true
-                    :close $ fn (self d!)
+                  node $ comp-confirm-modal options (:show? state)
+                    fn (e d!)
+                      if (some? @*next-confirm-task) (@*next-confirm-task)
+                      reset! *next-confirm-task nil
+                    fn (d!)
                       d! cursor $ assoc state :show? false
-                &record:with-class
-                  %{} PluginShape (:name :use-confirm)
-                    :node $ comp-confirm-modal options (:show? state)
-                      fn (e d!)
-                        if (some? @*next-confirm-task) (@*next-confirm-task)
-                        reset! *next-confirm-task nil
-                      fn (d!)
-                        d! cursor $ assoc state :show? false
-                        reset! *next-confirm-task nil
-                  , klass
+                      reset! *next-confirm-task nil
+                %:: %confirm-actions :plugin node cursor state
         |use-drawer $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn use-drawer (states options)
@@ -631,18 +702,10 @@
                   cursor $ :cursor states
                   state $ either (:data states)
                     {} $ :show? false
-                  klass $ %{} ModalShape
-                    :render $ fn (self) (:node self)
-                    :show $ fn (self d!)
-                      d! cursor $ assoc state :show? true
-                    :close $ fn (self d!)
+                  node $ comp-drawer options (:show? state)
+                    fn (d!)
                       d! cursor $ assoc state :show? false
-                &record:with-class
-                  %{} PluginShape (:name :use-drawer)
-                    :node $ comp-drawer options (:show? state)
-                      fn (d!)
-                        d! cursor $ assoc state :show? false
-                  , klass
+                %:: %drawer-actions :plugin node cursor state
         |use-modal $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn use-modal (states options)
@@ -650,18 +713,10 @@
                   cursor $ :cursor states
                   state $ either (:data states)
                     {} $ :show? false
-                  klass $ %{} ModalShape
-                    :render $ fn (self) (:node self)
-                    :show $ fn (self d!)
-                      d! cursor $ assoc state :show? true
-                    :close $ fn (self d!)
+                  node $ comp-modal options (:show? state)
+                    fn (d!)
                       d! cursor $ assoc state :show? false
-                &record:with-class
-                  %{} PluginShape (:name :use-modal)
-                    :node $ comp-modal options (:show? state)
-                      fn (d!)
-                        d! cursor $ assoc state :show? false
-                  , klass
+                %:: %modal-actions :plugin node cursor state
         |use-modal-menu $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn use-modal-menu (states options)
@@ -669,22 +724,14 @@
                   cursor $ :cursor states
                   state $ either (:data states)
                     {} $ :show? false
-                  klass $ %{} ModalShape
-                    :render $ fn (self) (:node self)
-                    :show $ fn (self d!)
-                      d! cursor $ assoc state :show? true
-                    :close $ fn (self d!)
+                  node $ comp-modal-menu options (:show? state)
+                    fn (d!)
                       d! cursor $ assoc state :show? false
-                &record:with-class
-                  %{} PluginShape (:name :use-modal-menu)
-                    :node $ comp-modal-menu options (:show? state)
-                      fn (d!)
-                        d! cursor $ assoc state :show? false
-                      fn (result d!)
-                          :on-result options
-                          , result d!
-                        d! cursor $ assoc state :show? false
-                  , klass
+                    fn (result d!)
+                        :on-result options
+                        , result d!
+                      d! cursor $ assoc state :show? false
+                %:: %modal-menu-actions :plugin node cursor state
         |use-prompt $ %{} :CodeEntry (:doc |)
           :code $ quote
             defplugin use-prompt (states options)
@@ -692,23 +739,15 @@
                   cursor $ :cursor states
                   state $ either (:data states)
                     {} (:show? false) (:failure nil)
-                  klass $ %{} ModalShape
-                    :render $ fn (self) (:node self)
-                    :show $ fn (self d! next-task) (reset! *next-prompt-task next-task)
-                      d! cursor $ assoc state :show? true
-                    :close $ fn (self d!)
+                  node $ comp-prompt-modal (>> states :modal) options (:show? state)
+                    fn (text d!)
+                      if (some? @*next-prompt-task) (@*next-prompt-task text)
+                      reset! *next-prompt-task nil
                       d! cursor $ assoc state :show? false
-                &record:with-class
-                  %{} PluginShape (:name :use-prompt)
-                    :node $ comp-prompt-modal (>> states :modal) options (:show? state)
-                      fn (text d!)
-                        if (some? @*next-prompt-task) (@*next-prompt-task text)
-                        reset! *next-prompt-task nil
-                        d! cursor $ assoc state :show? false
-                      fn (d!)
-                        d! cursor $ assoc state :show? false
-                        reset! *next-prompt-task nil
-                  , klass
+                    fn (d!)
+                      d! cursor $ assoc state :show? false
+                      reset! *next-prompt-task nil
+                %:: %prompt-actions :plugin node cursor state
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote
           ns respo-alerts.core $ :require
