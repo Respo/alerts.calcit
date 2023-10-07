@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.9.1)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.9.2)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -890,7 +890,7 @@
             defn focus-element! (query)
               let
                   target $ js/document.querySelector query
-                if (some? target) (.focus target)
+                if (some? target) (.!focus target)
         |select-element! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn select-element! (query)
