@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.9.2)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.9.3)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -18,6 +18,11 @@
                   {}
                     :class-name $ str-spaced css/global css/fullscreen css/column
                     :style $ {} (:padding 20)
+                  div ({})
+                    a
+                      {} (:href "\"https://respo-mvc.org/") (:target "\"_blank")
+                      img $ {} (:class-name style-logo) (:src "\"https://cos-sh.tiye.me/cos-up/bb4c2755050318e864b56f59145d726e-SubstractRespo.png")
+                  =< nil 40
                   comp-hooks-usages $ >> states :hooks
                   =< nil 40
                   comp-controlled-modals $ >> states :controlled
@@ -131,10 +136,16 @@
                   .render prompt-multilines-plugin
                   .render prompt-validation-plugin
                   .render alert-text-plugin
+        |style-logo $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defstyle style-logo $ {}
+              "\"&" $ {} (:width 120)
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote
-          ns respo-alerts.comp.container $ :require (respo-ui.core :as ui) (respo-ui.css :as css)
-            respo.core :refer $ defcomp >> <> div button textarea span
+          ns respo-alerts.comp.container $ :require (respo-ui.core :as ui)
+            respo.css :refer $ defstyle
+            respo-ui.css :as css
+            respo.core :refer $ defcomp >> <> div button textarea span img a
             respo.comp.space :refer $ =<
             reel.comp.reel :refer $ comp-reel
             respo-alerts.config :refer $ dev?
@@ -176,16 +187,16 @@
             defrecord! %confirm-actions
               :render $ fn (self)
                 tag-match self $ 
-                  :plugin node cursor state
+                  :plugin node cursor state *next
                   , node
               :show $ fn (self d! next-task)
                 tag-match self $ 
-                  :plugin node cursor state
-                  do (reset! *next-confirm-task next-task)
+                  :plugin node cursor state *next-confirm-task
+                  do (.set! *next-confirm-task next-task)
                     d! cursor $ assoc state :show? true
               :close $ fn (self d!)
                 tag-match self $ 
-                  :plugin node cursor state
+                  :plugin node cursor state *next
                   d! cursor $ assoc state :show? false
         |%drawer-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
@@ -237,21 +248,17 @@
             defrecord! %prompt-actions
               :render $ fn (self)
                 tag-match self $ 
-                  :plugin node cursor state
+                  :plugin node cursor state *next
                   , node
               :show $ fn (self d! next-task)
                 tag-match self $ 
-                  :plugin node cursor state
-                  do (reset! *next-prompt-task next-task)
+                  :plugin node cursor state *next-prompt-task
+                  do (.set! *next-prompt-task next-task)
                     d! cursor $ assoc state :show? true
               :close $ fn (self d!)
                 tag-match self $ 
-                  :plugin node cursor state
+                  :plugin node cursor state *next
                   d! cursor $ assoc state :show? false
-        |*next-confirm-task $ %{} :CodeEntry (:doc |)
-          :code $ quote (defatom *next-confirm-task nil)
-        |*next-prompt-task $ %{} :CodeEntry (:doc |)
-          :code $ quote (defatom *next-prompt-task nil)
         |comp-alert-modal $ %{} :CodeEntry (:doc |)
           :code $ quote
             defcomp comp-alert-modal (options show? on-read! on-close!)
@@ -687,14 +694,15 @@
                   cursor $ :cursor states
                   state $ either (:data states)
                     {} $ :show? false
+                  *next-confirm-task $ anchor-state (identity-path 'confirm)
                   node $ comp-confirm-modal options (:show? state)
                     fn (e d!)
                       if (some? @*next-confirm-task) (@*next-confirm-task)
-                      reset! *next-confirm-task nil
+                      .set! *next-confirm-task nil
                     fn (d!)
                       d! cursor $ assoc state :show? false
-                      reset! *next-confirm-task nil
-                %:: %confirm-actions :plugin node cursor state
+                      .set! *next-confirm-task nil
+                %:: %confirm-actions :plugin node cursor state *next-confirm-task
         |use-drawer $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn use-drawer (states options)
@@ -739,15 +747,16 @@
                   cursor $ :cursor states
                   state $ either (:data states)
                     {} (:show? false) (:failure nil)
+                  *next-prompt-task $ anchor-state (identity-path 'prompt)
                   node $ comp-prompt-modal (>> states :modal) options (:show? state)
                     fn (text d!)
                       if (some? @*next-prompt-task) (@*next-prompt-task text)
-                      reset! *next-prompt-task nil
+                      .set! *next-prompt-task nil
                       d! cursor $ assoc state :show? false
                     fn (d!)
                       d! cursor $ assoc state :show? false
-                      reset! *next-prompt-task nil
-                %:: %prompt-actions :plugin node cursor state
+                      .set! *next-prompt-task nil
+                %:: %prompt-actions :plugin node cursor state *next-prompt-task
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote
           ns respo-alerts.core $ :require
@@ -763,6 +772,7 @@
             respo-alerts.schema :as schema
             respo-alerts.util :refer $ focus-element! select-element!
             respo-alerts.style :as style
+            memof.anchor :refer $ anchor-state identity-path
     |respo-alerts.main $ %{} :FileEntry
       :defs $ {}
         |*reel $ %{} :CodeEntry (:doc |)
