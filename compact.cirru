@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.9.3)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.9.4)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -26,6 +26,8 @@
                   comp-hooks-usages $ >> states :hooks
                   =< nil 40
                   comp-controlled-modals $ >> states :controlled
+                  =< nil 40
+                  comp-demo-trigger $ >> states :trigger
                   when dev? $ comp-inspect "\"states" states
                     {} $ :bottom 0
                   when dev? $ comp-reel (>> states :reel) reel ({})
@@ -75,6 +77,20 @@
                     .render demo-modal
                     .render demo-modal-menu
                     .render demo-drawer
+        |comp-demo-trigger $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defcomp comp-demo-trigger (states)
+              let
+                  cursor $ :cursor states
+                  state $ either (:data states)
+                    {} $ :visible? false
+                div ({})
+                  div ({}) (<> "\"Trigger")
+                  div ({})
+                    comp-trigger (:visible? state)
+                      button $ {} (:inner-text "\"Toggle") (:class-name css/button)
+                        :on-click $ fn (e d!)
+                          d! cursor $ update state :visible? not
         |comp-hooks-usages $ %{} :CodeEntry (:doc |)
           :code $ quote
             defcomp comp-hooks-usages (states)
@@ -106,8 +122,9 @@
                 div ({})
                   div ({}) (<> "\"Hooks")
                   div ({})
-                    button $ {} (:inner-text "\"show alert") (:class-name css/button)
-                      :on-click $ fn (e d!) (.show alert-plugin d!)
+                    comp-trigger (.show? alert-plugin)
+                      button $ {} (:inner-text "\"show alert") (:class-name css/button)
+                        :on-click $ fn (e d!) (.show alert-plugin d!)
                     =< 8 nil
                     button $ {} (:inner-text "\"show alert text") (:class-name css/button)
                       :on-click $ fn (e d!) (.show alert-text-plugin d! "\"DEMO text")
@@ -126,10 +143,11 @@
                         .show prompt-multilines-plugin d! $ fn (text)
                           println "\"read from prompt" $ to-lispy-string text
                     =< 8 nil
-                    button $ {} (:inner-text "\"show validated prompt") (:class-name css/button)
-                      :on-click $ fn (e d!)
-                        .show prompt-validation-plugin d! $ fn (text)
-                          println "\"read from prompt" $ to-lispy-string text
+                    comp-trigger (.show? prompt-validation-plugin)
+                      button $ {} (:inner-text "\"show validated prompt") (:class-name css/button)
+                        :on-click $ fn (e d!)
+                          .show prompt-validation-plugin d! $ fn (text)
+                            println "\"read from prompt" $ to-lispy-string text
                   .render alert-plugin
                   .render confirm-plugin
                   .render prompt-plugin
@@ -153,6 +171,8 @@
             respo.comp.inspect :refer $ comp-inspect
             respo-alerts.style :as style
             "\"@calcit/std" :refer $ rand-int
+            respo-alerts.trigger :refer $ comp-trigger
+            respo-alerts.trigger :refer $ comp-trigger
     |respo-alerts.config $ %{} :FileEntry
       :defs $ {}
         |dev? $ %{} :CodeEntry (:doc |)
@@ -182,6 +202,10 @@
                 tag-match self $ 
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
+              :show? $ fn (self)
+                tag-match self $ 
+                  :plugin node cursor state
+                  :show? state
         |%confirm-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
             defrecord! %confirm-actions
@@ -198,6 +222,10 @@
                 tag-match self $ 
                   :plugin node cursor state *next
                   d! cursor $ assoc state :show? false
+              :show? $ fn (self)
+                tag-match self $ 
+                  :plugin node cursor state
+                  :show? state
         |%drawer-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
             defrecord! %drawer-actions
@@ -213,6 +241,10 @@
                 tag-match self $ 
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
+              :show? $ fn (self)
+                tag-match self $ 
+                  :plugin node cursor state
+                  :show? state
         |%modal-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
             defrecord! %modal-actions
@@ -228,6 +260,10 @@
                 tag-match self $ 
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
+              :show? $ fn (self)
+                tag-match self $ 
+                  :plugin node cursor state
+                  :show? state
         |%modal-menu-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
             defrecord! %modal-menu-actions
@@ -243,6 +279,10 @@
                 tag-match self $ 
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
+              :show? $ fn (self)
+                tag-match self $ 
+                  :plugin node cursor state
+                  :show? state
         |%prompt-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
             defrecord! %prompt-actions
@@ -259,6 +299,10 @@
                 tag-match self $ 
                   :plugin node cursor state *next
                   d! cursor $ assoc state :show? false
+              :show? $ fn (self)
+                tag-match self $ 
+                  :plugin node cursor state
+                  :show? state
         |comp-alert-modal $ %{} :CodeEntry (:doc |)
           :code $ quote
             defcomp comp-alert-modal (options show? on-read! on-close!)
@@ -877,6 +921,38 @@
           ns respo-alerts.style $ :require
             respo.util.format :refer $ hsl
             respo-ui.core :as ui
+    |respo-alerts.trigger $ %{} :FileEntry
+      :defs $ {}
+        |comp-trigger $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defcomp comp-trigger (show? el ? options)
+              div
+                {} $ :class-name style-trigger-container
+                , el $ div
+                  {}
+                    :class-name $ str-spaced style-trigger (if show? style-trigger-active)
+                    :style $ merge (get options :trigger-style)
+                      if show? $ get options :trigger-active-style
+        |style-trigger $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defstyle style-trigger $ {}
+              "\"&" $ {} (:border-radius "\"50%") (:position :absolute) (:transform "\"translate(-50%,-50%)") (:top "\"50%") (:left "\"50%") (:width 0) (:height 0) (:transition-duration "\"300ms") (:transition-delay "\"100ms") (:pointer-events :none) (:z-index 900) (:opacity 1)
+                :background $ str "\"radial-gradient(" (hsl 0 0 70 0.8) "\"0% ," (hsl 0 0 60 0.0) "\" 50%)"
+        |style-trigger-active $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defstyle style-trigger-active $ {}
+              "\"&" $ {} (:width 2000) (:height 2000) (:opacity 0.3) (:transition-delay "\"0ms")
+        |style-trigger-container $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defstyle style-trigger-container $ {}
+              "\"&" $ {} (:display :inline-block) (:position :relative)
+      :ns $ %{} :CodeEntry (:doc |)
+        :code $ quote
+          ns respo-alerts.trigger $ :require
+            respo.core :refer $ defcomp defplugin list-> <> >> div button textarea span input a defeffect
+            respo-ui.css :as css
+            respo.util.format :refer $ hsl
+            respo.css :refer $ defstyle
     |respo-alerts.updater $ %{} :FileEntry
       :defs $ {}
         |updater $ %{} :CodeEntry (:doc |)
