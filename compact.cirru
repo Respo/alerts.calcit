@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.9.4)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.9.5)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -107,13 +107,13 @@
                     {} (:title "\"demo multilines") (:text "\"This would be a very long content of alerts, like some prompt... write multiple lines:")
                       :initial $ str (rand-int 100)
                       :style $ {}
-                      :input-style $ {} (:font-family ui/font-code)
+                      :input-class css/font-code!
                       :multiline? true
                   prompt-validation-plugin $ use-prompt (>> states :validation-prompt)
                     {} (:titl "\"validated") (:text "\"This would be a very long content of alerts, like some prompt... write multiple lines:")
                       :initial $ str (rand-int 100)
                       :style $ {}
-                      :input-style $ {} (:font-family ui/font-code)
+                      :input-class css/font-code!
                       :multiline? true
                       :validator $ fn (x)
                         try
@@ -313,8 +313,9 @@
                   {} $ :style
                     {} $ :position :absolute
                   if show? $ div
-                    {} (:class-name css-modal-backdrop)
-                      :style $ :backdrop-style options
+                    {}
+                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
+                      :style $ get options :backdrop-style
                       :on-click $ fn (e d!)
                         let
                             event $ :event e
@@ -322,20 +323,22 @@
                           on-read! e d!
                           on-close! d!
                     div
-                      {} (:class-name css-modal-card)
-                        :style $ :card-style options
+                      {}
+                        :class-name $ str-spaced style-modal-card css/global css/column (get options :card-class)
+                        :style $ get options :card-style
                         :on-click $ fn (e d!) nil
                       div ({})
-                        <> $ either (:text options) "\"Alert!"
+                        <> $ either (get options :text) "\"Alert!"
                       =< nil 8
                       div
-                        {} $ :style ui/row-parted
+                        {} $ :class-name css/row-parted
                         span $ {}
                         button
                           {}
-                            :class-name $ str-spaced css/button schema/confirm-button-name
+                            :class-name $ str-spaced css/button schema/confirm-button-name (get options :confirm-class)
+                            :style $ get options :confirm-style
                             :on-click $ fn (e d!) (on-read! e d!) (on-close! d!)
-                          <> $ either (:button-text options) "\"Read"
+                          <> $ either (get options :confirm-text) "\"Read"
                     comp-esc-listener show? on-close!
         |comp-confirm-modal $ %{} :CodeEntry (:doc |)
           :code $ quote
@@ -347,22 +350,24 @@
                   {} $ :style
                     {} $ :position :absolute
                   if show? $ div
-                    {} (:class-name css-modal-backdrop)
+                    {}
+                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
                       :style $ :backdrop-style options
                       :on-click $ fn (e d!) (on-close! d!)
                     div
-                      {} (:class-name css-modal-card)
+                      {}
+                        :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
                         :style $ :card-style options
                         :on-click $ fn (e d!) nil
                       div ({})
                         <> $ either (:text options) "\"Confirm?"
                       =< nil 8
                       div
-                        {} $ :style ui/row-parted
+                        {} $ :class-name css/row-parted
                         span $ {}
                         button
                           {}
-                            :class-name $ str-spaced css/button schema/confirm-button-name
+                            :class-name $ str-spaced css/button schema/confirm-button-name (get options :confirm-class)
                             :on-click $ fn (e d!) (on-confirm! e d!) (on-close! d!)
                           <> $ either (:button-text options) "\"Confirm"
                     comp-esc-listener show? on-close!
@@ -376,7 +381,8 @@
                       {} $ :position :absolute
                       :container-style options
                   if show? $ div
-                    {} (:class-name css-drawer-backdrop)
+                    {}
+                      :class-name $ str-spaced css/fullscreen style-drawer-backdrop (get options :backdrop-class)
                       :style $ :backdrop-style options
                       :on-click $ fn (e d!)
                         let
@@ -384,7 +390,8 @@
                           .!stopPropagation event
                           on-close d!
                     div
-                      {} (:class-name css-drawer-card)
+                      {}
+                        :class-name $ str-spaced css/global css/column style-drawer-card (get options :card-class)
                         :style $ merge
                           {} $ :padding 0
                           :style options
@@ -393,7 +400,7 @@
                           title $ :title options
                         if (some? title)
                           div
-                            {} $ :class-name css-modal-title
+                            {} $ :class-name (str-spaced css/center css/font-fancy! style-modal-title)
                             <> title
                       cond
                           some? $ :render options
@@ -419,7 +426,8 @@
                       {} $ :position :absolute
                       :container-style options
                   if show? $ div
-                    {} (:class-name css-modal-backdrop)
+                    {}
+                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop
                       :style $ :backdrop-style options
                       :on-click $ fn (e d!)
                         let
@@ -427,7 +435,8 @@
                           .!stopPropagation event
                           on-close d!
                     div
-                      {} (:class-name css-modal-card)
+                      {}
+                        :class-name $ str-spaced css/global css/column style-modal-card
                         :style $ merge
                           {} $ :padding 0
                           :style options
@@ -436,7 +445,7 @@
                           title $ :title options
                         if (some? title)
                           div
-                            {} $ :class-name css-modal-title
+                            {} $ :class-name (str-spaced css/center css/font-fancy! style-modal-title)
                             <> title
                       cond
                           some? $ :render options
@@ -451,7 +460,8 @@
               [] (effect-fade show?)
                 div ({})
                   if show? $ div
-                    {} (:class-name css-modal-backdrop)
+                    {}
+                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
                       :style $ :backdrop-style options
                       :on-click $ fn (e d!)
                         let
@@ -459,7 +469,8 @@
                           .!stopPropagation event
                           on-close! d!
                     div
-                      {} (:class-name css-modal-card)
+                      {}
+                        :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
                         :style $ merge
                           {} $ :padding 0
                           :style options
@@ -468,19 +479,20 @@
                           title $ :title options
                         if (some? title)
                           div
-                            {} $ :style
-                              merge ui/row-parted $ {} (:padding "\"4px 8px") (:font-family ui/font-fancy)
+                            {}
+                              :class-name $ str-spaced css/row-parted css/font-fancy!
+                              :style $ {} (:padding "\"4px 8px")
                                 :color $ hsl 0 0 70
                             span nil
                             <> title
-                            span $ {} (:inner-text "\"Clear") (:class-name css-clear)
+                            span $ {} (:inner-text "\"Clear") (:class-name style-clear)
                               :on-click $ fn (e d!) (on-select! nil d!)
                       list-> ({})
                         -> (:items options)
                           map $ fn (item)
                             [] (:value item)
                               div
-                                {} (:class-name css-menu-item)
+                                {} (:class-name style-menu-item)
                                   :on-click $ fn (e d!) (on-select! item d!)
                                 let
                                     display $ :display item
@@ -510,14 +522,16 @@
                     {} $ :style
                       {} $ :position :absolute
                     if show? $ div
-                      {} (:class-name css-modal-backdrop)
+                      {}
+                        :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
                         :style $ merge
                           {} $ :line-height "\"32px"
                           :backdrop-style options
                         :on-click $ fn (e d!) (on-close! d!)
                           d! cursor $ -> state (assoc :text nil) (assoc :failure nil)
                       div
-                        {} (:class-name css-modal-card)
+                        {}
+                          :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
                           :style $ :card-style options
                           :on-click $ fn (e d!) nil
                         div ({})
@@ -544,19 +558,19 @@
                           if (:multiline? options)
                             textarea $ merge props
                               {}
-                                :class-name $ str-spaced schema/input-box-name css/textarea
+                                :class-name $ str-spaced schema/input-box-name css/textarea (get options :input-class)
                                 :style $ merge
                                   {} (:width "\"100%") (:min-height 120) (:max-height "\"50vh")
-                                  :input-style options
+                                  get options :input-style
                             input $ merge props
                               {}
-                                :class-name $ str-spaced schema/input-box-name css/input
+                                :class-name $ str-spaced schema/input-box-name css/input (get options :input-class)
                                 :style $ merge
                                   {} $ :width "\"100%"
-                                  :input-style options
+                                  get options :input-style
                         =< nil 16
                         div
-                          {} $ :style ui/row-parted
+                          {} $ :class-name css/row-parted
                           let
                               failure $ :failure state
                             if (some? failure)
@@ -566,52 +580,11 @@
                                 :inner-text failure
                               span $ {}
                           button
-                            {} (:class-name css/button)
+                            {}
+                              :class-name $ str-spaced css/button (get options :confirm-class)
                               :on-click $ fn (e d!) (check-submit! d!)
                             <> $ either (:button-text options) "\"Finish"
                       comp-esc-listener show? on-close!
-        |css-clear $ %{} :CodeEntry (:doc |)
-          :code $ quote
-            defstyle css-clear $ {}
-              "\"$0" $ {} (:font-size 10) (:cursor :pointer)
-                :color $ hsl 270 80 70
-                :opacity 0.6
-              "\"$0:hover" $ {} (:opacity 1)
-        |css-drawer-backdrop $ %{} :CodeEntry (:doc |)
-          :code $ quote
-            defstyle css-drawer-backdrop $ {}
-              "\"$0" $ merge ui/fullscreen style/backdrop
-                {} $ :padding 0
-        |css-drawer-card $ %{} :CodeEntry (:doc |)
-          :code $ quote
-            defstyle css-drawer-card $ {}
-              "\"$0" $ merge ui/column style/card ui/global
-                {} (:line-height "\"32px") (:height "\"100%") (:max-height "\"100vh") (:margin-right 0) (:border-radius "\"0px") (:max-width "\"50vw") (:width "\"24vw") (:min-width 360) (:box-shadow "\"-2px 0px 24px 2px hsla(0,0%,0%,0.2)") (:transition-property "\"opacity,transform")
-        |css-menu-item $ %{} :CodeEntry (:doc |)
-          :code $ quote
-            defstyle css-menu-item $ {}
-              "\"$0" $ {}
-                :border-top $ str "\"1px solid " (hsl 0 0 90)
-                :padding "\"0 16px"
-                :cursor :pointer
-                :white-space :nowrap
-                :line-height "\"40px"
-              "\"$0:hover" $ {}
-                :background-color $ hsl 0 0 97
-        |css-modal-backdrop $ %{} :CodeEntry (:doc |)
-          :code $ quote
-            defstyle css-modal-backdrop $ {}
-              "\"$0" $ merge ui/fullscreen ui/center style/backdrop
-        |css-modal-card $ %{} :CodeEntry (:doc |)
-          :code $ quote
-            defstyle css-modal-card $ {}
-              "\"$0" $ merge ui/column style/card ui/global
-                {} (:line-height "\"32px") (:box-shadow "\"0px 2px 24px 0px hsl(0,0%,0%,0.2)") (:transition-property "\"opacity,transform")
-        |css-modal-title $ %{} :CodeEntry (:doc |)
-          :code $ quote
-            defstyle css-modal-title $ {}
-              "\"$0" $ merge ui/center
-                {} (:padding "\"8px") (:font-family ui/font-fancy)
         |effect-fade $ %{} :CodeEntry (:doc |)
           :code $ quote
             defeffect effect-fade (show?) (action el at-place?)
@@ -713,6 +686,46 @@
                         set! (.-transform card-style) "\"translate(0px,0px)"
                       , 10
                   , nil
+        |style-clear $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defstyle style-clear $ {}
+              "\"&" $ {} (:font-size 10) (:cursor :pointer)
+                :color $ hsl 270 80 70
+                :opacity 0.6
+              "\"&:hover" $ {} (:opacity 1)
+        |style-drawer-backdrop $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defstyle style-drawer-backdrop $ {}
+              "\"&" $ merge style/backdrop
+                {} $ :padding 0
+        |style-drawer-card $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defstyle style-drawer-card $ {}
+              "\"&" $ merge  style/card
+                {} (:line-height "\"32px") (:height "\"100%") (:max-height "\"100vh") (:margin-right 0) (:border-radius "\"0px") (:max-width "\"50vw") (:width "\"24vw") (:min-width 360) (:box-shadow "\"-2px 0px 24px 2px hsla(0,0%,0%,0.2)") (:transition-property "\"opacity,transform")
+        |style-menu-item $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defstyle style-menu-item $ {}
+              "\"&" $ {}
+                :border-top $ str "\"1px solid " (hsl 0 0 90)
+                :padding "\"0 16px"
+                :cursor :pointer
+                :white-space :nowrap
+                :line-height "\"40px"
+              "\"&:hover" $ {}
+                :background-color $ hsl 0 0 97
+        |style-modal-backdrop $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defstyle style-modal-backdrop $ {} ("\"&" style/backdrop)
+        |style-modal-card $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defstyle style-modal-card $ {}
+              "\"&" $ merge style/card
+                {} (:line-height "\"32px") (:box-shadow "\"0px 2px 24px 0px hsl(0,0%,0%,0.2)") (:transition-property "\"opacity,transform")
+        |style-modal-title $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            defstyle style-modal-title $ {}
+              "\"&" $ {} (:padding "\"8px")
         |use-alert $ %{} :CodeEntry (:doc |)
           :code $ quote
             defplugin use-alert (states options)
