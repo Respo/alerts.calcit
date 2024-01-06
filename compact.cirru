@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.9.5)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.9.6)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -427,7 +427,7 @@
                       :container-style options
                   if show? $ div
                     {}
-                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop
+                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
                       :style $ :backdrop-style options
                       :on-click $ fn (e d!)
                         let
@@ -436,10 +436,11 @@
                           on-close d!
                     div
                       {}
-                        :class-name $ str-spaced css/global css/column style-modal-card
+                        :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
                         :style $ merge
                           {} $ :padding 0
                           :style options
+                          get options :card-style
                         :on-click $ fn (e d!) nil
                       let
                           title $ :title options
@@ -987,9 +988,9 @@
         |focus-element! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn focus-element! (query)
-              let
-                  target $ js/document.querySelector query
-                if (some? target) (.!focus target)
+              if-let
+                target $ js/document.querySelector query
+                .!focus target
         |select-element! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn select-element! (query)
