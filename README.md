@@ -18,6 +18,9 @@ respo-alerts.core :refer $ use-alert use-prompt use-confirm
   :style $ {}
   :card-style $ {}
   :backdrop-style $ {}
+  :card-class style-card
+  :backdrop-class style-backdrop
+  :confirm-class style-confirm
 ```
 
 ```cirru
@@ -42,6 +45,9 @@ extra argument can be added to overwrite `:text` field:
   :style $ {}
   :card-style $ {}
   :backdrop-style $ {}
+  :card-class style-card
+  :backdrop-class style-backdrop
+  :confirm-class style-confirm
 ```
 
 ```cirru
@@ -67,6 +73,9 @@ let
   :input-style $ {}
   :card-style $ {}
   :backdrop-style $ {}
+  :card-class style-card
+  :backdrop-class style-backdrop
+  :confirm-class style-confirm
   :multiline? false
   :initial "|default text"
   :placeholder "|input"
@@ -96,6 +105,9 @@ let
       :style $ {} (:width 400)
       :container-style $ {}
       :backdrop-style $ {}
+      :card-class style-card
+      :backdrop-class style-backdrop
+      :confirm-class style-confirm
       :render $ fn (on-close)
         div ({})
           <> "|Place for child content"
@@ -115,6 +127,9 @@ let
       :title "|Demo"
       :style $ {} (:width 300)
       :backdrop-style $ {}
+      :card-class style-card
+      :backdrop-class style-backdrop
+      :confirm-class style-confirm
       :items $ []
         {} (:value "|a") (:display "|A")
         {} (:value "|b")
@@ -138,6 +153,9 @@ let
       :style $ {} (:width 400)
       :container-style $ {}
       :backdrop-style $ {}
+      :card-class style-card
+      :backdrop-class style-backdrop
+      :confirm-class style-confirm
       :render $ fn (on-close)
         div ({})
           <> "|Place for child content"
@@ -165,6 +183,9 @@ let
       :style $ {} (:width 400)
       :container-style $ {}
       :backdrop-style $ {}
+      :card-class style-card
+      :backdrop-class style-backdrop
+      :confirm-class style-confirm
       :render $ fn (on-close)
         div ({})
           <> "|Place for child content"
@@ -176,6 +197,9 @@ comp-modal-menu (:show-modal-menu? state)
   {} (:title "|Demo")
     :style $ {} (:width 300)
     :backdrop-style $ {}
+    :card-class style-card
+    :backdrop-class style-backdrop
+    :confirm-class style-confirm
   []
     {} (:value |a) (:display "|A")
     {} (:value |b)
