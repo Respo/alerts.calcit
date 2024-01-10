@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.9.6)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.0)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -47,10 +47,8 @@
                   demo-modal-menu $ use-modal-menu (>> states :modal-menu)
                     {} (:title "\"Demo")
                       :style $ {} (:width 300)
-                      :items $ []
-                        {} (:value "\"a") (:display "\"A")
-                        {} (:value "\"b")
-                          :display $ div ({}) (<> "\"B")
+                      :items $ [] (:: :item "\"a" "\"A")
+                        :: :item "\"b" $ div ({}) (<> "\"B")
                       :on-result $ fn (result d!) (println "\"got result" result)
                   demo-drawer $ use-drawer (>> states :drawer)
                     {} (:title "\"demo")
@@ -490,14 +488,20 @@
                               :on-click $ fn (e d!) (on-select! nil d!)
                       list-> ({})
                         -> (:items options)
-                          map $ fn (item)
-                            [] (:value item)
-                              div
-                                {} (:class-name style-menu-item)
-                                  :on-click $ fn (e d!) (on-select! item d!)
-                                let
-                                    display $ :display item
-                                  if (string? display) (<> display) display
+                          map $ fn (info)
+                            let
+                                item $ cond
+                                    tuple? info
+                                    , info
+                                  (map? info)
+                                    :: :item (&map:get info :value) (&map:get info :display)
+                                  true $ raise "\"Unknown menu item"
+                              tag-match item $ 
+                                :item v l
+                                [] v $ div
+                                  {} (:class-name style-menu-item)
+                                    :on-click $ fn (e d!) (on-select! item d!)
+                                  if (string? l) (<> l) l
                     comp-esc-listener show? on-close!
         |comp-prompt-modal $ %{} :CodeEntry (:doc |)
           :code $ quote

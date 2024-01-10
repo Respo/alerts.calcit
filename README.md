@@ -131,9 +131,8 @@ let
       :backdrop-class style-backdrop
       :confirm-class style-confirm
       :items $ []
-        {} (:value "|a") (:display "|A")
-        {} (:value "|b")
-          :display $ div ({} (<> "|B"))
+        :: :item |a |A
+        :: :item |b $ div ({} (<> "|B"))
       :on-result $ fn (result d!)
         println "|got result" result
 
@@ -201,9 +200,8 @@ comp-modal-menu (:show-modal-menu? state)
     :backdrop-class style-backdrop
     :confirm-class style-confirm
   []
-    {} (:value |a) (:display "|A")
-    {} (:value |b)
-      :display $ div ({}) (<> "|B")
+    :: :item |a |A
+    :: :item |b $ div ({}) (<> "|B")
   fn (d!)
     d! cursor (assoc state :show-modal-menu? false)
   fn (result d!)
