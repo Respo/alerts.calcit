@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.0)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.1)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -299,7 +299,7 @@
                   d! cursor $ assoc state :show? false
               :show? $ fn (self)
                 tag-match self $ 
-                  :plugin node cursor state
+                  :plugin node cursor state *next
                   :show? state
         |comp-alert-modal $ %{} :CodeEntry (:doc |)
           :code $ quote
