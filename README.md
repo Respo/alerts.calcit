@@ -132,7 +132,7 @@ let
       :confirm-class style-confirm
       :items $ []
         :: :item |a |A
-        :: :item |b $ div ({} (<> "|B"))
+        :: :item |b $ div ({}) (<> "|B")
       :on-result $ fn (result d!)
         println "|got result" result
 
