@@ -3,9 +3,9 @@
   "devDependencies": {
     "@calcit/std": "^0.0.3",
     "bottom-tip": "^0.1.5",
-    "vite": "^5.2.2"
+    "vite": "^5.4.1"
   },
   "dependencies": {
-    "@calcit/procs": "^0.8.44"
+    "@calcit/procs": "^0.9.4"
   }
 }
