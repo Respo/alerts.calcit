@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:port 6001) (:reload-fn |respo-alerts.main/reload!) (:storage-key |calcit.cirru) (:version |0.10.1)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:port 6001) (:reload-fn |respo-alerts.main/reload!) (:storage-key |calcit.cirru) (:version |0.10.2)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -3296,7 +3296,9 @@
                                               |n $ %{} :Expr (:at 1669911873662) (:by |rJG4IHzWf)
                                                 :data $ {}
                                                   |T $ %{} :Leaf (:at 1669911875424) (:by |rJG4IHzWf) (:text |span)
-                                                  |b $ %{} :Leaf (:at 1669911877700) (:by |rJG4IHzWf) (:text |nil)
+                                                  |b $ %{} :Expr (:at 1729417788643) (:by |rJG4IHzWf)
+                                                    :data $ {}
+                                                      |T $ %{} :Leaf (:at 1729417788954) (:by |rJG4IHzWf) (:text |{})
                                               |r $ %{} :Expr (:at 1572886976861) (:by |rJG4IHzWf)
                                                 :data $ {}
                                                   |T $ %{} :Leaf (:at 1572886976861) (:by |rJG4IHzWf) (:text |<>)

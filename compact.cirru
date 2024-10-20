@@ -1,6 +1,6 @@
 
 {} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.1)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.2)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -482,7 +482,7 @@
                               :class-name $ str-spaced css/row-parted css/font-fancy!
                               :style $ {} (:padding "\"4px 8px")
                                 :color $ hsl 0 0 70
-                            span nil
+                            span $ {}
                             <> title
                             span $ {} (:inner-text "\"Clear") (:class-name style-clear)
                               :on-click $ fn (e d!) (on-select! nil d!)
