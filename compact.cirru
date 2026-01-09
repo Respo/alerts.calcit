@@ -1,6 +1,6 @@
 
-{} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.3)
+{} (:about "|file is generated - never edit directly; learn cr edit/tree workflows before changing") (:package |respo-alerts)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.4)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -134,6 +134,15 @@
                       :on-click $ fn (e d!)
                         .show confirm-plugin d! $ fn () (println "\"after confirmed")
                     =< 8 nil
+                    button $ {} (:inner-text "|show confirm with text") (:class-name css/button)
+                      :on-click $ fn (e d!)
+                        let
+                            text $ js/prompt "|Input confirm text"
+                          if
+                            not $ blank? text
+                            .show-with-text confirm-plugin d! (str "|Confirmed: " text)
+                              fn () $ println "|after confirmed"
+                    =< 8 nil
                     button $ {} (:inner-text "\"show prompt") (:class-name css/button)
                       :on-click $ fn (e d!)
                         .show prompt-plugin d! $ fn (text)
@@ -196,21 +205,21 @@
           :code $ quote
             defrecord! %alert-actions
               :render $ fn (self)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state
                   , node
               :show $ fn (self d! ? text)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state
                   if (some? text)
                     d! cursor $ assoc state :show? true :text text
                     d! cursor $ assoc state :show? true
               :close $ fn (self d!)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
               :show? $ fn (self)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state
                   :show? state
           :examples $ []
@@ -218,20 +227,25 @@
           :code $ quote
             defrecord! %confirm-actions
               :render $ fn (self)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state *next
                   , node
               :show $ fn (self d! next-task)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state *next-confirm-task
                   do (.set! *next-confirm-task next-task)
-                    d! cursor $ assoc state :show? true
+                    d! cursor $ assoc state :show? true :text nil
+              :show-with-text $ fn (self d! text next-task)
+                tag-match self $ 
+                  :plugin node cursor state *next-confirm-task
+                  do (.set! *next-confirm-task next-task)
+                    d! cursor $ assoc state :show? true :text text
               :close $ fn (self d!)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state *next
                   d! cursor $ assoc state :show? false
               :show? $ fn (self)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state
                   :show? state
           :examples $ []
@@ -239,19 +253,19 @@
           :code $ quote
             defrecord! %drawer-actions
               :render $ fn (self)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state
                   , node
               :show $ fn (self d!)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state
                   d! cursor $ assoc state :show? true
               :close $ fn (self d!)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
               :show? $ fn (self)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state
                   :show? state
           :examples $ []
@@ -259,19 +273,19 @@
           :code $ quote
             defrecord! %modal-actions
               :render $ fn (self)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state
                   , node
               :show $ fn (self d!)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state
                   d! cursor $ assoc state :show? true
               :close $ fn (self d!)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
               :show? $ fn (self)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state
                   :show? state
           :examples $ []
@@ -279,19 +293,19 @@
           :code $ quote
             defrecord! %modal-menu-actions
               :render $ fn (self)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state
                   , node
               :show $ fn (self d!)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state
                   d! cursor $ assoc state :show? true
               :close $ fn (self d!)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
               :show? $ fn (self)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state
                   :show? state
           :examples $ []
@@ -299,20 +313,20 @@
           :code $ quote
             defrecord! %prompt-actions
               :render $ fn (self)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state *next
                   , node
               :show $ fn (self d! next-task)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state *next-prompt-task
                   do (.set! *next-prompt-task next-task)
                     d! cursor $ assoc state :show? true
               :close $ fn (self d!)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state *next
                   d! cursor $ assoc state :show? false
               :show? $ fn (self)
-                tag-match self $
+                tag-match self $ 
                   :plugin node cursor state *next
                   :show? state
           :examples $ []
@@ -532,7 +546,7 @@
                                   (map? info)
                                     :: :item (&map:get info :value) (&map:get info :display)
                                   true $ raise "\"Unknown menu item"
-                              tag-match item $
+                              tag-match item $ 
                                 :item v l
                                 [] v $ div
                                   {} (:class-name style-menu-item)
@@ -820,9 +834,13 @@
               let
                   cursor $ :cursor states
                   state $ either (:data states)
-                    {} $ :show? false
+                    {} (:show? false) (:text nil)
                   *next-confirm-task $ anchor-state (identity-path 'confirm)
-                  node $ comp-confirm-modal options (:show? state)
+                  node $ comp-confirm-modal
+                    if
+                      blank? $ :text state
+                      , options $ assoc options :text (:text state)
+                    :show? state
                     fn (e d!)
                       if (some? @*next-confirm-task) (@*next-confirm-task)
                       .set! *next-confirm-task nil
@@ -839,6 +857,14 @@
                   fn (e d!)
                     .show confirm-plugin d! $ fn () (println |confirmed)
                 <> |Delete
+            quote $ let
+                confirm-plugin $ use-confirm (>> states :confirm)
+                  {} $ :text "|Default text"
+              button
+                {} (:class-name css/button)
+                  :on-click $ fn (e d!)
+                    .show-with-text confirm-plugin d! "|Confirm with dynamic text?" $ fn () (println |Confirmed!)
+                <> "|Show with text"
         |use-drawer $ %{} :CodeEntry (:doc "||Drawer hook. Shows a panel sliding from the side. Use :render function in options to customize content. Supports :style for width and other styles.")
           :code $ quote
             defn use-drawer (states options)
