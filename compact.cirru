@@ -1,6 +1,6 @@
 
-{} (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.2)
+{} (:about "|file is generated - never edit directly; learn cr edit/tree workflows before changing") (:package |respo-alerts)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.4)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -31,6 +31,7 @@
                   when dev? $ comp-inspect "\"states" states
                     {} $ :bottom 0
                   when dev? $ comp-reel (>> states :reel) reel ({})
+          :examples $ []
         |comp-controlled-modals $ %{} :CodeEntry (:doc |)
           :code $ quote
             defcomp comp-controlled-modals (states)
@@ -75,6 +76,7 @@
                     .render demo-modal
                     .render demo-modal-menu
                     .render demo-drawer
+          :examples $ []
         |comp-demo-trigger $ %{} :CodeEntry (:doc |)
           :code $ quote
             defcomp comp-demo-trigger (states)
@@ -89,6 +91,7 @@
                       button $ {} (:inner-text "\"Toggle") (:class-name css/button)
                         :on-click $ fn (e d!)
                           d! cursor $ update state :visible? not
+          :examples $ []
         |comp-hooks-usages $ %{} :CodeEntry (:doc |)
           :code $ quote
             defcomp comp-hooks-usages (states)
@@ -131,6 +134,15 @@
                       :on-click $ fn (e d!)
                         .show confirm-plugin d! $ fn () (println "\"after confirmed")
                     =< 8 nil
+                    button $ {} (:inner-text "|show confirm with text") (:class-name css/button)
+                      :on-click $ fn (e d!)
+                        let
+                            text $ js/prompt "|Input confirm text"
+                          if
+                            not $ blank? text
+                            .show-with-text confirm-plugin d! (str "|Confirmed: " text)
+                              fn () $ println "|after confirmed"
+                    =< 8 nil
                     button $ {} (:inner-text "\"show prompt") (:class-name css/button)
                       :on-click $ fn (e d!)
                         .show prompt-plugin d! $ fn (text)
@@ -152,10 +164,12 @@
                   .render prompt-multilines-plugin
                   .render prompt-validation-plugin
                   .render alert-text-plugin
+          :examples $ []
         |style-logo $ %{} :CodeEntry (:doc |)
           :code $ quote
             defstyle style-logo $ {}
               "\"&" $ {} (:width 120)
+          :examples $ []
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote
           ns respo-alerts.comp.container $ :require (respo-ui.core :as ui)
@@ -171,16 +185,20 @@
             "\"@calcit/std" :refer $ rand-int
             respo-alerts.trigger :refer $ comp-trigger
             respo-alerts.trigger :refer $ comp-trigger
+        :examples $ []
     |respo-alerts.config $ %{} :FileEntry
       :defs $ {}
         |dev? $ %{} :CodeEntry (:doc |)
           :code $ quote
             def dev? $ = "\"dev" (get-env "\"mode" "\"release")
+          :examples $ []
         |site $ %{} :CodeEntry (:doc |)
           :code $ quote
             def site $ {} (:dev-ui "\"http://localhost:8100/main-fonts.css") (:release-ui "\"http://cdn.tiye.me/favored-fonts/main-fonts.css") (:cdn-url "\"http://cdn.tiye.me/calcit-workflow/") (:title "\"Alerts") (:icon "\"http://cdn.tiye.me/logo/respo.png") (:storage-key "\"respo-alerts")
+          :examples $ []
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote (ns respo-alerts.config)
+        :examples $ []
     |respo-alerts.core $ %{} :FileEntry
       :defs $ {}
         |%alert-actions $ %{} :CodeEntry (:doc |)
@@ -204,6 +222,7 @@
                 tag-match self $ 
                   :plugin node cursor state
                   :show? state
+          :examples $ []
         |%confirm-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
             defrecord! %confirm-actions
@@ -215,7 +234,12 @@
                 tag-match self $ 
                   :plugin node cursor state *next-confirm-task
                   do (.set! *next-confirm-task next-task)
-                    d! cursor $ assoc state :show? true
+                    d! cursor $ assoc state :show? true :text nil
+              :show-with-text $ fn (self d! text next-task)
+                tag-match self $ 
+                  :plugin node cursor state *next-confirm-task
+                  do (.set! *next-confirm-task next-task)
+                    d! cursor $ assoc state :show? true :text text
               :close $ fn (self d!)
                 tag-match self $ 
                   :plugin node cursor state *next
@@ -224,6 +248,7 @@
                 tag-match self $ 
                   :plugin node cursor state
                   :show? state
+          :examples $ []
         |%drawer-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
             defrecord! %drawer-actions
@@ -243,6 +268,7 @@
                 tag-match self $ 
                   :plugin node cursor state
                   :show? state
+          :examples $ []
         |%modal-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
             defrecord! %modal-actions
@@ -262,6 +288,7 @@
                 tag-match self $ 
                   :plugin node cursor state
                   :show? state
+          :examples $ []
         |%modal-menu-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
             defrecord! %modal-menu-actions
@@ -281,6 +308,7 @@
                 tag-match self $ 
                   :plugin node cursor state
                   :show? state
+          :examples $ []
         |%prompt-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
             defrecord! %prompt-actions
@@ -301,7 +329,8 @@
                 tag-match self $ 
                   :plugin node cursor state *next
                   :show? state
-        |comp-alert-modal $ %{} :CodeEntry (:doc |)
+          :examples $ []
+        |comp-alert-modal $ %{} :CodeEntry (:doc "||Alert modal component. Shows a simple message dialog with a confirm button. Used internally by use-alert hook.")
           :code $ quote
             defcomp comp-alert-modal (options show? on-read! on-close!)
               []
@@ -338,7 +367,11 @@
                             :on-click $ fn (e d!) (on-read! e d!) (on-close! d!)
                           <> $ either (get options :confirm-text) "\"Read"
                     comp-esc-listener show? on-close!
-        |comp-confirm-modal $ %{} :CodeEntry (:doc |)
+          :examples $ []
+            quote $ comp-alert-modal
+              {} $ :text "|Hello World"
+              , show? on-read! on-close!
+        |comp-confirm-modal $ %{} :CodeEntry (:doc "||Confirm modal component. Shows a dialog with confirm and cancel buttons. Used internally by use-confirm hook.")
           :code $ quote
             defcomp comp-confirm-modal (options show? on-confirm! on-close!)
               []
@@ -369,7 +402,11 @@
                             :on-click $ fn (e d!) (on-confirm! e d!) (on-close! d!)
                           <> $ either (:button-text options) "\"Confirm"
                     comp-esc-listener show? on-close!
-        |comp-drawer $ %{} :CodeEntry (:doc |)
+          :examples $ []
+            quote $ comp-confirm-modal
+              {} $ :text "|Are you sure?"
+              , show? on-confirm! on-close!
+        |comp-drawer $ %{} :CodeEntry (:doc "||Drawer component. Renders a sliding panel from the side with custom content via :render function in options.")
           :code $ quote
             defcomp comp-drawer (options show? on-close)
               [] (effect-slide show?)
@@ -407,6 +444,12 @@
                           (:render-body options) on-close
                         true "\"TODO render body"
                     comp-esc-listener show? on-close
+          :examples $ []
+            quote $ comp-drawer
+              {} (:title |Settings)
+                :render $ fn (on-close)
+                  div ({}) (<> |Content)
+              , show? on-close
         |comp-esc-listener $ %{} :CodeEntry (:doc |)
           :code $ quote
             defcomp comp-esc-listener (show? on-close!)
@@ -414,7 +457,8 @@
                 div $ {}
                   :style $ {} (:position :absolute)
                   :on-keydown $ fn (e d!) (on-close! d!)
-        |comp-modal $ %{} :CodeEntry (:doc |)
+          :examples $ []
+        |comp-modal $ %{} :CodeEntry (:doc "||Modal component. Renders a modal dialog with custom content via :render function in options.")
           :code $ quote
             defcomp comp-modal (options show? on-close)
               [] (effect-fade show?)
@@ -453,7 +497,13 @@
                           (:render-body options) on-close
                         true "\"TODO render body"
                     comp-esc-listener show? on-close
-        |comp-modal-menu $ %{} :CodeEntry (:doc |)
+          :examples $ []
+            quote $ comp-modal
+              {} (:title |Dialog)
+                :render $ fn (on-close)
+                  div ({}) (<> |Content)
+              , show? on-close
+        |comp-modal-menu $ %{} :CodeEntry (:doc "||Modal menu component. Shows a modal dialog with a list of selectable items. Define items via :items in options.")
           :code $ quote
             defcomp comp-modal-menu (options show? on-close! on-select!)
               [] (effect-fade show?)
@@ -503,7 +553,12 @@
                                     :on-click $ fn (e d!) (on-select! item d!)
                                   if (string? l) (<> l) l
                     comp-esc-listener show? on-close!
-        |comp-prompt-modal $ %{} :CodeEntry (:doc |)
+          :examples $ []
+            quote $ comp-modal-menu
+              {} (:title |Choose)
+                :items $ [] (:: :item |a |A) (:: :item |b |B)
+              , show? on-close! on-select!
+        |comp-prompt-modal $ %{} :CodeEntry (:doc "||Prompt modal component. Shows a dialog with text input field and validation. Used internally by use-prompt hook.")
           :code $ quote
             defcomp comp-prompt-modal (states options show? on-finish! on-close!)
               let
@@ -590,6 +645,10 @@
                               :on-click $ fn (e d!) (check-submit! d!)
                             <> $ either (:button-text options) "\"Finish"
                       comp-esc-listener show? on-close!
+          :examples $ []
+            quote $ comp-prompt-modal states
+              {} (:text "|Enter name") (:placeholder |name)
+              , show? on-finish! on-close!
         |effect-fade $ %{} :CodeEntry (:doc |)
           :code $ quote
             defeffect effect-fade (show?) (action el at-place?)
@@ -627,11 +686,13 @@
                         set! (.-transform card-style) "\"scale(1) translate(0px,0px)"
                       , 10
                   , nil
+          :examples $ []
         |effect-focus $ %{} :CodeEntry (:doc |)
           :code $ quote
             defeffect effect-focus (query show?) (action el at-place?)
               case-default action nil $ :update
                 when show? $ focus-element! query
+          :examples $ []
         |effect-keydown $ %{} :CodeEntry (:doc |)
           :code $ quote
             defeffect effect-keydown () (action el at?)
@@ -649,11 +710,13 @@
                     f $ aget el "\"_listener"
                   js/window.removeEventListener "\"keydown" f
                   aset el "\"_listener" nil
+          :examples $ []
         |effect-select $ %{} :CodeEntry (:doc |)
           :code $ quote
             defeffect effect-select (query show?) (action el *local)
               case-default action nil $ :update
                 when show? $ select-element! query
+          :examples $ []
         |effect-slide $ %{} :CodeEntry (:doc |)
           :code $ quote
             defeffect effect-slide (show?) (action el at-place?)
@@ -691,6 +754,7 @@
                         set! (.-transform card-style) "\"translate(0px,0px)"
                       , 10
                   , nil
+          :examples $ []
         |style-clear $ %{} :CodeEntry (:doc |)
           :code $ quote
             defstyle style-clear $ {}
@@ -698,16 +762,19 @@
                 :color $ hsl 270 80 70
                 :opacity 0.6
               "\"&:hover" $ {} (:opacity 1)
+          :examples $ []
         |style-drawer-backdrop $ %{} :CodeEntry (:doc |)
           :code $ quote
             defstyle style-drawer-backdrop $ {}
               "\"&" $ merge style/backdrop
                 {} $ :padding 0
+          :examples $ []
         |style-drawer-card $ %{} :CodeEntry (:doc |)
           :code $ quote
             defstyle style-drawer-card $ {}
-              "\"&" $ merge  style/card
+              "\"&" $ merge style/card
                 {} (:line-height "\"32px") (:height "\"100%") (:max-height "\"100vh") (:margin-right 0) (:border-radius "\"0px") (:max-width "\"50vw") (:width "\"24vw") (:min-width 360) (:box-shadow "\"-2px 0px 24px 2px hsla(0,0%,0%,0.2)") (:transition-property "\"opacity,transform")
+          :examples $ []
         |style-menu-item $ %{} :CodeEntry (:doc |)
           :code $ quote
             defstyle style-menu-item $ {}
@@ -719,19 +786,23 @@
                 :line-height "\"40px"
               "\"&:hover" $ {}
                 :background-color $ hsl 0 0 97
+          :examples $ []
         |style-modal-backdrop $ %{} :CodeEntry (:doc |)
           :code $ quote
             defstyle style-modal-backdrop $ {} ("\"&" style/backdrop)
+          :examples $ []
         |style-modal-card $ %{} :CodeEntry (:doc |)
           :code $ quote
             defstyle style-modal-card $ {}
               "\"&" $ merge style/card
                 {} (:line-height "\"32px") (:box-shadow "\"0px 2px 24px 0px hsl(0,0%,0%,0.2)") (:transition-property "\"opacity,transform")
+          :examples $ []
         |style-modal-title $ %{} :CodeEntry (:doc |)
           :code $ quote
             defstyle style-modal-title $ {}
               "\"&" $ {} (:padding "\"8px")
-        |use-alert $ %{} :CodeEntry (:doc |)
+          :examples $ []
+        |use-alert $ %{} :CodeEntry (:doc "||Alert dialog hook. Shows a simple message box. Returns a plugin object with .show method to display the alert.")
           :code $ quote
             defplugin use-alert (states options)
               let
@@ -749,15 +820,27 @@
                       fn (d!)
                         d! cursor $ assoc state :show? false
                 %:: %alert-actions :plugin node cursor state
-        |use-confirm $ %{} :CodeEntry (:doc |)
+          :examples $ []
+            quote $ let
+                alert-plugin $ use-alert (>> states :alert)
+                  {} $ :text |demo
+              button
+                {} $ :on-click
+                  fn (e d!) (.show alert-plugin d!)
+                <> |Show
+        |use-confirm $ %{} :CodeEntry (:doc "||Confirm dialog hook. Shows a dialog with confirm/cancel buttons. Returns a plugin object, call .show with a callback function that executes after confirmation.")
           :code $ quote
             defplugin use-confirm (states options)
               let
                   cursor $ :cursor states
                   state $ either (:data states)
-                    {} $ :show? false
+                    {} (:show? false) (:text nil)
                   *next-confirm-task $ anchor-state (identity-path 'confirm)
-                  node $ comp-confirm-modal options (:show? state)
+                  node $ comp-confirm-modal
+                    if
+                      blank? $ :text state
+                      , options $ assoc options :text (:text state)
+                    :show? state
                     fn (e d!)
                       if (some? @*next-confirm-task) (@*next-confirm-task)
                       .set! *next-confirm-task nil
@@ -765,7 +848,24 @@
                       d! cursor $ assoc state :show? false
                       .set! *next-confirm-task nil
                 %:: %confirm-actions :plugin node cursor state *next-confirm-task
-        |use-drawer $ %{} :CodeEntry (:doc |)
+          :examples $ []
+            quote $ let
+                confirm-plugin $ use-confirm (>> states :confirm)
+                  {} $ :text "|确认删除？"
+              button
+                {} $ :on-click
+                  fn (e d!)
+                    .show confirm-plugin d! $ fn () (println |confirmed)
+                <> |Delete
+            quote $ let
+                confirm-plugin $ use-confirm (>> states :confirm)
+                  {} $ :text "|Default text"
+              button
+                {} (:class-name css/button)
+                  :on-click $ fn (e d!)
+                    .show-with-text confirm-plugin d! "|Confirm with dynamic text?" $ fn () (println |Confirmed!)
+                <> "|Show with text"
+        |use-drawer $ %{} :CodeEntry (:doc "||Drawer hook. Shows a panel sliding from the side. Use :render function in options to customize content. Supports :style for width and other styles.")
           :code $ quote
             defn use-drawer (states options)
               let
@@ -776,7 +876,18 @@
                     fn (d!)
                       d! cursor $ assoc state :show? false
                 %:: %drawer-actions :plugin node cursor state
-        |use-modal $ %{} :CodeEntry (:doc |)
+          :examples $ []
+            quote $ let
+                drawer-plugin $ use-drawer (>> states :drawer)
+                  {} (:title |Settings)
+                    :style $ {} (:width 400)
+                    :render $ fn (on-close)
+                      div ({}) (<> "|Settings content")
+              button
+                {} $ :on-click
+                  fn (e d!) (.show drawer-plugin d!)
+                <> "|Open Drawer"
+        |use-modal $ %{} :CodeEntry (:doc "||Modal dialog hook. Shows a modal with custom content. Use :render function in options to customize content. Returns a plugin object.")
           :code $ quote
             defn use-modal (states options)
               let
@@ -787,7 +898,17 @@
                     fn (d!)
                       d! cursor $ assoc state :show? false
                 %:: %modal-actions :plugin node cursor state
-        |use-modal-menu $ %{} :CodeEntry (:doc |)
+          :examples $ []
+            quote $ let
+                modal-plugin $ use-modal (>> states :modal)
+                  {} (:title |Demo)
+                    :render $ fn (on-close)
+                      div ({}) (<> |Content)
+              button
+                {} $ :on-click
+                  fn (e d!) (.show modal-plugin d!)
+                <> |Open
+        |use-modal-menu $ %{} :CodeEntry (:doc "||Modal menu hook. Shows a modal dialog with a list of options. Define options via :items and handle selection via :on-result in options.")
           :code $ quote
             defn use-modal-menu (states options)
               let
@@ -802,7 +923,17 @@
                         , result d!
                       d! cursor $ assoc state :show? false
                 %:: %modal-menu-actions :plugin node cursor state
-        |use-prompt $ %{} :CodeEntry (:doc |)
+          :examples $ []
+            quote $ let
+                menu-plugin $ use-modal-menu (>> states :menu)
+                  {} (:title "|选择")
+                    :items $ [] (:: :item |a |A) (:: :item |b |B)
+                    :on-result $ fn (result d!) (println |selected: result)
+              button
+                {} $ :on-click
+                  fn (e d!) (.show menu-plugin d!)
+                <> |Menu
+        |use-prompt $ %{} :CodeEntry (:doc "||Prompt dialog hook. Shows a dialog with text input. Returns a plugin object, call .show with a callback function to receive user input text.")
           :code $ quote
             defplugin use-prompt (states options)
               let
@@ -819,6 +950,15 @@
                       d! cursor $ assoc state :show? false
                       .set! *next-prompt-task nil
                 %:: %prompt-actions :plugin node cursor state *next-prompt-task
+          :examples $ []
+            quote $ let
+                prompt-plugin $ use-prompt (>> states :prompt)
+                  {} (:text "|请输入名称") (:placeholder |name)
+              button
+                {} $ :on-click
+                  fn (e d!)
+                    .show prompt-plugin d! $ fn (text) (println |got: text)
+                <> |Input
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote
           ns respo-alerts.core $ :require
@@ -835,11 +975,13 @@
             respo-alerts.util :refer $ focus-element! select-element!
             respo-alerts.style :as style
             memof.anchor :refer $ anchor-state identity-path
+        :examples $ []
     |respo-alerts.main $ %{} :FileEntry
       :defs $ {}
         |*reel $ %{} :CodeEntry (:doc |)
           :code $ quote
             defatom *reel $ -> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store)
+          :examples $ []
         |dispatch! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn dispatch! (op)
@@ -848,6 +990,7 @@
                   and config/dev? $ not= :states op
                   js/console.log "\"Dispatch:" op
                 reset! *reel $ reel-updater updater @*reel op
+          :examples $ []
         |main! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn main! ()
@@ -863,14 +1006,17 @@
                 when (some? raw)
                   dispatch! :hydrate-storage $ parse-cirru-edn raw
               println "|App started."
+          :examples $ []
         |mount-target $ %{} :CodeEntry (:doc |)
           :code $ quote
             def mount-target $ js/document.querySelector |.app
+          :examples $ []
         |persist-storage! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn persist-storage! (? e)
               js/localStorage.setItem (:storage-key config/site)
                 format-cirru-edn $ :store @*reel
+          :examples $ []
         |reload! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn reload! () $ if (nil? build-errors)
@@ -879,9 +1025,11 @@
                 reset! *reel $ refresh-reel @*reel schema/store updater
                 hud! "\"ok~" "\"Ok"
               hud! "\"error" build-errors
+          :examples $ []
         |render-app! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn render-app! () $ render! mount-target (comp-container @*reel) dispatch!
+          :examples $ []
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote
           ns respo-alerts.main $ :require
@@ -895,19 +1043,24 @@
             respo-alerts.config :as config
             "\"./calcit.build-errors" :default build-errors
             "\"bottom-tip" :default hud!
+        :examples $ []
     |respo-alerts.schema $ %{} :FileEntry
       :defs $ {}
         |confirm-button-name $ %{} :CodeEntry (:doc |)
           :code $ quote (def confirm-button-name "\"respo-confirm-button")
+          :examples $ []
         |input-box-name $ %{} :CodeEntry (:doc |)
           :code $ quote (def input-box-name "\"respo-prompt-input")
+          :examples $ []
         |store $ %{} :CodeEntry (:doc |)
           :code $ quote
             def store $ {}
               :states $ {}
               :content |
+          :examples $ []
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote (ns respo-alerts.schema)
+        :examples $ []
     |respo-alerts.style $ %{} :FileEntry
       :defs $ {}
         |backdrop $ %{} :CodeEntry (:doc |)
@@ -915,13 +1068,15 @@
             def backdrop $ {}
               :background-color $ hsl 0 30 10 0.6
               :position :fixed
-              :z-index 999
+              :z-index |999
               :padding 16
+          :examples $ []
         |button $ %{} :CodeEntry (:doc |)
           :code $ quote
             def button $ merge ui/button
               {} (:border-radius "\"4px") (:background-color :white)
                 :border-color $ hsl 240 60 90
+          :examples $ []
         |card $ %{} :CodeEntry (:doc |)
           :code $ quote
             def card $ {}
@@ -934,14 +1089,16 @@
               :color $ hsl 0 0 0
               :margin :auto
               :padding 16
+          :examples $ []
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote
           ns respo-alerts.style $ :require
             respo.util.format :refer $ hsl
             respo-ui.core :as ui
+        :examples $ []
     |respo-alerts.trigger $ %{} :FileEntry
       :defs $ {}
-        |comp-trigger $ %{} :CodeEntry (:doc |)
+        |comp-trigger $ %{} :CodeEntry (:doc "||Trigger component. Wraps an element with visual feedback when active. Uses :trigger-style and :trigger-active-style from options.")
           :code $ quote
             defcomp comp-trigger (show? el ? options)
               div
@@ -951,19 +1108,30 @@
                     :class-name $ str-spaced style-trigger (if show? style-trigger-active)
                     :style $ merge (get options :trigger-style)
                       if show? $ get options :trigger-active-style
+          :examples $ []
+            quote $ comp-trigger show?
+              button
+                {} $ :on-click on-click
+                <> "|Click me"
+              {}
+                :trigger-style $ {} (:color |blue)
+                :trigger-active-style $ {} (:color |red)
         |style-trigger $ %{} :CodeEntry (:doc |)
           :code $ quote
             defstyle style-trigger $ {}
-              "\"&" $ {} (:border-radius "\"50%") (:position :absolute) (:transform "\"translate(-50%,-50%)") (:top "\"50%") (:left "\"50%") (:width 0) (:height 0) (:transition-duration "\"300ms") (:transition-delay "\"100ms") (:pointer-events :none) (:z-index 900) (:opacity 1)
+              "\"&" $ {} (:border-radius "\"50%") (:position :absolute) (:transform "\"translate(-50%,-50%)") (:top "\"50%") (:left "\"50%") (:width 0) (:height 0) (:transition-duration "\"300ms") (:transition-delay "\"100ms") (:pointer-events :none) (:z-index |900) (:opacity 1)
                 :background $ str "\"radial-gradient(" (hsl 0 0 70 0.8) "\"0% ," (hsl 0 0 60 0.0) "\" 50%)"
+          :examples $ []
         |style-trigger-active $ %{} :CodeEntry (:doc |)
           :code $ quote
             defstyle style-trigger-active $ {}
               "\"&" $ {} (:width 2000) (:height 2000) (:opacity 0.3) (:transition-delay "\"0ms")
+          :examples $ []
         |style-trigger-container $ %{} :CodeEntry (:doc |)
           :code $ quote
             defstyle style-trigger-container $ {}
               "\"&" $ {} (:display :inline-block) (:position :relative)
+          :examples $ []
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote
           ns respo-alerts.trigger $ :require
@@ -971,6 +1139,7 @@
             respo-ui.css :as css
             respo.util.format :refer $ hsl
             respo.css :refer $ defstyle
+        :examples $ []
     |respo-alerts.updater $ %{} :FileEntry
       :defs $ {}
         |updater $ %{} :CodeEntry (:doc |)
@@ -982,11 +1151,13 @@
                 (:content c) (assoc store :content c)
                 (:hydrate-storage d) d
                 _ $ do (js/console.warn "\"Unknown op:" op) store
+          :examples $ []
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote
           ns respo-alerts.updater $ :require
             respo.cursor :refer $ update-states
             respo-alerts.config :refer $ dev?
+        :examples $ []
     |respo-alerts.util $ %{} :FileEntry
       :defs $ {}
         |focus-element! $ %{} :CodeEntry (:doc |)
@@ -995,11 +1166,14 @@
               if-let
                 target $ js/document.querySelector query
                 .!focus target
+          :examples $ []
         |select-element! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn select-element! (query)
               let
                   target $ js/document.querySelector query
                 if (some? target) (.!select target)
+          :examples $ []
       :ns $ %{} :CodeEntry (:doc |)
         :code $ quote (ns respo-alerts.util)
+        :examples $ []
