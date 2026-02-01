@@ -1,6 +1,6 @@
 
 {} (:about "|file is generated - never edit directly; learn cr edit/tree workflows before changing") (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.4)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.5)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -205,21 +205,21 @@
           :code $ quote
             defrecord! %alert-actions
               :render $ fn (self)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state
                   , node
               :show $ fn (self d! ? text)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state
                   if (some? text)
                     d! cursor $ assoc state :show? true :text text
                     d! cursor $ assoc state :show? true
               :close $ fn (self d!)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
               :show? $ fn (self)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state
                   :show? state
           :examples $ []
@@ -227,25 +227,25 @@
           :code $ quote
             defrecord! %confirm-actions
               :render $ fn (self)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state *next
                   , node
               :show $ fn (self d! next-task)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state *next-confirm-task
                   do (.set! *next-confirm-task next-task)
                     d! cursor $ assoc state :show? true :text nil
               :show-with-text $ fn (self d! text next-task)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state *next-confirm-task
                   do (.set! *next-confirm-task next-task)
                     d! cursor $ assoc state :show? true :text text
               :close $ fn (self d!)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state *next
                   d! cursor $ assoc state :show? false
               :show? $ fn (self)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state
                   :show? state
           :examples $ []
@@ -253,19 +253,19 @@
           :code $ quote
             defrecord! %drawer-actions
               :render $ fn (self)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state
                   , node
               :show $ fn (self d!)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? true
               :close $ fn (self d!)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
               :show? $ fn (self)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state
                   :show? state
           :examples $ []
@@ -273,19 +273,19 @@
           :code $ quote
             defrecord! %modal-actions
               :render $ fn (self)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state
                   , node
               :show $ fn (self d!)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? true
               :close $ fn (self d!)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
               :show? $ fn (self)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state
                   :show? state
           :examples $ []
@@ -293,19 +293,19 @@
           :code $ quote
             defrecord! %modal-menu-actions
               :render $ fn (self)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state
                   , node
               :show $ fn (self d!)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? true
               :close $ fn (self d!)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
               :show? $ fn (self)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state
                   :show? state
           :examples $ []
@@ -313,20 +313,20 @@
           :code $ quote
             defrecord! %prompt-actions
               :render $ fn (self)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state *next
                   , node
               :show $ fn (self d! next-task)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state *next-prompt-task
                   do (.set! *next-prompt-task next-task)
                     d! cursor $ assoc state :show? true
               :close $ fn (self d!)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state *next
                   d! cursor $ assoc state :show? false
               :show? $ fn (self)
-                tag-match self $ 
+                tag-match self $
                   :plugin node cursor state *next
                   :show? state
           :examples $ []
@@ -546,7 +546,7 @@
                                   (map? info)
                                     :: :item (&map:get info :value) (&map:get info :display)
                                   true $ raise "\"Unknown menu item"
-                              tag-match item $ 
+                              tag-match item $
                                 :item v l
                                 [] v $ div
                                   {} (:class-name style-menu-item)
@@ -819,7 +819,7 @@
                     , on-read
                       fn (d!)
                         d! cursor $ assoc state :show? false
-                %:: %alert-actions :plugin node cursor state
+                with-class (:: :plugin node cursor state) %alert-actions
           :examples $ []
             quote $ let
                 alert-plugin $ use-alert (>> states :alert)
@@ -847,7 +847,7 @@
                     fn (d!)
                       d! cursor $ assoc state :show? false
                       .set! *next-confirm-task nil
-                %:: %confirm-actions :plugin node cursor state *next-confirm-task
+                with-class (:: :plugin node cursor state *next-confirm-task) %confirm-actions
           :examples $ []
             quote $ let
                 confirm-plugin $ use-confirm (>> states :confirm)
@@ -875,7 +875,7 @@
                   node $ comp-drawer options (:show? state)
                     fn (d!)
                       d! cursor $ assoc state :show? false
-                %:: %drawer-actions :plugin node cursor state
+                with-class (:: :plugin node cursor state) %drawer-actions
           :examples $ []
             quote $ let
                 drawer-plugin $ use-drawer (>> states :drawer)
@@ -897,7 +897,7 @@
                   node $ comp-modal options (:show? state)
                     fn (d!)
                       d! cursor $ assoc state :show? false
-                %:: %modal-actions :plugin node cursor state
+                with-class (:: :plugin node cursor state) %modal-actions
           :examples $ []
             quote $ let
                 modal-plugin $ use-modal (>> states :modal)
@@ -922,7 +922,7 @@
                         :on-result options
                         , result d!
                       d! cursor $ assoc state :show? false
-                %:: %modal-menu-actions :plugin node cursor state
+                with-class (:: :plugin node cursor state) %modal-menu-actions
           :examples $ []
             quote $ let
                 menu-plugin $ use-modal-menu (>> states :menu)
@@ -949,7 +949,7 @@
                     fn (d!)
                       d! cursor $ assoc state :show? false
                       .set! *next-prompt-task nil
-                %:: %prompt-actions :plugin node cursor state *next-prompt-task
+                with-class (:: :plugin node cursor state *next-prompt-task) %prompt-actions
           :examples $ []
             quote $ let
                 prompt-plugin $ use-prompt (>> states :prompt)
