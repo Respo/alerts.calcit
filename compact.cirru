@@ -1,6 +1,6 @@
 
 {} (:about "|file is generated - never edit directly; learn cr edit/tree workflows before changing") (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.5)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.6)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -111,7 +111,7 @@
                       :input-class css/font-code!
                       :multiline? true
                   prompt-validation-plugin $ use-prompt (>> states :validation-prompt)
-                    {} (:titl "\"validated") (:text "\"This would be a very long content of alerts, like some prompt... write multiple lines:")
+                    {} (:title "\"validated") (:text "\"This would be a very long content of alerts, like some prompt... write multiple lines:")
                       :initial $ str (rand-int 100)
                       :style $ {}
                       :input-class css/font-code!
@@ -819,7 +819,7 @@
                     , on-read
                       fn (d!)
                         d! cursor $ assoc state :show? false
-                with-class (:: :plugin node cursor state) %alert-actions
+                impl-traits (:: :plugin node cursor state) %alert-actions
           :examples $ []
             quote $ let
                 alert-plugin $ use-alert (>> states :alert)
@@ -847,7 +847,7 @@
                     fn (d!)
                       d! cursor $ assoc state :show? false
                       .set! *next-confirm-task nil
-                with-class (:: :plugin node cursor state *next-confirm-task) %confirm-actions
+                impl-traits (:: :plugin node cursor state *next-confirm-task) %confirm-actions
           :examples $ []
             quote $ let
                 confirm-plugin $ use-confirm (>> states :confirm)
@@ -875,7 +875,7 @@
                   node $ comp-drawer options (:show? state)
                     fn (d!)
                       d! cursor $ assoc state :show? false
-                with-class (:: :plugin node cursor state) %drawer-actions
+                impl-traits (:: :plugin node cursor state) %drawer-actions
           :examples $ []
             quote $ let
                 drawer-plugin $ use-drawer (>> states :drawer)
@@ -897,7 +897,7 @@
                   node $ comp-modal options (:show? state)
                     fn (d!)
                       d! cursor $ assoc state :show? false
-                with-class (:: :plugin node cursor state) %modal-actions
+                impl-traits (:: :plugin node cursor state) %modal-actions
           :examples $ []
             quote $ let
                 modal-plugin $ use-modal (>> states :modal)
@@ -922,7 +922,7 @@
                         :on-result options
                         , result d!
                       d! cursor $ assoc state :show? false
-                with-class (:: :plugin node cursor state) %modal-menu-actions
+                impl-traits (:: :plugin node cursor state) %modal-menu-actions
           :examples $ []
             quote $ let
                 menu-plugin $ use-modal-menu (>> states :menu)
@@ -949,7 +949,7 @@
                     fn (d!)
                       d! cursor $ assoc state :show? false
                       .set! *next-prompt-task nil
-                with-class (:: :plugin node cursor state *next-prompt-task) %prompt-actions
+                impl-traits (:: :plugin node cursor state *next-prompt-task) %prompt-actions
           :examples $ []
             quote $ let
                 prompt-plugin $ use-prompt (>> states :prompt)
