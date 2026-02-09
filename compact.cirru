@@ -1,6 +1,6 @@
 
 {} (:about "|file is generated - never edit directly; learn cr edit/tree workflows before changing") (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.6)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.7)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -203,7 +203,7 @@
       :defs $ {}
         |%alert-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
-            defrecord! %alert-actions
+            defimpl %alert-actions AlertActions
               :render $ fn (self)
                 tag-match self $
                   :plugin node cursor state
@@ -225,7 +225,7 @@
           :examples $ []
         |%confirm-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
-            defrecord! %confirm-actions
+            defimpl %confirm-actions ConfirmActions
               :render $ fn (self)
                 tag-match self $
                   :plugin node cursor state *next
@@ -251,7 +251,7 @@
           :examples $ []
         |%drawer-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
-            defrecord! %drawer-actions
+            defimpl %drawer-actions DrawerActions
               :render $ fn (self)
                 tag-match self $
                   :plugin node cursor state
@@ -271,7 +271,7 @@
           :examples $ []
         |%modal-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
-            defrecord! %modal-actions
+            defimpl %modal-actions ModalActions
               :render $ fn (self)
                 tag-match self $
                   :plugin node cursor state
@@ -291,7 +291,7 @@
           :examples $ []
         |%modal-menu-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
-            defrecord! %modal-menu-actions
+            defimpl %modal-menu-actions ModalMenuActions
               :render $ fn (self)
                 tag-match self $
                   :plugin node cursor state
@@ -311,7 +311,7 @@
           :examples $ []
         |%prompt-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
-            defrecord! %prompt-actions
+            defimpl %prompt-actions PromptActions
               :render $ fn (self)
                 tag-match self $
                   :plugin node cursor state *next
@@ -329,6 +329,30 @@
                 tag-match self $
                   :plugin node cursor state *next
                   :show? state
+          :examples $ []
+        |AlertActions $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            deftrait AlertActions (:render :fn) (:show :fn) (:close :fn) (:show? :fn)
+          :examples $ []
+        |ConfirmActions $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            deftrait ConfirmActions (:render :fn) (:show :fn) (:show-with-text :fn) (:close :fn) (:show? :fn)
+          :examples $ []
+        |DrawerActions $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            deftrait DrawerActions (:render :fn) (:show :fn) (:close :fn) (:show? :fn)
+          :examples $ []
+        |ModalActions $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            deftrait ModalActions (:render :fn) (:show :fn) (:close :fn) (:show? :fn)
+          :examples $ []
+        |ModalMenuActions $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            deftrait ModalMenuActions (:render :fn) (:show :fn) (:close :fn) (:show? :fn)
+          :examples $ []
+        |PromptActions $ %{} :CodeEntry (:doc |)
+          :code $ quote
+            deftrait PromptActions (:render :fn) (:show :fn) (:close :fn) (:show? :fn)
           :examples $ []
         |comp-alert-modal $ %{} :CodeEntry (:doc "||Alert modal component. Shows a simple message dialog with a confirm button. Used internally by use-alert hook.")
           :code $ quote
