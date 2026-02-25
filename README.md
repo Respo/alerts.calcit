@@ -72,10 +72,11 @@ let
 ns app.main
   :require
     respo-alerts.core :refer $ use-confirm
+    respo.core :refer $ >>
 
 let
-    cursor nil
-    confirm-plugin $ use-confirm cursor ({} (:text "|demo"))
+    states $ {} (:cursor $ [])
+    confirm-plugin $ use-confirm (>> states :confirm) ({} (:text "|demo"))
     on-click $ fn (e dispatch!)
       .show confirm-plugin dispatch! $ fn ()
         println "|after confirmed"
@@ -107,10 +108,11 @@ let
 ns app.main
   :require
     respo-alerts.core :refer $ use-prompt
+    respo.core :refer $ >>
 
 let
-    cursor nil
-    prompt-plugin $ use-prompt cursor ({} (:text "|demo"))
+    states $ {} (:cursor $ [])
+    prompt-plugin $ use-prompt (>> states :prompt) ({} (:text "|demo"))
     on-click $ fn (e dispatch!)
       .show prompt-plugin dispatch! $ fn (text)
         println "|read from prompt" (pr-str text)
@@ -124,10 +126,11 @@ let
 ns app.main
   :require
     respo-alerts.core :refer $ use-modal
+    respo.core :refer $ >>
 
 let
-    cursor nil
-    demo-modal $ use-modal cursor $ {}
+    states $ {} (:cursor $ [])
+    demo-modal $ use-modal (>> states :modal) $ {}
       :title "|demo"
       :style $ {} (:width 400)
       :container-style $ {}
@@ -148,10 +151,11 @@ let
 ns app.main
   :require
     respo-alerts.core :refer $ use-modal-menu
+    respo.core :refer $ >>
 
 let
-    cursor nil
-    demo-modal-menu $ use-modal-menu cursor $ {}
+    states $ {} (:cursor $ [])
+    demo-modal-menu $ use-modal-menu (>> states :modal-menu) $ {}
       :title "|Demo"
       :style $ {} (:width 300)
       :backdrop-style $ {}
@@ -174,10 +178,11 @@ let
 ns app.main
   :require
     respo-alerts.core :refer $ use-drawer
+    respo.core :refer $ >>
 
 let
-    cursor nil
-    demo-drawer $ use-drawer cursor $ {}
+    states $ {} (:cursor $ [])
+    demo-drawer $ use-drawer (>> states :drawer) $ {}
       :title "|demo"
       :style $ {} (:width 400)
       :container-style $ {}
@@ -193,6 +198,41 @@ let
 ```
 
 > No hooks API for `comp-select` yet.
+
+### Practical component pattern
+
+From real demo usage in `compact.cirru`, a common pattern is: create plugins with `>> states :key`, trigger them in `on-click`, then render plugin nodes at the end.
+
+```cirru.no-run
+ns app.main
+  :require
+    respo-alerts.core :refer $ use-alert use-confirm use-prompt
+    respo.core :refer $ defcomp >> div button
+
+defcomp comp-hooks-demo (states)
+  let
+      alert-plugin $ use-alert (>> states :alert) ({} (:text "|demo"))
+      confirm-plugin $ use-confirm (>> states :confirm) ({} (:text "|confirm?"))
+      prompt-plugin $ use-prompt (>> states :prompt) ({} (:text "|input text"))
+    div ({})
+      button
+        {} (:inner-text "|show alert")
+          :on-click $ fn (e dispatch!)
+            .show alert-plugin dispatch!
+      button
+        {} (:inner-text "|show confirm")
+          :on-click $ fn (e dispatch!)
+            .show confirm-plugin dispatch! $ fn ()
+              println "|after confirmed"
+      button
+        {} (:inner-text "|show prompt")
+          :on-click $ fn (e dispatch!)
+            .show prompt-plugin dispatch! $ fn (text)
+              println text
+      .render alert-plugin
+      .render confirm-plugin
+      .render prompt-plugin
+```
 
 ### Components
 
