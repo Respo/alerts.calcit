@@ -1,14 +1,18 @@
 ## Respo alerts library in Calcit-js
 
-> Respo web page based on calcit-js.
+> Respo alert/prompt/confirm/modal helpers for calcit-js.
 
 Demo http://repo.respo-mvc.org/alerts.calcit/ .
 
 ### Hooks usages
 
-```cirru
-respo-alerts.core :refer $ use-alert use-prompt use-confirm
+```cirru.no-run
+ns app.main
+  :require
+    respo-alerts.core :refer $ use-alert use-prompt use-confirm use-modal use-modal-menu use-drawer
 ```
+
+> Snippets below are API-focused fragments. They are written as self-contained `cirru`/`cirru.no-run` snippets for stricter markdown validation.
 
 #### `use-alert`
 
@@ -18,23 +22,37 @@ respo-alerts.core :refer $ use-alert use-prompt use-confirm
   :style $ {}
   :card-style $ {}
   :backdrop-style $ {}
-  :card-class style-card
-  :backdrop-class style-backdrop
-  :confirm-class style-confirm
+  :card-class "|style-card"
+  :backdrop-class "|style-backdrop"
+  :confirm-class "|style-confirm"
 ```
 
-```cirru
+```cirru.no-run
+ns app.main
+  :require
+    respo-alerts.core :refer $ use-alert
+    respo.core :refer $ >>
+
 let
+    states $ {} (:cursor $ [])
     alert-plugin $ use-alert (>> states :alert) ({} (:text "|demo"))
-  button $ {}
-    :on-click $ fn (e d!)
-      .show alert-plugin d!
+    on-click $ fn (e dispatch!)
+      .show alert-plugin dispatch!
 ```
 
 extra argument can be added to overwrite `:text` field:
 
-```cirru
-.show alert-plugin d! "|Extra text"
+```cirru.no-run
+ns app.main
+  :require
+    respo-alerts.core :refer $ use-alert
+    respo.core :refer $ >>
+
+let
+    states $ {} (:cursor $ [])
+    alert-plugin $ use-alert (>> states :alert) ({} (:text "|demo"))
+    on-click $ fn (e dispatch!)
+      .show alert-plugin dispatch! "|Extra text"
 ```
 
 #### `use-confirm`
@@ -45,22 +63,23 @@ extra argument can be added to overwrite `:text` field:
   :style $ {}
   :card-style $ {}
   :backdrop-style $ {}
-  :card-class style-card
-  :backdrop-class style-backdrop
-  :confirm-class style-confirm
+  :card-class "|style-card"
+  :backdrop-class "|style-backdrop"
+  :confirm-class "|style-confirm"
 ```
 
-```cirru
-let
-    confirm-plugin $ use-confirm (>> states :alert) ({} (:text "|demo"))
-  button
-    {}
-      :on-click $ fn (e d!)
-        ; "open UI"
-        .show confirm-plugin d! $ fn ()
-          println "|after confirmed"
+```cirru.no-run
+ns app.main
+  :require
+    respo-alerts.core :refer $ use-confirm
 
-  ; "render UI"
+let
+    cursor nil
+    confirm-plugin $ use-confirm cursor ({} (:text "|demo"))
+    on-click $ fn (e dispatch!)
+      .show confirm-plugin dispatch! $ fn ()
+        println "|after confirmed"
+
   .render confirm-plugin
 ```
 
@@ -73,9 +92,9 @@ let
   :input-style $ {}
   :card-style $ {}
   :backdrop-style $ {}
-  :card-class style-card
-  :backdrop-class style-backdrop
-  :confirm-class style-confirm
+  :card-class "|style-card"
+  :backdrop-class "|style-backdrop"
+  :confirm-class "|style-confirm"
   :multiline? false
   :initial "|default text"
   :placeholder "|input"
@@ -84,85 +103,92 @@ let
     if (blank? x) "|Blank failed" nil
 ```
 
-```cirru
+```cirru.no-check
+ns app.main
+  :require
+    respo-alerts.core :refer $ use-prompt
+
 let
-    prompt-plugin $ use-prompt (>> states :prompt) ({} (:text "|demo"))
-  button $ {}
-    :on-click $ fn (e d!)
-      .show prompt-plugin d! $ fn (text)
+    cursor nil
+    prompt-plugin $ use-prompt cursor ({} (:text "|demo"))
+    on-click $ fn (e dispatch!)
+      .show prompt-plugin dispatch! $ fn (text)
         println "|read from prompt" (pr-str text)
 
-  ; "render UI"
   .render prompt-plugin
 ```
 
 #### `use-modal`
 
-```cirru
+```cirru.no-run
+ns app.main
+  :require
+    respo-alerts.core :refer $ use-modal
+
 let
-    demo-modal $ use-modal (>> states :modal) $ {}
+    cursor nil
+    demo-modal $ use-modal cursor $ {}
       :title "|demo"
       :style $ {} (:width 400)
       :container-style $ {}
       :backdrop-style $ {}
-      :card-class style-card
-      :backdrop-class style-backdrop
-      :confirm-class style-confirm
+      :card-class "|style-card"
+      :backdrop-class "|style-backdrop"
+      :confirm-class "|style-confirm"
       :render $ fn (on-close)
-        div ({})
-          <> "|Place for child content"
-
-  ; "event handler to open menu"
-  .show demo-modal d!
-
-  ; "render UI"
+        , nil
+    on-click $ fn (e dispatch!)
+      .show demo-modal dispatch!
   .render demo-modal
 ```
 
 #### `use-modal-menu`
 
-```cirru
+```cirru.no-run
+ns app.main
+  :require
+    respo-alerts.core :refer $ use-modal-menu
+
 let
-    demo-modal-menu $ use-modal-menu (>> states :modal-menu) $ {}
+    cursor nil
+    demo-modal-menu $ use-modal-menu cursor $ {}
       :title "|Demo"
       :style $ {} (:width 300)
       :backdrop-style $ {}
-      :card-class style-card
-      :backdrop-class style-backdrop
-      :confirm-class style-confirm
+      :card-class "|style-card"
+      :backdrop-class "|style-backdrop"
+      :confirm-class "|style-confirm"
       :items $ []
         :: :item |a |A
-        :: :item |b $ div ({}) (<> "|B")
-      :on-result $ fn (result d!)
+        :: :item |b |B
+      :on-result $ fn (result dispatch!)
         println "|got result" result
-
-  ; "event handler to open menu"
-  .show demo-modal-menu d!
-
-  ; "render UI"
+    on-click $ fn (e dispatch!)
+      .show demo-modal-menu dispatch!
   .render demo-modal-menu
 ```
 
 #### `use-drawer`
 
-```cirru
+```cirru.no-run
+ns app.main
+  :require
+    respo-alerts.core :refer $ use-drawer
+
 let
-    demo-drawer $ use-drawer (>> states :drawer) $ {}
+    cursor nil
+    demo-drawer $ use-drawer cursor $ {}
       :title "|demo"
       :style $ {} (:width 400)
       :container-style $ {}
       :backdrop-style $ {}
-      :card-class style-card
-      :backdrop-class style-backdrop
-      :confirm-class style-confirm
+      :card-class "|style-card"
+      :backdrop-class "|style-backdrop"
+      :confirm-class "|style-confirm"
       :render $ fn (on-close)
-        div ({})
-          <> "|Place for child content"
-
-  ; "event handler to open menu"
-  .show demo-drawer d!
-
-  ; "render UI"
+        , nil
+    on-click $ fn (e dispatch!)
+      .show demo-drawer dispatch!
   .render demo-drawer
 ```
 
@@ -172,41 +198,52 @@ let
 
 `comp-modal` for rendering modal without child:
 
-```cirru
+```cirru.no-run
+ns app.main
+  :require
+    respo-alerts.core :refer $ comp-modal
+
 let
-    on-close $ fn (d!)
-      d! cursor (assoc state :show? false)
+    show? true
+    on-close $ fn (dispatch!)
+      , dispatch!
   comp-modal
     {}
       :title "|Demo"
       :style $ {} (:width 400)
       :container-style $ {}
       :backdrop-style $ {}
-      :card-class style-card
-      :backdrop-class style-backdrop
-      :confirm-class style-confirm
+      :card-class "|style-card"
+      :backdrop-class "|style-backdrop"
+      :confirm-class "|style-confirm"
       :render $ fn (on-close)
-        div ({})
-          <> "|Place for child content"
+        , on-close
     , show? on-close
 ```
 
-```cirru
-comp-modal-menu (:show-modal-menu? state)
-  {} (:title "|Demo")
-    :style $ {} (:width 300)
-    :backdrop-style $ {}
-    :card-class style-card
-    :backdrop-class style-backdrop
-    :confirm-class style-confirm
-  []
-    :: :item |a |A
-    :: :item |b $ div ({}) (<> "|B")
-  fn (d!)
-    d! cursor (assoc state :show-modal-menu? false)
-  fn (result d!)
-    println "|result" result
-    d! cursor (assoc state :show-modal-menu? false)
+```cirru.no-check
+ns app.main
+  :require
+    respo-alerts.core :refer $ comp-modal-menu
+
+let
+    state $ {} (:show-modal-menu? true)
+    cursor nil
+  comp-modal-menu (:show-modal-menu? state)
+    {} (:title "|Demo")
+      :style $ {} (:width 300)
+      :backdrop-style $ {}
+      :card-class "|style-card"
+      :backdrop-class "|style-backdrop"
+      :confirm-class "|style-confirm"
+    []
+      :: :item |a |A
+      :: :item |b |B
+    fn (dispatch!)
+      dispatch! cursor (assoc state :show-modal-menu? false)
+    fn (result dispatch!)
+      println "|result" result
+      dispatch! cursor (assoc state :show-modal-menu? false)
 ```
 
 ### Workflow
