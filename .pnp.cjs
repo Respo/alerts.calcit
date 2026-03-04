@@ -28,7 +28,7 @@ const RAW_RUNTIME_STATE =
       [null, {\
         "packageLocation": "./",\
         "packageDependencies": [\
-          ["@calcit/procs", "npm:0.11.6"],\
+          ["@calcit/procs", "npm:0.11.8"],\
           ["@calcit/std", "npm:0.0.3"],\
           ["bottom-tip", "npm:0.1.5"],\
           ["root-workspace-0b6124", "workspace:."],\
@@ -38,10 +38,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@calcit/procs", [\
-      ["npm:0.11.6", {\
-        "packageLocation": "../../../.yarn/berry/cache/@calcit-procs-npm-0.11.6-9ca76f63a9-10c0.zip/node_modules/@calcit/procs/",\
+      ["npm:0.11.8", {\
+        "packageLocation": "../../../.yarn/berry/cache/@calcit-procs-npm-0.11.8-66989a6e4f-10c0.zip/node_modules/@calcit/procs/",\
         "packageDependencies": [\
-          ["@calcit/procs", "npm:0.11.6"],\
+          ["@calcit/procs", "npm:0.11.8"],\
           ["@calcit/ternary-tree", "npm:0.0.25"],\
           ["@cirru/parser.ts", "npm:0.0.8"],\
           ["@cirru/writer.ts", "npm:0.1.7"]\
@@ -1267,7 +1267,7 @@ const RAW_RUNTIME_STATE =
       ["workspace:.", {\
         "packageLocation": "./",\
         "packageDependencies": [\
-          ["@calcit/procs", "npm:0.11.6"],\
+          ["@calcit/procs", "npm:0.11.8"],\
           ["@calcit/std", "npm:0.0.3"],\
           ["bottom-tip", "npm:0.1.5"],\
           ["root-workspace-0b6124", "workspace:."],\

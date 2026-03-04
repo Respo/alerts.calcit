@@ -1,6 +1,6 @@
 
 {} (:about "|file is generated - never edit directly; learn cr edit/tree workflows before changing") (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.8)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.9)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -204,21 +204,21 @@
         |%alert-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
             defimpl %alert-actions AlertActions
-              :render $ fn (self)
+              .render $ fn (self)
                 tag-match self $
                   :plugin node cursor state
                   , node
-              :show $ fn (self d! ? text)
+              .show $ fn (self d! ? text)
                 tag-match self $
                   :plugin node cursor state
                   if (some? text)
                     d! cursor $ assoc state :show? true :text text
                     d! cursor $ assoc state :show? true
-              :close $ fn (self d!)
+              .close $ fn (self d!)
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
-              :show? $ fn (self)
+              .show? $ fn (self)
                 tag-match self $
                   :plugin node cursor state
                   :show? state
@@ -226,25 +226,25 @@
         |%confirm-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
             defimpl %confirm-actions ConfirmActions
-              :render $ fn (self)
+              .render $ fn (self)
                 tag-match self $
                   :plugin node cursor state *next
                   , node
-              :show $ fn (self d! next-task)
+              .show $ fn (self d! next-task)
                 tag-match self $
                   :plugin node cursor state *next-confirm-task
                   do (.set! *next-confirm-task next-task)
                     d! cursor $ assoc state :show? true :text nil
-              :show-with-text $ fn (self d! text next-task)
+              .show-with-text $ fn (self d! text next-task)
                 tag-match self $
                   :plugin node cursor state *next-confirm-task
                   do (.set! *next-confirm-task next-task)
                     d! cursor $ assoc state :show? true :text text
-              :close $ fn (self d!)
+              .close $ fn (self d!)
                 tag-match self $
                   :plugin node cursor state *next
                   d! cursor $ assoc state :show? false
-              :show? $ fn (self)
+              .show? $ fn (self)
                 tag-match self $
                   :plugin node cursor state
                   :show? state
@@ -252,19 +252,19 @@
         |%drawer-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
             defimpl %drawer-actions DrawerActions
-              :render $ fn (self)
+              .render $ fn (self)
                 tag-match self $
                   :plugin node cursor state
                   , node
-              :show $ fn (self d!)
+              .show $ fn (self d!)
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? true
-              :close $ fn (self d!)
+              .close $ fn (self d!)
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
-              :show? $ fn (self)
+              .show? $ fn (self)
                 tag-match self $
                   :plugin node cursor state
                   :show? state
@@ -272,19 +272,19 @@
         |%modal-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
             defimpl %modal-actions ModalActions
-              :render $ fn (self)
+              .render $ fn (self)
                 tag-match self $
                   :plugin node cursor state
                   , node
-              :show $ fn (self d!)
+              .show $ fn (self d!)
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? true
-              :close $ fn (self d!)
+              .close $ fn (self d!)
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
-              :show? $ fn (self)
+              .show? $ fn (self)
                 tag-match self $
                   :plugin node cursor state
                   :show? state
@@ -292,19 +292,19 @@
         |%modal-menu-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
             defimpl %modal-menu-actions ModalMenuActions
-              :render $ fn (self)
+              .render $ fn (self)
                 tag-match self $
                   :plugin node cursor state
                   , node
-              :show $ fn (self d!)
+              .show $ fn (self d!)
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? true
-              :close $ fn (self d!)
+              .close $ fn (self d!)
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
-              :show? $ fn (self)
+              .show? $ fn (self)
                 tag-match self $
                   :plugin node cursor state
                   :show? state
@@ -312,43 +312,43 @@
         |%prompt-actions $ %{} :CodeEntry (:doc |)
           :code $ quote
             defimpl %prompt-actions PromptActions
-              :render $ fn (self)
+              .render $ fn (self)
                 tag-match self $
                   :plugin node cursor state *next
                   , node
-              :show $ fn (self d! next-task)
+              .show $ fn (self d! next-task)
                 tag-match self $
                   :plugin node cursor state *next-prompt-task
                   do (.set! *next-prompt-task next-task)
                     d! cursor $ assoc state :show? true
-              :close $ fn (self d!)
+              .close $ fn (self d!)
                 tag-match self $
                   :plugin node cursor state *next
                   d! cursor $ assoc state :show? false
-              :show? $ fn (self)
+              .show? $ fn (self)
                 tag-match self $
                   :plugin node cursor state *next
                   :show? state
           :examples $ []
         |AlertActions $ %{} :CodeEntry (:doc |)
           :code $ quote
-            deftrait AlertActions (:render :fn) (:show :fn) (:close :fn) (:show? :fn)
+            deftrait AlertActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
         |ConfirmActions $ %{} :CodeEntry (:doc |)
           :code $ quote
-            deftrait ConfirmActions (:render :fn) (:show :fn) (:show-with-text :fn) (:close :fn) (:show? :fn)
+            deftrait ConfirmActions (.render :fn) (.show :fn) (.show-with-text :fn) (.close :fn) (.show? :fn)
           :examples $ []
         |DrawerActions $ %{} :CodeEntry (:doc |)
           :code $ quote
-            deftrait DrawerActions (:render :fn) (:show :fn) (:close :fn) (:show? :fn)
+            deftrait DrawerActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
         |ModalActions $ %{} :CodeEntry (:doc |)
           :code $ quote
-            deftrait ModalActions (:render :fn) (:show :fn) (:close :fn) (:show? :fn)
+            deftrait ModalActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
         |ModalMenuActions $ %{} :CodeEntry (:doc |)
           :code $ quote
-            deftrait ModalMenuActions (:render :fn) (:show :fn) (:close :fn) (:show? :fn)
+            deftrait ModalMenuActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
         |PluginNodeCursorState $ %{} :CodeEntry (:doc |)
           :code $ quote
@@ -360,7 +360,7 @@
           :examples $ []
         |PromptActions $ %{} :CodeEntry (:doc |)
           :code $ quote
-            deftrait PromptActions (:render :fn) (:show :fn) (:close :fn) (:show? :fn)
+            deftrait PromptActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
         |alert-actions-plugin $ %{} :CodeEntry (:doc |)
           :code $ quote
