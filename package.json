@@ -1,11 +1,11 @@
 {
-  "version": "0.10.1",
   "devDependencies": {
     "@calcit/std": "^0.0.3",
     "bottom-tip": "^0.1.5",
     "vite": "^7.3.0"
   },
   "dependencies": {
-    "@calcit/procs": "^0.10.4"
-  }
+    "@calcit/procs": "0.12.1"
+  },
+  "packageManager": "yarn@4.12.0"
 }
