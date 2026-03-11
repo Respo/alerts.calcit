@@ -28,7 +28,7 @@ const RAW_RUNTIME_STATE =
       [null, {\
         "packageLocation": "./",\
         "packageDependencies": [\
-          ["@calcit/procs", "npm:0.12.0"],\
+          ["@calcit/procs", "npm:0.12.3"],\
           ["@calcit/std", "npm:0.0.3"],\
           ["bottom-tip", "npm:0.1.5"],\
           ["root-workspace-0b6124", "workspace:."],\
@@ -38,12 +38,12 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@calcit/procs", [\
-      ["npm:0.12.0", {\
-        "packageLocation": "../../../.yarn/berry/cache/@calcit-procs-npm-0.12.0-39d59bd72a-10c0.zip/node_modules/@calcit/procs/",\
+      ["npm:0.12.3", {\
+        "packageLocation": "../../../.yarn/berry/cache/@calcit-procs-npm-0.12.3-5c49b810a8-10c0.zip/node_modules/@calcit/procs/",\
         "packageDependencies": [\
-          ["@calcit/procs", "npm:0.12.0"],\
+          ["@calcit/procs", "npm:0.12.3"],\
           ["@calcit/ternary-tree", "npm:0.0.25"],\
-          ["@cirru/parser.ts", "npm:0.0.8"],\
+          ["@cirru/parser.ts", "npm:0.0.9"],\
           ["@cirru/writer.ts", "npm:0.1.7"]\
         ],\
         "linkType": "HARD"\
@@ -68,10 +68,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@cirru/parser.ts", [\
-      ["npm:0.0.8", {\
-        "packageLocation": "../../../.yarn/berry/cache/@cirru-parser.ts-npm-0.0.8-9b8400220e-10c0.zip/node_modules/@cirru/parser.ts/",\
+      ["npm:0.0.9", {\
+        "packageLocation": "../../../.yarn/berry/cache/@cirru-parser.ts-npm-0.0.9-d7e6fe396b-10c0.zip/node_modules/@cirru/parser.ts/",\
         "packageDependencies": [\
-          ["@cirru/parser.ts", "npm:0.0.8"]\
+          ["@cirru/parser.ts", "npm:0.0.9"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -1267,7 +1267,7 @@ const RAW_RUNTIME_STATE =
       ["workspace:.", {\
         "packageLocation": "./",\
         "packageDependencies": [\
-          ["@calcit/procs", "npm:0.12.0"],\
+          ["@calcit/procs", "npm:0.12.3"],\
           ["@calcit/std", "npm:0.0.3"],\
           ["bottom-tip", "npm:0.1.5"],\
           ["root-workspace-0b6124", "workspace:."],\
