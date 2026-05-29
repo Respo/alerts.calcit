@@ -203,20 +203,32 @@
           :code $ quote
             defimpl %alert-actions AlertActions
               .render $ fn (self)
+                hint-fn $ {}
+                  :args $ [] :dynamic
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   , node
               .show $ fn (self d! ? text)
+                hint-fn $ {}
+                  :args $ [] :dynamic :fn (:: :optional :string)
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   if (some? text)
                     d! cursor $ -> state (assoc :show? true) (assoc :text text)
                     d! cursor $ assoc state :show? true
               .close $ fn (self d!)
+                hint-fn $ {}
+                  :args $ [] :dynamic :fn
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
               .show? $ fn (self)
+                hint-fn $ {}
+                  :args $ [] :dynamic
+                  :return :bool
                 tag-match self $
                   :plugin node cursor state
                   :show? state
@@ -225,24 +237,39 @@
           :code $ quote
             defimpl %confirm-actions ConfirmActions
               .render $ fn (self)
+                hint-fn $ {}
+                  :args $ [] :dynamic
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state *next
                   , node
               .show $ fn (self d! next-task)
+                hint-fn $ {}
+                  :args $ [] :dynamic :fn :fn
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state *next-confirm-task
                   do (.set! *next-confirm-task next-task)
                     d! cursor $ -> state (assoc :show? true) (assoc :text nil)
               .show-with-text $ fn (self d! text next-task)
+                hint-fn $ {}
+                  :args $ [] :dynamic :fn :string :fn
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state *next-confirm-task
                   do (.set! *next-confirm-task next-task)
                     d! cursor $ -> state (assoc :show? true) (assoc :text text)
               .close $ fn (self d!)
+                hint-fn $ {}
+                  :args $ [] :dynamic :fn
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state *next
                   d! cursor $ assoc state :show? false
               .show? $ fn (self)
+                hint-fn $ {}
+                  :args $ [] :dynamic
+                  :return :bool
                 tag-match self $
                   :plugin node cursor state
                   :show? state
@@ -251,18 +278,30 @@
           :code $ quote
             defimpl %drawer-actions DrawerActions
               .render $ fn (self)
+                hint-fn $ {}
+                  :args $ [] :dynamic
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   , node
               .show $ fn (self d!)
+                hint-fn $ {}
+                  :args $ [] :dynamic :fn
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? true
               .close $ fn (self d!)
+                hint-fn $ {}
+                  :args $ [] :dynamic :fn
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
               .show? $ fn (self)
+                hint-fn $ {}
+                  :args $ [] :dynamic
+                  :return :bool
                 tag-match self $
                   :plugin node cursor state
                   :show? state
@@ -271,18 +310,30 @@
           :code $ quote
             defimpl %modal-actions ModalActions
               .render $ fn (self)
+                hint-fn $ {}
+                  :args $ [] :dynamic
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   , node
               .show $ fn (self d!)
+                hint-fn $ {}
+                  :args $ [] :dynamic :fn
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? true
               .close $ fn (self d!)
+                hint-fn $ {}
+                  :args $ [] :dynamic :fn
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
               .show? $ fn (self)
+                hint-fn $ {}
+                  :args $ [] :dynamic
+                  :return :bool
                 tag-match self $
                   :plugin node cursor state
                   :show? state
@@ -291,18 +342,30 @@
           :code $ quote
             defimpl %modal-menu-actions ModalMenuActions
               .render $ fn (self)
+                hint-fn $ {}
+                  :args $ [] :dynamic
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   , node
               .show $ fn (self d!)
+                hint-fn $ {}
+                  :args $ [] :dynamic :fn
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? true
               .close $ fn (self d!)
+                hint-fn $ {}
+                  :args $ [] :dynamic :fn
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
               .show? $ fn (self)
+                hint-fn $ {}
+                  :args $ [] :dynamic
+                  :return :bool
                 tag-match self $
                   :plugin node cursor state
                   :show? state
@@ -311,19 +374,31 @@
           :code $ quote
             defimpl %prompt-actions PromptActions
               .render $ fn (self)
+                hint-fn $ {}
+                  :args $ [] :dynamic
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state *next
                   , node
               .show $ fn (self d! next-task)
+                hint-fn $ {}
+                  :args $ [] :dynamic :fn :fn
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state *next-prompt-task
                   do (.set! *next-prompt-task next-task)
                     d! cursor $ assoc state :show? true
               .close $ fn (self d!)
+                hint-fn $ {}
+                  :args $ [] :dynamic :fn
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state *next
                   d! cursor $ assoc state :show? false
               .show? $ fn (self)
+                hint-fn $ {}
+                  :args $ [] :dynamic
+                  :return :bool
                 tag-match self $
                   :plugin node cursor state *next
                   :show? state
