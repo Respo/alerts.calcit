@@ -1,5 +1,4 @@
 
-calcit.cirru -diff linguist-generated
 yarn.lock -diff linguist-generated
 .pnp.cjs -diff linguist-generated
 .pnp.loader.mjs -diff linguist-generated

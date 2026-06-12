@@ -1,6 +1,6 @@
 
 {} (:about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `cr query` to inspect and `cr edit`/`cr tree` to modify. Run `cr docs agents --full` first. Manual edits must follow format and schema conventions, then run `cr edit format`.") (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.11)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.10)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -212,7 +212,7 @@
               .show $ fn (self d! ? text)
                 hint-fn $ {}
                   :args $ [] :dynamic :fn (:: :optional :string)
-                  :return :unit
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   if (some? text)
@@ -221,7 +221,7 @@
               .close $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] :dynamic :fn
-                  :return :unit
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
@@ -246,7 +246,7 @@
               .show $ fn (self d! next-task)
                 hint-fn $ {}
                   :args $ [] :dynamic :fn :fn
-                  :return :unit
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state *next-confirm-task
                   do (.set! *next-confirm-task next-task)
@@ -254,7 +254,7 @@
               .show-with-text $ fn (self d! text next-task)
                 hint-fn $ {}
                   :args $ [] :dynamic :fn :string :fn
-                  :return :unit
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state *next-confirm-task
                   do (.set! *next-confirm-task next-task)
@@ -262,7 +262,7 @@
               .close $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] :dynamic :fn
-                  :return :unit
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state *next
                   d! cursor $ assoc state :show? false
@@ -287,14 +287,14 @@
               .show $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] :dynamic :fn
-                  :return :unit
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? true
               .close $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] :dynamic :fn
-                  :return :unit
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
@@ -319,14 +319,14 @@
               .show $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] :dynamic :fn
-                  :return :unit
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? true
               .close $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] :dynamic :fn
-                  :return :unit
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
@@ -351,14 +351,14 @@
               .show $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] :dynamic :fn
-                  :return :unit
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? true
               .close $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] :dynamic :fn
-                  :return :unit
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
@@ -383,7 +383,7 @@
               .show $ fn (self d! next-task)
                 hint-fn $ {}
                   :args $ [] :dynamic :fn :fn
-                  :return :unit
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state *next-prompt-task
                   do (.set! *next-prompt-task next-task)
@@ -391,7 +391,7 @@
               .close $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] :dynamic :fn
-                  :return :unit
+                  :return :dynamic
                 tag-match self $
                   :plugin node cursor state *next
                   d! cursor $ assoc state :show? false
@@ -405,128 +405,23 @@
           :examples $ []
         |AlertActions $ %{} :CodeEntry (:doc |) (:schema :dynamic)
           :code $ quote
-            deftrait AlertActions
-              .render $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T
-                  :return :dynamic
-              .show $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T :fn (:: :optional :string)
-                  :return :unit
-              .close $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T :fn
-                  :return :unit
-              .show? $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T
-                  :return :bool
+            deftrait AlertActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
         |ConfirmActions $ %{} :CodeEntry (:doc |) (:schema :dynamic)
           :code $ quote
-            deftrait ConfirmActions
-              .render $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T
-                  :return :dynamic
-              .show $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T :fn :fn
-                  :return :unit
-              .show-with-text $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T :fn :string :fn
-                  :return :unit
-              .close $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T :fn
-                  :return :unit
-              .show? $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T
-                  :return :bool
+            deftrait ConfirmActions (.render :fn) (.show :fn) (.show-with-text :fn) (.close :fn) (.show? :fn)
           :examples $ []
         |DrawerActions $ %{} :CodeEntry (:doc |) (:schema :dynamic)
           :code $ quote
-            deftrait DrawerActions
-              .render $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T
-                  :return :dynamic
-              .show $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T :fn
-                  :return :unit
-              .close $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T :fn
-                  :return :unit
-              .show? $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T
-                  :return :bool
+            deftrait DrawerActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
         |ModalActions $ %{} :CodeEntry (:doc |) (:schema :dynamic)
           :code $ quote
-            deftrait ModalActions
-              .render $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T
-                  :return :dynamic
-              .show $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T :fn
-                  :return :unit
-              .close $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T :fn
-                  :return :unit
-              .show? $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T
-                  :return :bool
+            deftrait ModalActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
         |ModalMenuActions $ %{} :CodeEntry (:doc |) (:schema :dynamic)
           :code $ quote
-            deftrait ModalMenuActions
-              .render $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T
-                  :return :dynamic
-              .show $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T :fn
-                  :return :unit
-              .close $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T :fn
-                  :return :unit
-              .show? $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T
-                  :return :bool
+            deftrait ModalMenuActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
         |PluginNodeCursorState $ %{} :CodeEntry (:doc |) (:schema :dynamic)
           :code $ quote
@@ -538,27 +433,7 @@
           :examples $ []
         |PromptActions $ %{} :CodeEntry (:doc |) (:schema :dynamic)
           :code $ quote
-            deftrait PromptActions
-              .render $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T
-                  :return :dynamic
-              .show $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T :fn :fn
-                  :return :unit
-              .close $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T :fn
-                  :return :unit
-              .show? $ :: :fn
-                {}
-                  :generics $ [] 'T
-                  :args $ [] 'T
-                  :return :bool
+            deftrait PromptActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
         |alert-actions-plugin $ %{} :CodeEntry (:doc |) (:schema :dynamic)
           :code $ quote
