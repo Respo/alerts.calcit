@@ -1,6 +1,6 @@
 
 {} (:about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `cr query` to inspect and `cr edit`/`cr tree` to modify. Run `cr docs agents --full` first. Manual edits must follow format and schema conventions, then run `cr edit format`.") (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.10)
+  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.12)
     :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
   :entries $ {}
   :files $ {}
@@ -187,11 +187,11 @@
             respo-alerts.trigger :refer $ comp-trigger
     |respo-alerts.config $ %{} :FileEntry
       :defs $ {}
-        |dev? $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |dev? $ %{} :CodeEntry (:doc |) (:schema :bool)
           :code $ quote
             def dev? $ = |dev (get-env |mode |release)
           :examples $ []
-        |site $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |site $ %{} :CodeEntry (:doc |) (:schema :map)
           :code $ quote
             def site $ {} (:dev-ui |http://localhost:8100/main-fonts.css) (:release-ui |http://cdn.tiye.me/favored-fonts/main-fonts.css) (:cdn-url |http://cdn.tiye.me/calcit-workflow/) (:title |Alerts) (:icon |http://cdn.tiye.me/logo/respo.png) (:storage-key |respo-alerts)
           :examples $ []
@@ -931,7 +931,7 @@
             defstyle style-modal-title $ {}
               |& $ {} (:padding |8px)
           :examples $ []
-        |use-alert $ %{} :CodeEntry (:doc "||Alert dialog hook. Shows a simple message box. Returns a plugin object with .show method to display the alert.") (:schema :dynamic)
+        |use-alert $ %{} :CodeEntry (:doc "||Alert dialog hook. Shows a simple message box. Returns a plugin object with .show method to display the alert.")
           :code $ quote
             defplugin use-alert (states options)
               let
@@ -957,7 +957,10 @@
                 {} $ :on-click
                   fn (e d!) (.show alert-plugin d!)
                 <> |Show
-        |use-confirm $ %{} :CodeEntry (:doc "||Confirm dialog hook. Shows a dialog with confirm/cancel buttons. Returns a plugin object, call .show with a callback function that executes after confirmation.") (:schema :dynamic)
+          :schema $ :: :fn
+            {} (:return :tuple)
+              :args $ [] :map :map
+        |use-confirm $ %{} :CodeEntry (:doc "||Confirm dialog hook. Shows a dialog with confirm/cancel buttons. Returns a plugin object, call .show with a callback function that executes after confirmation.")
           :code $ quote
             defplugin use-confirm (states options)
               let
@@ -994,7 +997,10 @@
                   :on-click $ fn (e d!)
                     .show-with-text confirm-plugin d! "|Confirm with dynamic text?" $ fn () (println |Confirmed!)
                 <> "|Show with text"
-        |use-drawer $ %{} :CodeEntry (:doc "||Drawer hook. Shows a panel sliding from the side. Use :render function in options to customize content. Supports :style for width and other styles.") (:schema :dynamic)
+          :schema $ :: :fn
+            {} (:return :tuple)
+              :args $ [] :map :map
+        |use-drawer $ %{} :CodeEntry (:doc "||Drawer hook. Shows a panel sliding from the side. Use :render function in options to customize content. Supports :style for width and other styles.")
           :code $ quote
             defn use-drawer (states options)
               let
@@ -1016,7 +1022,10 @@
                 {} $ :on-click
                   fn (e d!) (.show drawer-plugin d!)
                 <> "|Open Drawer"
-        |use-modal $ %{} :CodeEntry (:doc "||Modal dialog hook. Shows a modal with custom content. Use :render function in options to customize content. Returns a plugin object.") (:schema :dynamic)
+          :schema $ :: :fn
+            {} (:return :tuple)
+              :args $ [] :map :map
+        |use-modal $ %{} :CodeEntry (:doc "||Modal dialog hook. Shows a modal with custom content. Use :render function in options to customize content. Returns a plugin object.")
           :code $ quote
             defn use-modal (states options)
               let
@@ -1037,7 +1046,10 @@
                 {} $ :on-click
                   fn (e d!) (.show modal-plugin d!)
                 <> |Open
-        |use-modal-menu $ %{} :CodeEntry (:doc "||Modal menu hook. Shows a modal dialog with a list of options. Define options via :items and handle selection via :on-result in options.") (:schema :dynamic)
+          :schema $ :: :fn
+            {} (:return :tuple)
+              :args $ [] :map :map
+        |use-modal-menu $ %{} :CodeEntry (:doc "||Modal menu hook. Shows a modal dialog with a list of options. Define options via :items and handle selection via :on-result in options.")
           :code $ quote
             defn use-modal-menu (states options)
               let
@@ -1061,7 +1073,10 @@
                 {} $ :on-click
                   fn (e d!) (.show menu-plugin d!)
                 <> |Menu
-        |use-prompt $ %{} :CodeEntry (:doc "||Prompt dialog hook. Shows a dialog with text input. Returns a plugin object, call .show with a callback function to receive user input text.") (:schema :dynamic)
+          :schema $ :: :fn
+            {} (:return :tuple)
+              :args $ [] :map :map
+        |use-prompt $ %{} :CodeEntry (:doc "||Prompt dialog hook. Shows a dialog with text input. Returns a plugin object, call .show with a callback function to receive user input text.")
           :code $ quote
             defplugin use-prompt (states options)
               let
@@ -1087,6 +1102,9 @@
                   fn (e d!)
                     .show prompt-plugin d! $ fn (text) (println |got: text)
                 <> |Input
+          :schema $ :: :fn
+            {} (:return :tuple)
+              :args $ [] :map :map
       :ns $ %{} :NsEntry (:doc |)
         :code $ quote
           ns respo-alerts.core $ :require
@@ -1105,11 +1123,11 @@
             memof.anchor :refer $ anchor-state identity-path
     |respo-alerts.main $ %{} :FileEntry
       :defs $ {}
-        |*reel $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |*reel $ %{} :CodeEntry (:doc |) (:schema :ref)
           :code $ quote
             defatom *reel $ -> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store)
           :examples $ []
-        |dispatch! $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |dispatch! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn dispatch! (op)
               do
@@ -1118,6 +1136,9 @@
                   js/console.log |Dispatch: op
                 reset! *reel $ reel-updater updater @*reel op
           :examples $ []
+          :schema $ :: :fn
+            {} (:return :tag)
+              :args $ [] :list
         |main! $ %{} :CodeEntry (:doc |) (:schema :dynamic)
           :code $ quote
             defn main! ()
@@ -1172,13 +1193,13 @@
             |bottom-tip :default hud!
     |respo-alerts.schema $ %{} :FileEntry
       :defs $ {}
-        |confirm-button-name $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |confirm-button-name $ %{} :CodeEntry (:doc |) (:schema :string)
           :code $ quote (def confirm-button-name |respo-confirm-button)
           :examples $ []
-        |input-box-name $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |input-box-name $ %{} :CodeEntry (:doc |) (:schema :string)
           :code $ quote (def input-box-name |respo-prompt-input)
           :examples $ []
-        |store $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |store $ %{} :CodeEntry (:doc |) (:schema :map)
           :code $ quote
             def store $ {}
               :states $ {}
@@ -1188,7 +1209,7 @@
         :code $ quote (ns respo-alerts.schema)
     |respo-alerts.style $ %{} :FileEntry
       :defs $ {}
-        |backdrop $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |backdrop $ %{} :CodeEntry (:doc |) (:schema :map)
           :code $ quote
             def backdrop $ {}
               :background-color $ hsl 0 30 10 0.6
@@ -1196,13 +1217,13 @@
               :z-index |999
               :padding 16
           :examples $ []
-        |button $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |button $ %{} :CodeEntry (:doc |) (:schema :map)
           :code $ quote
             def button $ merge ui/button
               {} (:border-radius |4px) (:background-color :white)
                 :border-color $ hsl 240 60 90
           :examples $ []
-        |card $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |card $ %{} :CodeEntry (:doc |) (:schema :map)
           :code $ quote
             def card $ {}
               :background-color $ hsl 0 0 100
@@ -1265,7 +1286,7 @@
             respo.css :refer $ defstyle
     |respo-alerts.updater $ %{} :FileEntry
       :defs $ {}
-        |updater $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |updater $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn updater (store op op-id op-time)
               tag-match op
@@ -1274,6 +1295,9 @@
                 (:hydrate-storage d) d
                 _ $ do (js/console.warn "|Unknown op:" op) store
           :examples $ []
+          :schema $ :: :fn
+            {} (:return :map)
+              :args $ [] :map :list :string :number
       :ns $ %{} :NsEntry (:doc |)
         :code $ quote
           ns respo-alerts.updater $ :require
@@ -1281,19 +1305,25 @@
             respo-alerts.config :refer $ dev?
     |respo-alerts.util $ %{} :FileEntry
       :defs $ {}
-        |focus-element! $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |focus-element! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn focus-element! (query)
               if-let
                 target $ js/document.querySelector query
                 .!focus target
           :examples $ []
-        |select-element! $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: :fn
+            {} (:return :tag)
+              :args $ [] :string
+        |select-element! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn select-element! (query)
               let
                   target $ js/document.querySelector query
                 if (some? target) (.!select target)
           :examples $ []
+          :schema $ :: :fn
+            {} (:return :tag)
+              :args $ [] :string
       :ns $ %{} :NsEntry (:doc |)
         :code $ quote (ns respo-alerts.util)
