@@ -766,7 +766,7 @@
           :code $ quote
             def drawer-actions-plugin $ impl-traits PluginNodeCursorState %drawer-actions
           :examples $ []
-        |effect-fade $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |effect-fade $ %{} :CodeEntry (:doc |)
           :code $ quote
             defeffect effect-fade (show?) (action el at-place?)
               case-default action nil
@@ -804,13 +804,17 @@
                       , 10
                   , nil
           :examples $ []
+          :schema $ :: :fn
+            {} (:return :dynamic)
+              :args $ [] :dynamic
+              :features $ #{} :js-ffi
         |effect-focus $ %{} :CodeEntry (:doc |) (:schema :dynamic)
           :code $ quote
             defeffect effect-focus (query show?) (action el at-place?)
               case-default action nil $ :update
                 when show? $ focus-element! query
           :examples $ []
-        |effect-keydown $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |effect-keydown $ %{} :CodeEntry (:doc |)
           :code $ quote
             defeffect effect-keydown () (action el at?)
               case-default action nil
@@ -828,13 +832,17 @@
                   js/window.removeEventListener |keydown f
                   aset el |_listener nil
           :examples $ []
+          :schema $ :: :fn
+            {} (:return :dynamic)
+              :args $ []
+              :features $ #{} :js-ffi
         |effect-select $ %{} :CodeEntry (:doc |) (:schema :dynamic)
           :code $ quote
             defeffect effect-select (query show?) (action el *local)
               case-default action nil $ :update
                 when show? $ select-element! query
           :examples $ []
-        |effect-slide $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |effect-slide $ %{} :CodeEntry (:doc |)
           :code $ quote
             defeffect effect-slide (show?) (action el at-place?)
               case-default action nil
@@ -872,6 +880,10 @@
                       , 10
                   , nil
           :examples $ []
+          :schema $ :: :fn
+            {} (:return :dynamic)
+              :args $ [] :dynamic
+              :features $ #{} :js-ffi
         |modal-actions-plugin $ %{} :CodeEntry (:doc |) (:schema :dynamic)
           :code $ quote
             def modal-actions-plugin $ impl-traits PluginNodeCursorState %modal-actions
@@ -1139,7 +1151,7 @@
           :schema $ :: :fn
             {} (:return :tag)
               :args $ [] :list
-        |main! $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |main! $ %{} :CodeEntry (:doc |)
           :code $ quote
             defn main! ()
               println "|Running mode:" $ if config/dev? |dev |release
@@ -1155,6 +1167,10 @@
                   dispatch! :hydrate-storage $ parse-cirru-edn raw
               println "|App started."
           :examples $ []
+          :schema $ :: :fn
+            {} (:return :dynamic)
+              :args $ []
+              :features $ #{} :js-ffi
         |mount-target $ %{} :CodeEntry (:doc |) (:schema :dynamic)
           :code $ quote
             def mount-target $ js/document.querySelector |.app
