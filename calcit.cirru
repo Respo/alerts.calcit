@@ -979,7 +979,7 @@
                   cursor $ :cursor states
                   state $ either (:data states)
                     {} (:show? false) (:text nil)
-                  *next-confirm-task $ anchor-state (identity-path 'confirm)
+                  *next-confirm-task $ anchor-state (identity-path confirm)
                   node $ comp-confirm-modal
                     if
                       blank? $ :text state
@@ -1095,7 +1095,7 @@
                   cursor $ :cursor states
                   state $ either (:data states)
                     {} (:show? false) (:failure nil)
-                  *next-prompt-task $ anchor-state (identity-path 'prompt)
+                  *next-prompt-task $ anchor-state (identity-path prompt)
                   node $ comp-prompt-modal (>> states :modal) options (:show? state)
                     fn (text d!)
                       if (some? @*next-prompt-task) (@*next-prompt-task text)
