@@ -194,7 +194,8 @@
       :defs $ {}
         |dev? $ %{} 'CodeEntry (:doc |)
           :code $ quote
-            def dev? $ = |dev (get-env |mode |release)
+            def dev? $ = |dev
+              option:unwrap-or (get-env |mode) |release
           :examples $ []
           :schema $ :: 'Bool
         |site $ %{} 'CodeEntry (:doc |)
@@ -1381,22 +1382,32 @@
         |focus-element! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn focus-element! (query)
-              if-let
-                target $ js/document.querySelector query
-                .!focus target
+              let
+                  target $ js/document.querySelector query
+                if (js-present? target)
+                  do
+                    .!focus $ unsafe-coerce target JsObject
+                    ;nil
+                  ;nil
           :examples $ []
           :schema $ :: 'Fn
-            {} (:return 'Tag)
+            {} (:return 'Unit)
               :args $ [] 'String
+              :features $ #{} :js-ffi
         |select-element! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn select-element! (query)
               let
                   target $ js/document.querySelector query
-                if (some? target) (.!select target)
+                if (js-present? target)
+                  do
+                    .!select $ unsafe-coerce target JsObject
+                    ;nil
+                  ;nil
           :examples $ []
           :schema $ :: 'Fn
-            {} (:return 'Tag)
+            {} (:return 'Unit)
               :args $ [] 'String
+              :features $ #{} :js-ffi
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote (ns respo-alerts.util)
