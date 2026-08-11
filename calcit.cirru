@@ -1,19 +1,19 @@
 
-{} (:about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `cr query` to inspect and `cr edit`/`cr tree` to modify. Run `cr docs agents --full` first. Manual edits must follow format and schema conventions, then run `cr edit format`.") (:package |respo-alerts) (:version |0.10.14)
+{} (:about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `cr query` to inspect and `cr edit`/`cr tree` to modify. Run `cr docs agents --full` first. Manual edits must follow format and schema conventions, then run `cr edit format`.") (:package |respo-alerts) (:version |0.10.15)
   :entries $ {}
     :default $ {} (:description |) (:init-fn 'respo-alerts.main/main!) (:mode :native) (:reload-fn 'respo-alerts.main/reload!)
-      :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
+      :modules $ [] |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
       :type-slots $ {}
   :files $ {}
-    |respo-alerts.comp.container $ %{} :FileEntry
+    |respo-alerts.comp.container $ %{} 'FileEntry
       :defs $ {}
-        |comp-container $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |comp-container $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defcomp comp-container (reel)
               let
-                  store $ :store reel
-                  states $ :states store
-                  state $ either (:data states)
+                  store $ read-field reel :store
+                  states $ read-field store :states
+                  state $ either (read-field states :data)
                     {} (:selected |) (:show-modal? false) (:show-modal-menu? false)
                 div
                   {}
@@ -33,7 +33,8 @@
                     {} $ :bottom 0
                   when dev? $ comp-reel (>> states :reel) reel ({})
           :examples $ []
-        |comp-controlled-modals $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |comp-controlled-modals $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defcomp comp-controlled-modals (states)
               let
@@ -78,22 +79,24 @@
                     .render demo-modal-menu
                     .render demo-drawer
           :examples $ []
-        |comp-demo-trigger $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |comp-demo-trigger $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defcomp comp-demo-trigger (states)
               let
-                  cursor $ :cursor states
-                  state $ either (:data states)
+                  cursor $ read-field states :cursor
+                  state $ either (read-field states :data)
                     {} $ :visible? false
                 div ({})
                   div ({}) (<> |Trigger)
                   div ({})
-                    comp-trigger (:visible? state)
+                    comp-trigger (read-field state :visible?)
                       button $ {} (:inner-text |Toggle) (:class-name css/button)
                         :on-click $ fn (e d!)
                           d! cursor $ update state :visible? not
           :examples $ []
-        |comp-hooks-usages $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |comp-hooks-usages $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defcomp comp-hooks-usages (states)
               let
@@ -140,7 +143,8 @@
                         let
                             text $ js/prompt "|Input confirm text"
                           if
-                            not $ blank? text
+                            and (js-present? text)
+                              not $ blank? (unsafe-coerce text 'String)
                             .show-with-text confirm-plugin d! (str "|Confirmed: " text)
                               fn () $ println "|after confirmed"
                     =< 8 nil
@@ -166,12 +170,14 @@
                   .render prompt-validation-plugin
                   .render alert-text-plugin
           :examples $ []
-        |style-logo $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |style-logo $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defstyle style-logo $ {}
               |& $ {} (:width 120)
           :examples $ []
-      :ns $ %{} :NsEntry (:doc |)
+          :schema $ :: 'Dynamic
+      :ns $ %{} 'NsEntry (:doc |)
         :code $ quote
           ns respo-alerts.comp.container $ :require (respo-ui.core :as ui)
             respo.css :refer $ defstyle
@@ -185,34 +191,38 @@
             respo-alerts.style :as style
             |@calcit/std :refer $ rand-int
             respo-alerts.trigger :refer $ comp-trigger
-    |respo-alerts.config $ %{} :FileEntry
+            respo-alerts.util :refer $ read-field
+    |respo-alerts.config $ %{} 'FileEntry
       :defs $ {}
-        |dev? $ %{} :CodeEntry (:doc |) (:schema :bool)
+        |dev? $ %{} 'CodeEntry (:doc |)
           :code $ quote
-            def dev? $ = |dev (get-env |mode |release)
+            def dev? $ = |dev
+              option:unwrap-or (get-env |mode) |release
           :examples $ []
-        |site $ %{} :CodeEntry (:doc |) (:schema :map)
+          :schema $ :: 'Bool
+        |site $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def site $ {} (:dev-ui |http://localhost:8100/main-fonts.css) (:release-ui |http://cdn.tiye.me/favored-fonts/main-fonts.css) (:cdn-url |http://cdn.tiye.me/calcit-workflow/) (:title |Alerts) (:icon |http://cdn.tiye.me/logo/respo.png) (:storage-key |respo-alerts)
           :examples $ []
-      :ns $ %{} :NsEntry (:doc |)
+          :schema $ :: 'Map
+      :ns $ %{} 'NsEntry (:doc |)
         :code $ quote (ns respo-alerts.config)
-    |respo-alerts.core $ %{} :FileEntry
+    |respo-alerts.core $ %{} 'FileEntry
       :defs $ {}
-        |%alert-actions $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |%alert-actions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defimpl %alert-actions AlertActions
               .render $ fn (self)
                 hint-fn $ {}
-                  :args $ [] :dynamic
-                  :return :dynamic
+                  :args $ [] 'Dynamic
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state
                   , node
               .show $ fn (self d! ? text)
                 hint-fn $ {}
-                  :args $ [] :dynamic :fn (:: :optional :string)
-                  :return :dynamic
+                  :args $ [] 'Dynamic 'Fn (:: 'Optional 'String)
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state
                   if (some? text)
@@ -220,226 +230,241 @@
                     d! cursor $ assoc state :show? true
               .close $ fn (self d!)
                 hint-fn $ {}
-                  :args $ [] :dynamic :fn
-                  :return :dynamic
+                  :args $ [] 'Dynamic 'Fn
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
               .show? $ fn (self)
                 hint-fn $ {}
-                  :args $ [] :dynamic
-                  :return :bool
+                  :args $ [] 'Dynamic
+                  :return 'Bool
                 tag-match self $
                   :plugin node cursor state
-                  :show? state
+                  read-field state :show?
           :examples $ []
-        |%confirm-actions $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |%confirm-actions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defimpl %confirm-actions ConfirmActions
               .render $ fn (self)
                 hint-fn $ {}
-                  :args $ [] :dynamic
-                  :return :dynamic
+                  :args $ [] 'Dynamic
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state *next
                   , node
               .show $ fn (self d! next-task)
                 hint-fn $ {}
-                  :args $ [] :dynamic :fn :fn
-                  :return :dynamic
+                  :args $ [] 'Dynamic 'Fn 'Fn
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state *next-confirm-task
                   do (.set! *next-confirm-task next-task)
                     d! cursor $ -> state (assoc :show? true) (assoc :text nil)
               .show-with-text $ fn (self d! text next-task)
                 hint-fn $ {}
-                  :args $ [] :dynamic :fn :string :fn
-                  :return :dynamic
+                  :args $ [] 'Dynamic 'Fn 'String 'Fn
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state *next-confirm-task
                   do (.set! *next-confirm-task next-task)
                     d! cursor $ -> state (assoc :show? true) (assoc :text text)
               .close $ fn (self d!)
                 hint-fn $ {}
-                  :args $ [] :dynamic :fn
-                  :return :dynamic
+                  :args $ [] 'Dynamic 'Fn
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state *next
                   d! cursor $ assoc state :show? false
               .show? $ fn (self)
                 hint-fn $ {}
-                  :args $ [] :dynamic
-                  :return :bool
+                  :args $ [] 'Dynamic
+                  :return 'Bool
                 tag-match self $
                   :plugin node cursor state
-                  :show? state
+                  read-field state :show?
           :examples $ []
-        |%drawer-actions $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |%drawer-actions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defimpl %drawer-actions DrawerActions
               .render $ fn (self)
                 hint-fn $ {}
-                  :args $ [] :dynamic
-                  :return :dynamic
+                  :args $ [] 'Dynamic
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state
                   , node
               .show $ fn (self d!)
                 hint-fn $ {}
-                  :args $ [] :dynamic :fn
-                  :return :dynamic
+                  :args $ [] 'Dynamic 'Fn
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? true
               .close $ fn (self d!)
                 hint-fn $ {}
-                  :args $ [] :dynamic :fn
-                  :return :dynamic
+                  :args $ [] 'Dynamic 'Fn
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
               .show? $ fn (self)
                 hint-fn $ {}
-                  :args $ [] :dynamic
-                  :return :bool
+                  :args $ [] 'Dynamic
+                  :return 'Bool
                 tag-match self $
                   :plugin node cursor state
-                  :show? state
+                  read-field state :show?
           :examples $ []
-        |%modal-actions $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |%modal-actions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defimpl %modal-actions ModalActions
               .render $ fn (self)
                 hint-fn $ {}
-                  :args $ [] :dynamic
-                  :return :dynamic
+                  :args $ [] 'Dynamic
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state
                   , node
               .show $ fn (self d!)
                 hint-fn $ {}
-                  :args $ [] :dynamic :fn
-                  :return :dynamic
+                  :args $ [] 'Dynamic 'Fn
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? true
               .close $ fn (self d!)
                 hint-fn $ {}
-                  :args $ [] :dynamic :fn
-                  :return :dynamic
+                  :args $ [] 'Dynamic 'Fn
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
               .show? $ fn (self)
                 hint-fn $ {}
-                  :args $ [] :dynamic
-                  :return :bool
+                  :args $ [] 'Dynamic
+                  :return 'Bool
                 tag-match self $
                   :plugin node cursor state
-                  :show? state
+                  read-field state :show?
           :examples $ []
-        |%modal-menu-actions $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |%modal-menu-actions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defimpl %modal-menu-actions ModalMenuActions
               .render $ fn (self)
                 hint-fn $ {}
-                  :args $ [] :dynamic
-                  :return :dynamic
+                  :args $ [] 'Dynamic
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state
                   , node
               .show $ fn (self d!)
                 hint-fn $ {}
-                  :args $ [] :dynamic :fn
-                  :return :dynamic
+                  :args $ [] 'Dynamic 'Fn
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? true
               .close $ fn (self d!)
                 hint-fn $ {}
-                  :args $ [] :dynamic :fn
-                  :return :dynamic
+                  :args $ [] 'Dynamic 'Fn
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state
                   d! cursor $ assoc state :show? false
               .show? $ fn (self)
                 hint-fn $ {}
-                  :args $ [] :dynamic
-                  :return :bool
+                  :args $ [] 'Dynamic
+                  :return 'Bool
                 tag-match self $
                   :plugin node cursor state
-                  :show? state
+                  read-field state :show?
           :examples $ []
-        |%prompt-actions $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |%prompt-actions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defimpl %prompt-actions PromptActions
               .render $ fn (self)
                 hint-fn $ {}
-                  :args $ [] :dynamic
-                  :return :dynamic
+                  :args $ [] 'Dynamic
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state *next
                   , node
               .show $ fn (self d! next-task)
                 hint-fn $ {}
-                  :args $ [] :dynamic :fn :fn
-                  :return :dynamic
+                  :args $ [] 'Dynamic 'Fn 'Fn
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state *next-prompt-task
                   do (.set! *next-prompt-task next-task)
                     d! cursor $ assoc state :show? true
               .close $ fn (self d!)
                 hint-fn $ {}
-                  :args $ [] :dynamic :fn
-                  :return :dynamic
+                  :args $ [] 'Dynamic 'Fn
+                  :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state *next
                   d! cursor $ assoc state :show? false
               .show? $ fn (self)
                 hint-fn $ {}
-                  :args $ [] :dynamic
-                  :return :bool
+                  :args $ [] 'Dynamic
+                  :return 'Bool
                 tag-match self $
                   :plugin node cursor state *next
-                  :show? state
+                  read-field state :show?
           :examples $ []
-        |AlertActions $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |AlertActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait AlertActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
-        |ConfirmActions $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |ConfirmActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait ConfirmActions (.render :fn) (.show :fn) (.show-with-text :fn) (.close :fn) (.show? :fn)
           :examples $ []
-        |DrawerActions $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |DrawerActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait DrawerActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
-        |ModalActions $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |ModalActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait ModalActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
-        |ModalMenuActions $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |ModalMenuActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait ModalMenuActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
-        |PluginNodeCursorState $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |PluginNodeCursorState $ %{} 'CodeEntry (:doc |)
           :code $ quote
-            defenum PluginNodeCursorState $ :plugin :tuple :list :map
+            defenum PluginNodeCursorState $ :plugin 'Enum 'List 'Map
           :examples $ []
-        |PluginNodeCursorStateTask $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |PluginNodeCursorStateTask $ %{} 'CodeEntry (:doc |)
           :code $ quote
-            defenum PluginNodeCursorStateTask $ :plugin :tuple :list :map :ref
+            defenum PluginNodeCursorStateTask $ :plugin 'Enum 'List 'Map 'Ref
           :examples $ []
-        |PromptActions $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |PromptActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait PromptActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
-        |alert-actions-plugin $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |alert-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def alert-actions-plugin $ impl-traits PluginNodeCursorState %alert-actions
           :examples $ []
-        |comp-alert-modal $ %{} :CodeEntry (:doc "||Alert modal component. Shows a simple message dialog with a confirm button. Used internally by use-alert hook.") (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |comp-alert-modal $ %{} 'CodeEntry (:doc "||Alert modal component. Shows a simple message dialog with a confirm button. Used internally by use-alert hook.")
           :code $ quote
             defcomp comp-alert-modal (options show? on-read! on-close!)
               []
@@ -454,7 +479,7 @@
                       :style $ get options :backdrop-style
                       :on-click $ fn (e d!)
                         let
-                            event $ :event e
+                            event $ read-field e :event
                           .!stopPropagation event
                           on-read! e d!
                           on-close! d!
@@ -480,7 +505,8 @@
             quote $ comp-alert-modal
               {} $ :text "|Hello World"
               , show? on-read! on-close!
-        |comp-confirm-modal $ %{} :CodeEntry (:doc "||Confirm modal component. Shows a dialog with confirm and cancel buttons. Used internally by use-confirm hook.") (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |comp-confirm-modal $ %{} 'CodeEntry (:doc "||Confirm modal component. Shows a dialog with confirm and cancel buttons. Used internally by use-confirm hook.")
           :code $ quote
             defcomp comp-confirm-modal (options show? on-confirm! on-close!)
               []
@@ -492,15 +518,15 @@
                   if show? $ div
                     {}
                       :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
-                      :style $ :backdrop-style options
+                      :style $ read-field options :backdrop-style
                       :on-click $ fn (e d!) (on-close! d!)
                     div
                       {}
                         :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
-                        :style $ :card-style options
+                        :style $ read-field options :card-style
                         :on-click $ fn (e d!) nil
                       div ({})
-                        <> $ either (:text options) |Confirm?
+                        <> $ either (read-field options :text) |Confirm?
                       =< nil 8
                       div
                         {} $ :class-name css/row-parted
@@ -509,13 +535,14 @@
                           {}
                             :class-name $ str-spaced css/button schema/confirm-button-name (get options :confirm-class)
                             :on-click $ fn (e d!) (on-confirm! e d!) (on-close! d!)
-                          <> $ either (:button-text options) |Confirm
+                          <> $ either (read-field options :button-text) |Confirm
                     comp-esc-listener show? on-close!
           :examples $ []
             quote $ comp-confirm-modal
               {} $ :text "|Are you sure?"
               , show? on-confirm! on-close!
-        |comp-drawer $ %{} :CodeEntry (:doc "||Drawer component. Renders a sliding panel from the side with custom content via :render function in options.") (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |comp-drawer $ %{} 'CodeEntry (:doc "||Drawer component. Renders a sliding panel from the side with custom content via :render function in options.")
           :code $ quote
             defcomp comp-drawer (options show? on-close)
               [] (effect-slide show?)
@@ -523,14 +550,14 @@
                   {} $ :style
                     merge
                       {} $ :position :absolute
-                      :container-style options
+                      read-field options :container-style
                   if show? $ div
                     {}
                       :class-name $ str-spaced css/fullscreen style-drawer-backdrop (get options :backdrop-class)
-                      :style $ :backdrop-style options
+                      :style $ read-field options :backdrop-style
                       :on-click $ fn (e d!)
                         let
-                            event $ :event e
+                            event $ read-field e :event
                           .!stopPropagation event
                           on-close d!
                     div
@@ -538,19 +565,19 @@
                         :class-name $ str-spaced css/global css/column style-drawer-card (get options :card-class)
                         :style $ merge
                           {} $ :padding 0
-                          :style options
+                          read-field options :style
                         :on-click $ fn (e d!) nil
                       let
-                          title $ :title options
+                          title $ read-field options :title
                         if (some? title)
                           div
                             {} $ :class-name (str-spaced css/center css/font-fancy! style-modal-title)
                             <> title
                       cond
-                          some? $ :render options
-                          (:render options) on-close
-                        (some? (:render-body options))
-                          (:render-body options) on-close
+                          some? $ read-field options :render
+                          (read-field options :render) on-close
+                        (some? (read-field options :render-body))
+                          (read-field options :render-body) on-close
                         true "|TODO render body"
                     comp-esc-listener show? on-close
           :examples $ []
@@ -559,7 +586,8 @@
                 :render $ fn (on-close)
                   div ({}) (<> |Content)
               , show? on-close
-        |comp-esc-listener $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |comp-esc-listener $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defcomp comp-esc-listener (show? on-close!)
               [] (effect-keydown)
@@ -567,7 +595,8 @@
                   :style $ {} (:position :absolute)
                   :on-keydown $ fn (e d!) (on-close! d!)
           :examples $ []
-        |comp-modal $ %{} :CodeEntry (:doc "||Modal component. Renders a modal dialog with custom content via :render function in options.") (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |comp-modal $ %{} 'CodeEntry (:doc "||Modal component. Renders a modal dialog with custom content via :render function in options.")
           :code $ quote
             defcomp comp-modal (options show? on-close)
               [] (effect-fade show?)
@@ -575,14 +604,14 @@
                   {} $ :style
                     merge
                       {} $ :position :absolute
-                      :container-style options
+                      read-field options :container-style
                   if show? $ div
                     {}
                       :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
-                      :style $ :backdrop-style options
+                      :style $ read-field options :backdrop-style
                       :on-click $ fn (e d!)
                         let
-                            event $ :event e
+                            event $ read-field e :event
                           .!stopPropagation event
                           on-close d!
                     div
@@ -590,20 +619,20 @@
                         :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
                         :style $ merge
                           {} $ :padding 0
-                          :style options
-                          get options :card-style
+                          read-field options :style
+                          read-field options :card-style
                         :on-click $ fn (e d!) nil
                       let
-                          title $ :title options
+                          title $ read-field options :title
                         if (some? title)
                           div
                             {} $ :class-name (str-spaced css/center css/font-fancy! style-modal-title)
                             <> title
                       cond
-                          some? $ :render options
-                          (:render options) on-close
-                        (some? (:render-body options))
-                          (:render-body options) on-close
+                          some? $ read-field options :render
+                          (read-field options :render) on-close
+                        (some? (read-field options :render-body))
+                          (read-field options :render-body) on-close
                         true "|TODO render body"
                     comp-esc-listener show? on-close
           :examples $ []
@@ -612,7 +641,8 @@
                 :render $ fn (on-close)
                   div ({}) (<> |Content)
               , show? on-close
-        |comp-modal-menu $ %{} :CodeEntry (:doc "||Modal menu component. Shows a modal dialog with a list of selectable items. Define items via :items in options.") (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |comp-modal-menu $ %{} 'CodeEntry (:doc "||Modal menu component. Shows a modal dialog with a list of selectable items. Define items via :items in options.")
           :code $ quote
             defcomp comp-modal-menu (options show? on-close! on-select!)
               [] (effect-fade show?)
@@ -620,10 +650,10 @@
                   if show? $ div
                     {}
                       :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
-                      :style $ :backdrop-style options
+                      :style $ read-field options :backdrop-style
                       :on-click $ fn (e d!)
                         let
-                            event $ :event e
+                            event $ read-field e :event
                           .!stopPropagation event
                           on-close! d!
                     div
@@ -631,10 +661,10 @@
                         :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
                         :style $ merge
                           {} $ :padding 0
-                          :style options
+                          read-field options :style
                         :on-click $ fn (e d!) nil
                       let
-                          title $ :title options
+                          title $ read-field options :title
                         if (some? title)
                           div
                             {}
@@ -646,11 +676,11 @@
                             span $ {} (:inner-text |Clear) (:class-name style-clear)
                               :on-click $ fn (e d!) (on-select! nil d!)
                       list-> ({})
-                        -> (:items options)
+                        -> (read-field options :items)
                           map $ fn (info)
                             let
                                 item $ cond
-                                    tuple? info
+                                    enum? info
                                     , info
                                   (map? info)
                                     :: :item (&map:get info :value) (&map:get info :display)
@@ -667,18 +697,19 @@
               {} (:title |Choose)
                 :items $ [] (:: :item |a |A) (:: :item |b |B)
               , show? on-close! on-select!
-        |comp-prompt-modal $ %{} :CodeEntry (:doc "||Prompt modal component. Shows a dialog with text input field and validation. Used internally by use-prompt hook.") (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |comp-prompt-modal $ %{} 'CodeEntry (:doc "||Prompt modal component. Shows a dialog with text input field and validation. Used internally by use-prompt hook.")
           :code $ quote
             defcomp comp-prompt-modal (states options show? on-finish! on-close!)
               let
-                  initial-text $ either (:initial options) |
-                  cursor $ :cursor states
-                  state $ either (:data states)
+                  initial-text $ either (read-field options :initial) |
+                  cursor $ read-field states :cursor
+                  state $ either (read-field states :data)
                     {} (:text initial-text) (:failure nil)
-                  text $ either (:text state) initial-text
+                  text $ either (read-field state :text) initial-text
                   check-submit! $ fn (d!)
                     let
-                        validator $ :validator options
+                        validator $ read-field options :validator
                         result $ if (fn? validator) (validator text) nil
                       if (some? result)
                         d! cursor $ assoc state :failure result
@@ -695,53 +726,53 @@
                         :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
                         :style $ merge
                           {} $ :line-height |32px
-                          :backdrop-style options
+                          read-field options :backdrop-style
                         :on-click $ fn (e d!) (on-close! d!)
                           d! cursor $ -> state (assoc :text nil) (assoc :failure nil)
                       div
                         {}
                           :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
-                          :style $ :card-style options
+                          :style $ read-field options :card-style
                           :on-click $ fn (e d!) nil
                         div ({})
-                          <> $ either (:text options) "|Type in text"
+                          <> $ either (read-field options :text) "|Type in text"
                         =< nil 8
                         let
                             props $ {} (:value text)
                               :on-input $ fn (e d!)
-                                d! cursor $ assoc state :text (:value e)
+                                d! cursor $ assoc state :text (read-field e :value)
                               :on-keydown $ fn (e d!)
                                 cond
                                     and
-                                      not= 229 $ :keycode e
-                                      = (:key e) |Enter
-                                    if (:multiline? options)
+                                      not= 229 $ read-field e :keycode
+                                      = (read-field e :key) |Enter
+                                    if (read-field options :multiline?)
                                       when
-                                        .-metaKey $ :event e
+                                        .-metaKey $ read-field e :event
                                         check-submit! d!
                                       check-submit! d!
-                                  (= (:key e) |Escape)
+                                  (= (read-field e :key) |Escape)
                                     on-close! d!
                                   true nil
-                              :placeholder $ either (:placeholder options) |
-                          if (:multiline? options)
+                              :placeholder $ either (read-field options :placeholder) |
+                          if (read-field options :multiline?)
                             textarea $ merge props
                               {}
                                 :class-name $ str-spaced schema/input-box-name css/textarea (get options :input-class)
                                 :style $ merge
                                   {} (:width |100%) (:min-height 120) (:max-height |50vh)
-                                  get options :input-style
+                                  read-field options :input-style
                             input $ merge props
                               {}
                                 :class-name $ str-spaced schema/input-box-name css/input (get options :input-class)
                                 :style $ merge
                                   {} $ :width |100%
-                                  get options :input-style
+                                  read-field options :input-style
                         =< nil 16
                         div
                           {} $ :class-name css/row-parted
                           let
-                              failure $ :failure state
+                              failure $ read-field state :failure
                             if (some? failure)
                               span $ {}
                                 :style $ merge ui/flex
@@ -752,32 +783,37 @@
                             {}
                               :class-name $ str-spaced css/button (get options :confirm-class)
                               :on-click $ fn (e d!) (check-submit! d!)
-                            <> $ either (:button-text options) |Finish
+                            <> $ either (read-field options :button-text) |Finish
                       comp-esc-listener show? on-close!
           :examples $ []
             quote $ comp-prompt-modal states
               {} (:text "|Enter name") (:placeholder |name)
               , show? on-finish! on-close!
-        |confirm-actions-plugin $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |confirm-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def confirm-actions-plugin $ impl-traits PluginNodeCursorStateTask %confirm-actions
           :examples $ []
-        |drawer-actions-plugin $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |drawer-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def drawer-actions-plugin $ impl-traits PluginNodeCursorState %drawer-actions
           :examples $ []
-        |effect-fade $ %{} :CodeEntry (:doc |)
+          :schema $ :: 'Dynamic
+        |effect-fade $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defeffect effect-fade (show?) (action el at-place?)
               case-default action nil
                 :before-update $ if show? nil
                   if
-                    some? $ .-firstElementChild el
+                    js-present? $ .-firstElementChild el
                     let
-                        target $ .-firstElementChild el
-                        cloned $ .!cloneNode target true
-                        style $ .-style cloned
-                        card-style $ -> cloned .-firstElementChild .-style
+                        target $ unsafe-coerce (.-firstElementChild el) 'JsObject
+                        cloned $ unsafe-coerce (.!cloneNode target true) 'JsObject
+                        style $ unsafe-coerce (.-style cloned) 'JsObject
+                        card-style $ unsafe-coerce
+                          .-style $ unsafe-coerce (.-firstElementChild cloned) 'JsObject
+                          , 'JsObject
                       js/document.body.appendChild cloned
                       js/setTimeout
                         fn ()
@@ -790,9 +826,11 @@
                         , 240
                 :update $ if show?
                   let
-                      target $ .-firstElementChild el
-                      card-style $ -> target .-firstElementChild .-style
-                      style $ .-style target
+                      target $ unsafe-coerce (.-firstElementChild el) 'JsObject
+                      card-style $ unsafe-coerce
+                        .-style $ unsafe-coerce (.-firstElementChild target) 'JsObject
+                        , 'JsObject
+                      style $ unsafe-coerce (.-style target) 'JsObject
                     set! (.-opacity style) 0
                     set! (.-transform card-style) "|scale(0.94) translate(0px,-20px)"
                     js/setTimeout
@@ -804,17 +842,18 @@
                       , 10
                   , nil
           :examples $ []
-          :schema $ :: :fn
-            {} (:return :dynamic)
-              :args $ [] :dynamic
+          :schema $ :: 'Fn
+            {} (:return 'Dynamic)
+              :args $ [] 'Dynamic
               :features $ #{} :js-ffi
-        |effect-focus $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |effect-focus $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defeffect effect-focus (query show?) (action el at-place?)
               case-default action nil $ :update
                 when show? $ focus-element! query
           :examples $ []
-        |effect-keydown $ %{} :CodeEntry (:doc |)
+          :schema $ :: 'Dynamic
+        |effect-keydown $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defeffect effect-keydown () (action el at?)
               case-default action nil
@@ -832,28 +871,31 @@
                   js/window.removeEventListener |keydown f
                   aset el |_listener nil
           :examples $ []
-          :schema $ :: :fn
-            {} (:return :dynamic)
+          :schema $ :: 'Fn
+            {} (:return 'Dynamic)
               :args $ []
               :features $ #{} :js-ffi
-        |effect-select $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |effect-select $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defeffect effect-select (query show?) (action el *local)
               case-default action nil $ :update
                 when show? $ select-element! query
           :examples $ []
-        |effect-slide $ %{} :CodeEntry (:doc |)
+          :schema $ :: 'Dynamic
+        |effect-slide $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defeffect effect-slide (show?) (action el at-place?)
               case-default action nil
                 :before-update $ if show? nil
                   if
-                    some? $ .-firstElementChild el
+                    js-present? $ .-firstElementChild el
                     let
-                        target $ .-firstElementChild el
-                        cloned $ .!cloneNode target true
-                        style $ .-style cloned
-                        card-style $ -> cloned .-firstElementChild .-style
+                        target $ unsafe-coerce (.-firstElementChild el) 'JsObject
+                        cloned $ unsafe-coerce (.!cloneNode target true) 'JsObject
+                        style $ unsafe-coerce (.-style cloned) 'JsObject
+                        card-style $ unsafe-coerce
+                          .-style $ unsafe-coerce (.-firstElementChild cloned) 'JsObject
+                          , 'JsObject
                       js/document.body.appendChild cloned
                       js/setTimeout
                         fn ()
@@ -866,9 +908,11 @@
                         , 240
                 :update $ if show?
                   let
-                      target $ .-firstElementChild el
-                      card-style $ -> target .-firstElementChild .-style
-                      style $ .-style target
+                      target $ unsafe-coerce (.-firstElementChild el) 'JsObject
+                      card-style $ unsafe-coerce
+                        .-style $ unsafe-coerce (.-firstElementChild target) 'JsObject
+                        , 'JsObject
+                      style $ unsafe-coerce (.-style target) 'JsObject
                     set! (.-opacity style) 0
                     set! (.-transform card-style) "|translate(100%,0px)"
                     js/setTimeout
@@ -880,23 +924,26 @@
                       , 10
                   , nil
           :examples $ []
-          :schema $ :: :fn
-            {} (:return :dynamic)
-              :args $ [] :dynamic
+          :schema $ :: 'Fn
+            {} (:return 'Dynamic)
+              :args $ [] 'Dynamic
               :features $ #{} :js-ffi
-        |modal-actions-plugin $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |modal-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def modal-actions-plugin $ impl-traits PluginNodeCursorState %modal-actions
           :examples $ []
-        |modal-menu-actions-plugin $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |modal-menu-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def modal-menu-actions-plugin $ impl-traits PluginNodeCursorState %modal-menu-actions
           :examples $ []
-        |prompt-actions-plugin $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |prompt-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def prompt-actions-plugin $ impl-traits PluginNodeCursorStateTask %prompt-actions
           :examples $ []
-        |style-clear $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |style-clear $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defstyle style-clear $ {}
               |& $ {} (:font-size 10) (:cursor :pointer)
@@ -904,19 +951,22 @@
                 :opacity 0.6
               |&:hover $ {} (:opacity 1)
           :examples $ []
-        |style-drawer-backdrop $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |style-drawer-backdrop $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defstyle style-drawer-backdrop $ {}
               |& $ merge style/backdrop
                 {} $ :padding 0
           :examples $ []
-        |style-drawer-card $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |style-drawer-card $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defstyle style-drawer-card $ {}
               |& $ merge style/card
                 {} (:line-height |32px) (:height |100%) (:max-height |100vh) (:margin-right 0) (:border-radius |0px) (:max-width |50vw) (:width |24vw) (:min-width 360) (:box-shadow "|-2px 0px 24px 2px hsla(0,0%,0%,0.2)") (:transition-property |opacity,transform)
           :examples $ []
-        |style-menu-item $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |style-menu-item $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defstyle style-menu-item $ {}
               |& $ {}
@@ -928,35 +978,39 @@
               |&:hover $ {}
                 :background-color $ hsl 0 0 97
           :examples $ []
-        |style-modal-backdrop $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |style-modal-backdrop $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defstyle style-modal-backdrop $ {} (|& style/backdrop)
           :examples $ []
-        |style-modal-card $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |style-modal-card $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defstyle style-modal-card $ {}
               |& $ merge style/card
                 {} (:line-height |32px) (:box-shadow "|0px 2px 24px 0px hsl(0,0%,0%,0.2)") (:transition-property |opacity,transform)
           :examples $ []
-        |style-modal-title $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |style-modal-title $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defstyle style-modal-title $ {}
               |& $ {} (:padding |8px)
           :examples $ []
-        |use-alert $ %{} :CodeEntry (:doc "||Alert dialog hook. Shows a simple message box. Returns a plugin object with .show method to display the alert.")
+          :schema $ :: 'Dynamic
+        |use-alert $ %{} 'CodeEntry (:doc "||Alert dialog hook. Shows a simple message box. Returns a plugin object with .show method to display the alert.")
           :code $ quote
             defplugin use-alert (states options)
               let
-                  cursor $ :cursor states
-                  state $ either (:data states)
+                  cursor $ read-field states :cursor
+                  state $ either (read-field states :data)
                     {} (:show? false)
-                      :text $ :text options
-                  on-read $ either (:on-read options)
+                      :text $ read-field options :text
+                  on-read $ either (read-field options :on-read)
                     fn (e d!)
                       d! cursor $ assoc state :show? false
                   node $ comp-alert-modal
-                    assoc options :text $ :text state
-                    :show? state
+                    assoc options :text $ read-field state :text
+                    read-field state :show?
                     , on-read
                       fn (d!)
                         d! cursor $ assoc state :show? false
@@ -969,22 +1023,22 @@
                 {} $ :on-click
                   fn (e d!) (.show alert-plugin d!)
                 <> |Show
-          :schema $ :: :fn
-            {} (:return :tuple)
-              :args $ [] :map :map
-        |use-confirm $ %{} :CodeEntry (:doc "||Confirm dialog hook. Shows a dialog with confirm/cancel buttons. Returns a plugin object, call .show with a callback function that executes after confirmation.")
+          :schema $ :: 'Fn
+            {} (:return 'Enum)
+              :args $ [] 'Map 'Map
+        |use-confirm $ %{} 'CodeEntry (:doc "||Confirm dialog hook. Shows a dialog with confirm/cancel buttons. Returns a plugin object, call .show with a callback function that executes after confirmation.")
           :code $ quote
             defplugin use-confirm (states options)
               let
-                  cursor $ :cursor states
-                  state $ either (:data states)
+                  cursor $ read-field states :cursor
+                  state $ either (read-field states :data)
                     {} (:show? false) (:text nil)
-                  *next-confirm-task $ anchor-state (identity-path confirm)
+                  *next-confirm-task $ atom nil
                   node $ comp-confirm-modal
                     if
-                      blank? $ :text state
-                      , options $ assoc options :text (:text state)
-                    :show? state
+                      blank? $ read-field state :text
+                      , options $ assoc options :text (read-field state :text)
+                    read-field state :show?
                     fn (e d!)
                       if (some? @*next-confirm-task) (@*next-confirm-task)
                       .set! *next-confirm-task nil
@@ -1009,17 +1063,17 @@
                   :on-click $ fn (e d!)
                     .show-with-text confirm-plugin d! "|Confirm with dynamic text?" $ fn () (println |Confirmed!)
                 <> "|Show with text"
-          :schema $ :: :fn
-            {} (:return :tuple)
-              :args $ [] :map :map
-        |use-drawer $ %{} :CodeEntry (:doc "||Drawer hook. Shows a panel sliding from the side. Use :render function in options to customize content. Supports :style for width and other styles.")
+          :schema $ :: 'Fn
+            {} (:return 'Enum)
+              :args $ [] 'Map 'Map
+        |use-drawer $ %{} 'CodeEntry (:doc "||Drawer hook. Shows a panel sliding from the side. Use :render function in options to customize content. Supports :style for width and other styles.")
           :code $ quote
             defn use-drawer (states options)
               let
-                  cursor $ :cursor states
-                  state $ either (:data states)
+                  cursor $ read-field states :cursor
+                  state $ either (read-field states :data)
                     {} $ :show? false
-                  node $ comp-drawer options (:show? state)
+                  node $ comp-drawer options (read-field state :show?)
                     fn (d!)
                       d! cursor $ assoc state :show? false
                 %:: drawer-actions-plugin :plugin node cursor state
@@ -1034,17 +1088,17 @@
                 {} $ :on-click
                   fn (e d!) (.show drawer-plugin d!)
                 <> "|Open Drawer"
-          :schema $ :: :fn
-            {} (:return :tuple)
-              :args $ [] :map :map
-        |use-modal $ %{} :CodeEntry (:doc "||Modal dialog hook. Shows a modal with custom content. Use :render function in options to customize content. Returns a plugin object.")
+          :schema $ :: 'Fn
+            {} (:return 'Enum)
+              :args $ [] 'Map 'Map
+        |use-modal $ %{} 'CodeEntry (:doc "||Modal dialog hook. Shows a modal with custom content. Use :render function in options to customize content. Returns a plugin object.")
           :code $ quote
             defn use-modal (states options)
               let
-                  cursor $ :cursor states
-                  state $ either (:data states)
+                  cursor $ read-field states :cursor
+                  state $ either (read-field states :data)
                     {} $ :show? false
-                  node $ comp-modal options (:show? state)
+                  node $ comp-modal options (read-field state :show?)
                     fn (d!)
                       d! cursor $ assoc state :show? false
                 %:: modal-actions-plugin :plugin node cursor state
@@ -1058,21 +1112,21 @@
                 {} $ :on-click
                   fn (e d!) (.show modal-plugin d!)
                 <> |Open
-          :schema $ :: :fn
-            {} (:return :tuple)
-              :args $ [] :map :map
-        |use-modal-menu $ %{} :CodeEntry (:doc "||Modal menu hook. Shows a modal dialog with a list of options. Define options via :items and handle selection via :on-result in options.")
+          :schema $ :: 'Fn
+            {} (:return 'Enum)
+              :args $ [] 'Map 'Map
+        |use-modal-menu $ %{} 'CodeEntry (:doc "||Modal menu hook. Shows a modal dialog with a list of options. Define options via :items and handle selection via :on-result in options.")
           :code $ quote
             defn use-modal-menu (states options)
               let
-                  cursor $ :cursor states
-                  state $ either (:data states)
+                  cursor $ read-field states :cursor
+                  state $ either (read-field states :data)
                     {} $ :show? false
-                  node $ comp-modal-menu options (:show? state)
+                  node $ comp-modal-menu options (read-field state :show?)
                     fn (d!)
                       d! cursor $ assoc state :show? false
                     fn (result d!)
-                      (:on-result options) result d!
+                      (read-field options :on-result) result d!
                       d! cursor $ assoc state :show? false
                 %:: modal-menu-actions-plugin :plugin node cursor state
           :examples $ []
@@ -1085,18 +1139,18 @@
                 {} $ :on-click
                   fn (e d!) (.show menu-plugin d!)
                 <> |Menu
-          :schema $ :: :fn
-            {} (:return :tuple)
-              :args $ [] :map :map
-        |use-prompt $ %{} :CodeEntry (:doc "||Prompt dialog hook. Shows a dialog with text input. Returns a plugin object, call .show with a callback function to receive user input text.")
+          :schema $ :: 'Fn
+            {} (:return 'Enum)
+              :args $ [] 'Map 'Map
+        |use-prompt $ %{} 'CodeEntry (:doc "||Prompt dialog hook. Shows a dialog with text input. Returns a plugin object, call .show with a callback function to receive user input text.")
           :code $ quote
             defplugin use-prompt (states options)
               let
-                  cursor $ :cursor states
-                  state $ either (:data states)
+                  cursor $ read-field states :cursor
+                  state $ either (read-field states :data)
                     {} (:show? false) (:failure nil)
-                  *next-prompt-task $ anchor-state (identity-path prompt)
-                  node $ comp-prompt-modal (>> states :modal) options (:show? state)
+                  *next-prompt-task $ atom nil
+                  node $ comp-prompt-modal (>> states :modal) options (read-field state :show?)
                     fn (text d!)
                       if (some? @*next-prompt-task) (@*next-prompt-task text)
                       .set! *next-prompt-task nil
@@ -1114,10 +1168,10 @@
                   fn (e d!)
                     .show prompt-plugin d! $ fn (text) (println |got: text)
                 <> |Input
-          :schema $ :: :fn
-            {} (:return :tuple)
-              :args $ [] :map :map
-      :ns $ %{} :NsEntry (:doc |)
+          :schema $ :: 'Fn
+            {} (:return 'Enum)
+              :args $ [] 'Map 'Map
+      :ns $ %{} 'NsEntry (:doc |)
         :code $ quote
           ns respo-alerts.core $ :require
             respo.util.format :refer $ hsl
@@ -1130,15 +1184,15 @@
             respo-alerts.config :refer $ dev?
             respo-alerts.style :as style
             respo-alerts.schema :as schema
-            respo-alerts.util :refer $ focus-element! select-element!
-            memof.anchor :refer $ anchor-state identity-path
-    |respo-alerts.main $ %{} :FileEntry
+            respo-alerts.util :refer $ focus-element! select-element! read-field
+    |respo-alerts.main $ %{} 'FileEntry
       :defs $ {}
-        |*reel $ %{} :CodeEntry (:doc |) (:schema :ref)
+        |*reel $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defatom *reel $ -> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store)
           :examples $ []
-        |dispatch! $ %{} :CodeEntry (:doc |)
+          :schema $ :: 'Ref
+        |dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn dispatch! (op)
               do
@@ -1147,10 +1201,10 @@
                   js/console.log |Dispatch: op
                 reset! *reel $ reel-updater updater @*reel op
           :examples $ []
-          :schema $ :: :fn
-            {} (:return :tag)
-              :args $ [] :list
-        |main! $ %{} :CodeEntry (:doc |)
+          :schema $ :: 'Fn
+            {} (:return 'Tag)
+              :args $ [] 'List
+        |main! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn main! ()
               println "|Running mode:" $ if config/dev? |dev |release
@@ -1166,21 +1220,23 @@
                   dispatch! :hydrate-storage $ parse-cirru-edn raw
               println "|App started."
           :examples $ []
-          :schema $ :: :fn
-            {} (:return :dynamic)
+          :schema $ :: 'Fn
+            {} (:return 'Dynamic)
               :args $ []
               :features $ #{} :js-ffi
-        |mount-target $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+        |mount-target $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def mount-target $ js/document.querySelector |.app
           :examples $ []
-        |persist-storage! $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |persist-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn persist-storage! (? e)
               js/localStorage.setItem (:storage-key config/site)
                 format-cirru-edn $ :store @*reel
           :examples $ []
-        |reload! $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn reload! () $ if (nil? build-errors)
               do (remove-watch *reel :changes) (clear-cache!)
@@ -1189,11 +1245,13 @@
                 hud! |ok~ |Ok
               hud! |error build-errors
           :examples $ []
-        |render-app! $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn render-app! () $ render! mount-target (comp-container @*reel) dispatch!
           :examples $ []
-      :ns $ %{} :NsEntry (:doc |)
+          :schema $ :: 'Dynamic
+      :ns $ %{} 'NsEntry (:doc |)
         :code $ quote
           ns respo-alerts.main $ :require
             respo.core :refer $ render! clear-cache! realize-ssr!
@@ -1206,25 +1264,28 @@
             respo-alerts.config :as config
             |./calcit.build-errors :default build-errors
             |bottom-tip :default hud!
-    |respo-alerts.schema $ %{} :FileEntry
+    |respo-alerts.schema $ %{} 'FileEntry
       :defs $ {}
-        |confirm-button-name $ %{} :CodeEntry (:doc |) (:schema :string)
+        |confirm-button-name $ %{} 'CodeEntry (:doc |)
           :code $ quote (def confirm-button-name |respo-confirm-button)
           :examples $ []
-        |input-box-name $ %{} :CodeEntry (:doc |) (:schema :string)
+          :schema $ :: 'String
+        |input-box-name $ %{} 'CodeEntry (:doc |)
           :code $ quote (def input-box-name |respo-prompt-input)
           :examples $ []
-        |store $ %{} :CodeEntry (:doc |) (:schema :map)
+          :schema $ :: 'String
+        |store $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def store $ {}
               :states $ {}
               :content |
           :examples $ []
-      :ns $ %{} :NsEntry (:doc |)
+          :schema $ :: 'Map
+      :ns $ %{} 'NsEntry (:doc |)
         :code $ quote (ns respo-alerts.schema)
-    |respo-alerts.style $ %{} :FileEntry
+    |respo-alerts.style $ %{} 'FileEntry
       :defs $ {}
-        |backdrop $ %{} :CodeEntry (:doc |) (:schema :map)
+        |backdrop $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def backdrop $ {}
               :background-color $ hsl 0 30 10 0.6
@@ -1232,13 +1293,15 @@
               :z-index |999
               :padding 16
           :examples $ []
-        |button $ %{} :CodeEntry (:doc |) (:schema :map)
+          :schema $ :: 'Map
+        |button $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def button $ merge ui/button
               {} (:border-radius |4px) (:background-color :white)
                 :border-color $ hsl 240 60 90
           :examples $ []
-        |card $ %{} :CodeEntry (:doc |) (:schema :map)
+          :schema $ :: 'Map
+        |card $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def card $ {}
               :background-color $ hsl 0 0 100
@@ -1251,14 +1314,15 @@
               :margin :auto
               :padding 16
           :examples $ []
-      :ns $ %{} :NsEntry (:doc |)
+          :schema $ :: 'Map
+      :ns $ %{} 'NsEntry (:doc |)
         :code $ quote
           ns respo-alerts.style $ :require
             respo.util.format :refer $ hsl
             respo-ui.core :as ui
-    |respo-alerts.trigger $ %{} :FileEntry
+    |respo-alerts.trigger $ %{} 'FileEntry
       :defs $ {}
-        |comp-trigger $ %{} :CodeEntry (:doc "||Trigger component. Wraps an element with visual feedback when active. Uses :trigger-style and :trigger-active-style from options.") (:schema :dynamic)
+        |comp-trigger $ %{} 'CodeEntry (:doc "||Trigger component. Wraps an element with visual feedback when active. Uses :trigger-style and :trigger-active-style from options.")
           :code $ quote
             defcomp comp-trigger (show? el ? options)
               div
@@ -1266,7 +1330,7 @@
                 , el $ div
                   {}
                     :class-name $ str-spaced style-trigger (if show? style-trigger-active)
-                    :style $ merge (get options :trigger-style)
+                    :style $ merge (read-field options :trigger-style)
                       if show? $ get options :trigger-active-style
           :examples $ []
             quote $ comp-trigger show?
@@ -1276,32 +1340,37 @@
               {}
                 :trigger-style $ {} (:color |blue)
                 :trigger-active-style $ {} (:color |red)
-        |style-trigger $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |style-trigger $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defstyle style-trigger $ {}
               |& $ {} (:border-radius |50%) (:position :absolute) (:transform "|translate(-50%,-50%)") (:top |50%) (:left |50%) (:width 0) (:height 0) (:transition-duration |300ms) (:transition-delay |100ms) (:pointer-events :none) (:z-index |900) (:opacity 1)
                 :background $ str "|radial-gradient(" (hsl 0 0 70 0.8) "|0% ," (hsl 0 0 60 0.0) "| 50%)"
           :examples $ []
-        |style-trigger-active $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |style-trigger-active $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defstyle style-trigger-active $ {}
               |& $ {} (:width 2000) (:height 2000) (:opacity 0.3) (:transition-delay |0ms)
           :examples $ []
-        |style-trigger-container $ %{} :CodeEntry (:doc |) (:schema :dynamic)
+          :schema $ :: 'Dynamic
+        |style-trigger-container $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defstyle style-trigger-container $ {}
               |& $ {} (:display :inline-block) (:position :relative)
           :examples $ []
-      :ns $ %{} :NsEntry (:doc |)
+          :schema $ :: 'Dynamic
+      :ns $ %{} 'NsEntry (:doc |)
         :code $ quote
           ns respo-alerts.trigger $ :require
             respo.core :refer $ defcomp defplugin list-> <> >> div button textarea span input a defeffect
             respo-ui.css :as css
             respo.util.format :refer $ hsl
             respo.css :refer $ defstyle
-    |respo-alerts.updater $ %{} :FileEntry
+            respo-alerts.util :refer $ read-field
+    |respo-alerts.updater $ %{} 'FileEntry
       :defs $ {}
-        |updater $ %{} :CodeEntry (:doc |)
+        |updater $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn updater (store op op-id op-time)
               tag-match op
@@ -1310,35 +1379,59 @@
                 (:hydrate-storage d) d
                 _ $ do (js/console.warn "|Unknown op:" op) store
           :examples $ []
-          :schema $ :: :fn
-            {} (:return :map)
-              :args $ [] :map :tuple :string :number
-      :ns $ %{} :NsEntry (:doc |)
+          :schema $ :: 'Fn
+            {} (:return 'Map)
+              :args $ [] 'Map 'Enum 'String 'Number
+      :ns $ %{} 'NsEntry (:doc |)
         :code $ quote
           ns respo-alerts.updater $ :require
             respo.cursor :refer $ update-states
             respo-alerts.config :refer $ dev?
-    |respo-alerts.util $ %{} :FileEntry
+    |respo-alerts.util $ %{} 'FileEntry
       :defs $ {}
-        |focus-element! $ %{} :CodeEntry (:doc |)
+        |focus-element! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn focus-element! (query)
-              if-let
-                target $ js/document.querySelector query
-                .!focus target
+              let
+                  target $ js/document.querySelector query
+                if (js-present? target)
+                  do
+                    .!focus $ unsafe-coerce target JsObject
+                    ;nil
+                  ;nil
           :examples $ []
-          :schema $ :: :fn
-            {} (:return :tag)
-              :args $ [] :string
-        |select-element! $ %{} :CodeEntry (:doc |)
+          :schema $ :: 'Fn
+            {} (:return 'Unit)
+              :args $ [] 'String
+              :features $ #{} :js-ffi
+        |read-field $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn read-field (value field)
+              if (struct? value) (&struct:get value field) (&map:get value field)
+          :examples $ []
+          :schema $ :: 'Fn
+            {} (:return 'Dynamic)
+              :args $ [] 'Dynamic 'Tag
+          :tests $ []
+            %{} 'TestEntry (:name |reads-map)
+              :code $ quote
+                assert= 1 $ read-field
+                  {} $ :value 1
+                  , :value
+        |select-element! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn select-element! (query)
               let
                   target $ js/document.querySelector query
-                if (some? target) (.!select target)
+                if (js-present? target)
+                  do
+                    .!select $ unsafe-coerce target JsObject
+                    ;nil
+                  ;nil
           :examples $ []
-          :schema $ :: :fn
-            {} (:return :tag)
-              :args $ [] :string
-      :ns $ %{} :NsEntry (:doc |)
+          :schema $ :: 'Fn
+            {} (:return 'Unit)
+              :args $ [] 'String
+              :features $ #{} :js-ffi
+      :ns $ %{} 'NsEntry (:doc |)
         :code $ quote (ns respo-alerts.util)
