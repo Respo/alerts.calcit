@@ -1,8 +1,9 @@
 
-{} (:about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `cr query` to inspect and `cr edit`/`cr tree` to modify. Run `cr docs agents --full` first. Manual edits must follow format and schema conventions, then run `cr edit format`.") (:package |respo-alerts)
-  :configs $ {} (:init-fn |respo-alerts.main/main!) (:reload-fn |respo-alerts.main/reload!) (:version |0.10.13)
-    :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
+{} (:about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `cr query` to inspect and `cr edit`/`cr tree` to modify. Run `cr docs agents --full` first. Manual edits must follow format and schema conventions, then run `cr edit format`.") (:package |respo-alerts) (:version |0.10.14)
   :entries $ {}
+    :default $ {} (:description |) (:init-fn 'respo-alerts.main/main!) (:mode :native) (:reload-fn 'respo-alerts.main/reload!)
+      :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
+      :type-slots $ {}
   :files $ {}
     |respo-alerts.comp.container $ %{} :FileEntry
       :defs $ {}
@@ -183,7 +184,6 @@
             respo.comp.inspect :refer $ comp-inspect
             respo-alerts.style :as style
             |@calcit/std :refer $ rand-int
-            respo-alerts.trigger :refer $ comp-trigger
             respo-alerts.trigger :refer $ comp-trigger
     |respo-alerts.config $ %{} :FileEntry
       :defs $ {}
@@ -979,7 +979,7 @@
                   cursor $ :cursor states
                   state $ either (:data states)
                     {} (:show? false) (:text nil)
-                  *next-confirm-task $ anchor-state (identity-path 'confirm)
+                  *next-confirm-task $ anchor-state (identity-path confirm)
                   node $ comp-confirm-modal
                     if
                       blank? $ :text state
@@ -1095,7 +1095,7 @@
                   cursor $ :cursor states
                   state $ either (:data states)
                     {} (:show? false) (:failure nil)
-                  *next-prompt-task $ anchor-state (identity-path 'prompt)
+                  *next-prompt-task $ anchor-state (identity-path prompt)
                   node $ comp-prompt-modal (>> states :modal) options (:show? state)
                     fn (text d!)
                       if (some? @*next-prompt-task) (@*next-prompt-task text)
@@ -1131,7 +1131,6 @@
             respo-alerts.style :as style
             respo-alerts.schema :as schema
             respo-alerts.util :refer $ focus-element! select-element!
-            respo-alerts.style :as style
             memof.anchor :refer $ anchor-state identity-path
     |respo-alerts.main $ %{} :FileEntry
       :defs $ {}
@@ -1313,7 +1312,7 @@
           :examples $ []
           :schema $ :: :fn
             {} (:return :map)
-              :args $ [] :map :list :string :number
+              :args $ [] :map :tuple :string :number
       :ns $ %{} :NsEntry (:doc |)
         :code $ quote
           ns respo-alerts.updater $ :require
