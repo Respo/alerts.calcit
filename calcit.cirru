@@ -1,8 +1,8 @@
 
-{} (:about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `cr query` to inspect and `cr edit`/`cr tree` to modify. Run `cr docs agents --full` first. Manual edits must follow format and schema conventions, then run `cr edit format`.") (:package |respo-alerts) (:version |0.10.14)
+{} (:about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `cr query` to inspect and `cr edit`/`cr tree` to modify. Run `cr docs agents --full` first. Manual edits must follow format and schema conventions, then run `cr edit format`.") (:package |respo-alerts) (:version |0.10.15)
   :entries $ {}
     :default $ {} (:description |) (:init-fn 'respo-alerts.main/main!) (:mode :native) (:reload-fn 'respo-alerts.main/reload!)
-      :modules $ [] |lilac/ |memof/ |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
+      :modules $ [] |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
       :type-slots $ {}
   :files $ {}
     |respo-alerts.comp.container $ %{} 'FileEntry
@@ -11,9 +11,9 @@
           :code $ quote
             defcomp comp-container (reel)
               let
-                  store $ :store reel
-                  states $ :states store
-                  state $ either (:data states)
+                  store $ respo-alerts.core/read-field reel :store
+                  states $ respo-alerts.core/read-field store :states
+                  state $ either (respo-alerts.core/read-field states :data)
                     {} (:selected |) (:show-modal? false) (:show-modal-menu? false)
                 div
                   {}
@@ -84,13 +84,13 @@
           :code $ quote
             defcomp comp-demo-trigger (states)
               let
-                  cursor $ :cursor states
-                  state $ either (:data states)
+                  cursor $ respo-alerts.core/read-field states :cursor
+                  state $ either (respo-alerts.core/read-field states :data)
                     {} $ :visible? false
                 div ({})
                   div ({}) (<> |Trigger)
                   div ({})
-                    comp-trigger (:visible? state)
+                    comp-trigger (respo-alerts.core/read-field state :visible?)
                       button $ {} (:inner-text |Toggle) (:class-name css/button)
                         :on-click $ fn (e d!)
                           d! cursor $ update state :visible? not
@@ -143,7 +143,8 @@
                         let
                             text $ js/prompt "|Input confirm text"
                           if
-                            not $ blank? text
+                            and (js-present? text)
+                              not $ blank? (unsafe-coerce text 'String)
                             .show-with-text confirm-plugin d! (str "|Confirmed: " text)
                               fn () $ println "|after confirmed"
                     =< 8 nil
@@ -239,7 +240,7 @@
                   :return 'Bool
                 tag-match self $
                   :plugin node cursor state
-                  :show? state
+                  respo-alerts.core/read-field state :show?
           :examples $ []
           :schema $ :: 'Dynamic
         |%confirm-actions $ %{} 'CodeEntry (:doc |)
@@ -281,7 +282,7 @@
                   :return 'Bool
                 tag-match self $
                   :plugin node cursor state
-                  :show? state
+                  respo-alerts.core/read-field state :show?
           :examples $ []
           :schema $ :: 'Dynamic
         |%drawer-actions $ %{} 'CodeEntry (:doc |)
@@ -314,7 +315,7 @@
                   :return 'Bool
                 tag-match self $
                   :plugin node cursor state
-                  :show? state
+                  respo-alerts.core/read-field state :show?
           :examples $ []
           :schema $ :: 'Dynamic
         |%modal-actions $ %{} 'CodeEntry (:doc |)
@@ -347,7 +348,7 @@
                   :return 'Bool
                 tag-match self $
                   :plugin node cursor state
-                  :show? state
+                  respo-alerts.core/read-field state :show?
           :examples $ []
           :schema $ :: 'Dynamic
         |%modal-menu-actions $ %{} 'CodeEntry (:doc |)
@@ -380,7 +381,7 @@
                   :return 'Bool
                 tag-match self $
                   :plugin node cursor state
-                  :show? state
+                  respo-alerts.core/read-field state :show?
           :examples $ []
           :schema $ :: 'Dynamic
         |%prompt-actions $ %{} 'CodeEntry (:doc |)
@@ -414,7 +415,7 @@
                   :return 'Bool
                 tag-match self $
                   :plugin node cursor state *next
-                  :show? state
+                  respo-alerts.core/read-field state :show?
           :examples $ []
           :schema $ :: 'Dynamic
         |AlertActions $ %{} 'CodeEntry (:doc |)
@@ -477,7 +478,7 @@
                       :style $ get options :backdrop-style
                       :on-click $ fn (e d!)
                         let
-                            event $ :event e
+                            event $ respo-alerts.core/read-field e :event
                           .!stopPropagation event
                           on-read! e d!
                           on-close! d!
@@ -516,15 +517,15 @@
                   if show? $ div
                     {}
                       :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
-                      :style $ :backdrop-style options
+                      :style $ respo-alerts.core/read-field options :backdrop-style
                       :on-click $ fn (e d!) (on-close! d!)
                     div
                       {}
                         :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
-                        :style $ :card-style options
+                        :style $ respo-alerts.core/read-field options :card-style
                         :on-click $ fn (e d!) nil
                       div ({})
-                        <> $ either (:text options) |Confirm?
+                        <> $ either (respo-alerts.core/read-field options :text) |Confirm?
                       =< nil 8
                       div
                         {} $ :class-name css/row-parted
@@ -533,7 +534,7 @@
                           {}
                             :class-name $ str-spaced css/button schema/confirm-button-name (get options :confirm-class)
                             :on-click $ fn (e d!) (on-confirm! e d!) (on-close! d!)
-                          <> $ either (:button-text options) |Confirm
+                          <> $ either (respo-alerts.core/read-field options :button-text) |Confirm
                     comp-esc-listener show? on-close!
           :examples $ []
             quote $ comp-confirm-modal
@@ -548,14 +549,14 @@
                   {} $ :style
                     merge
                       {} $ :position :absolute
-                      :container-style options
+                      respo-alerts.core/read-field options :container-style
                   if show? $ div
                     {}
                       :class-name $ str-spaced css/fullscreen style-drawer-backdrop (get options :backdrop-class)
-                      :style $ :backdrop-style options
+                      :style $ respo-alerts.core/read-field options :backdrop-style
                       :on-click $ fn (e d!)
                         let
-                            event $ :event e
+                            event $ respo-alerts.core/read-field e :event
                           .!stopPropagation event
                           on-close d!
                     div
@@ -563,19 +564,19 @@
                         :class-name $ str-spaced css/global css/column style-drawer-card (get options :card-class)
                         :style $ merge
                           {} $ :padding 0
-                          :style options
+                          respo-alerts.core/read-field options :style
                         :on-click $ fn (e d!) nil
                       let
-                          title $ :title options
+                          title $ respo-alerts.core/read-field options :title
                         if (some? title)
                           div
                             {} $ :class-name (str-spaced css/center css/font-fancy! style-modal-title)
                             <> title
                       cond
-                          some? $ :render options
-                          (:render options) on-close
-                        (some? (:render-body options))
-                          (:render-body options) on-close
+                          some? $ respo-alerts.core/read-field options :render
+                          (respo-alerts.core/read-field options :render) on-close
+                        (some? (respo-alerts.core/read-field options :render-body))
+                          (respo-alerts.core/read-field options :render-body) on-close
                         true "|TODO render body"
                     comp-esc-listener show? on-close
           :examples $ []
@@ -602,14 +603,14 @@
                   {} $ :style
                     merge
                       {} $ :position :absolute
-                      :container-style options
+                      respo-alerts.core/read-field options :container-style
                   if show? $ div
                     {}
                       :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
-                      :style $ :backdrop-style options
+                      :style $ respo-alerts.core/read-field options :backdrop-style
                       :on-click $ fn (e d!)
                         let
-                            event $ :event e
+                            event $ respo-alerts.core/read-field e :event
                           .!stopPropagation event
                           on-close d!
                     div
@@ -617,20 +618,20 @@
                         :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
                         :style $ merge
                           {} $ :padding 0
-                          :style options
-                          get options :card-style
+                          respo-alerts.core/read-field options :style
+                          respo-alerts.core/read-field options :card-style
                         :on-click $ fn (e d!) nil
                       let
-                          title $ :title options
+                          title $ respo-alerts.core/read-field options :title
                         if (some? title)
                           div
                             {} $ :class-name (str-spaced css/center css/font-fancy! style-modal-title)
                             <> title
                       cond
-                          some? $ :render options
-                          (:render options) on-close
-                        (some? (:render-body options))
-                          (:render-body options) on-close
+                          some? $ respo-alerts.core/read-field options :render
+                          (respo-alerts.core/read-field options :render) on-close
+                        (some? (respo-alerts.core/read-field options :render-body))
+                          (respo-alerts.core/read-field options :render-body) on-close
                         true "|TODO render body"
                     comp-esc-listener show? on-close
           :examples $ []
@@ -648,10 +649,10 @@
                   if show? $ div
                     {}
                       :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
-                      :style $ :backdrop-style options
+                      :style $ respo-alerts.core/read-field options :backdrop-style
                       :on-click $ fn (e d!)
                         let
-                            event $ :event e
+                            event $ respo-alerts.core/read-field e :event
                           .!stopPropagation event
                           on-close! d!
                     div
@@ -659,10 +660,10 @@
                         :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
                         :style $ merge
                           {} $ :padding 0
-                          :style options
+                          respo-alerts.core/read-field options :style
                         :on-click $ fn (e d!) nil
                       let
-                          title $ :title options
+                          title $ respo-alerts.core/read-field options :title
                         if (some? title)
                           div
                             {}
@@ -674,11 +675,11 @@
                             span $ {} (:inner-text |Clear) (:class-name style-clear)
                               :on-click $ fn (e d!) (on-select! nil d!)
                       list-> ({})
-                        -> (:items options)
+                        -> (respo-alerts.core/read-field options :items)
                           map $ fn (info)
                             let
                                 item $ cond
-                                    tuple? info
+                                    enum? info
                                     , info
                                   (map? info)
                                     :: :item (&map:get info :value) (&map:get info :display)
@@ -700,14 +701,14 @@
           :code $ quote
             defcomp comp-prompt-modal (states options show? on-finish! on-close!)
               let
-                  initial-text $ either (:initial options) |
-                  cursor $ :cursor states
-                  state $ either (:data states)
+                  initial-text $ either (respo-alerts.core/read-field options :initial) |
+                  cursor $ respo-alerts.core/read-field states :cursor
+                  state $ either (respo-alerts.core/read-field states :data)
                     {} (:text initial-text) (:failure nil)
-                  text $ either (:text state) initial-text
+                  text $ either (respo-alerts.core/read-field state :text) initial-text
                   check-submit! $ fn (d!)
                     let
-                        validator $ :validator options
+                        validator $ respo-alerts.core/read-field options :validator
                         result $ if (fn? validator) (validator text) nil
                       if (some? result)
                         d! cursor $ assoc state :failure result
@@ -724,53 +725,53 @@
                         :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
                         :style $ merge
                           {} $ :line-height |32px
-                          :backdrop-style options
+                          respo-alerts.core/read-field options :backdrop-style
                         :on-click $ fn (e d!) (on-close! d!)
                           d! cursor $ -> state (assoc :text nil) (assoc :failure nil)
                       div
                         {}
                           :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
-                          :style $ :card-style options
+                          :style $ respo-alerts.core/read-field options :card-style
                           :on-click $ fn (e d!) nil
                         div ({})
-                          <> $ either (:text options) "|Type in text"
+                          <> $ either (respo-alerts.core/read-field options :text) "|Type in text"
                         =< nil 8
                         let
                             props $ {} (:value text)
                               :on-input $ fn (e d!)
-                                d! cursor $ assoc state :text (:value e)
+                                d! cursor $ assoc state :text (respo-alerts.core/read-field e :value)
                               :on-keydown $ fn (e d!)
                                 cond
                                     and
-                                      not= 229 $ :keycode e
-                                      = (:key e) |Enter
-                                    if (:multiline? options)
+                                      not= 229 $ respo-alerts.core/read-field e :keycode
+                                      = (respo-alerts.core/read-field e :key) |Enter
+                                    if (respo-alerts.core/read-field options :multiline?)
                                       when
-                                        .-metaKey $ :event e
+                                        .-metaKey $ respo-alerts.core/read-field e :event
                                         check-submit! d!
                                       check-submit! d!
-                                  (= (:key e) |Escape)
+                                  (= (respo-alerts.core/read-field e :key) |Escape)
                                     on-close! d!
                                   true nil
-                              :placeholder $ either (:placeholder options) |
-                          if (:multiline? options)
+                              :placeholder $ either (respo-alerts.core/read-field options :placeholder) |
+                          if (respo-alerts.core/read-field options :multiline?)
                             textarea $ merge props
                               {}
                                 :class-name $ str-spaced schema/input-box-name css/textarea (get options :input-class)
                                 :style $ merge
                                   {} (:width |100%) (:min-height 120) (:max-height |50vh)
-                                  get options :input-style
+                                  respo-alerts.core/read-field options :input-style
                             input $ merge props
                               {}
                                 :class-name $ str-spaced schema/input-box-name css/input (get options :input-class)
                                 :style $ merge
                                   {} $ :width |100%
-                                  get options :input-style
+                                  respo-alerts.core/read-field options :input-style
                         =< nil 16
                         div
                           {} $ :class-name css/row-parted
                           let
-                              failure $ :failure state
+                              failure $ respo-alerts.core/read-field state :failure
                             if (some? failure)
                               span $ {}
                                 :style $ merge ui/flex
@@ -781,7 +782,7 @@
                             {}
                               :class-name $ str-spaced css/button (get options :confirm-class)
                               :on-click $ fn (e d!) (check-submit! d!)
-                            <> $ either (:button-text options) |Finish
+                            <> $ either (respo-alerts.core/read-field options :button-text) |Finish
                       comp-esc-listener show? on-close!
           :examples $ []
             quote $ comp-prompt-modal states
@@ -804,12 +805,14 @@
               case-default action nil
                 :before-update $ if show? nil
                   if
-                    some? $ .-firstElementChild el
+                    js-present? $ .-firstElementChild el
                     let
-                        target $ .-firstElementChild el
-                        cloned $ .!cloneNode target true
-                        style $ .-style cloned
-                        card-style $ -> cloned .-firstElementChild .-style
+                        target $ unsafe-coerce (.-firstElementChild el) 'JsObject
+                        cloned $ unsafe-coerce (.!cloneNode target true) 'JsObject
+                        style $ unsafe-coerce (.-style cloned) 'JsObject
+                        card-style $ unsafe-coerce
+                          .-style $ unsafe-coerce (.-firstElementChild cloned) 'JsObject
+                          , 'JsObject
                       js/document.body.appendChild cloned
                       js/setTimeout
                         fn ()
@@ -822,9 +825,11 @@
                         , 240
                 :update $ if show?
                   let
-                      target $ .-firstElementChild el
-                      card-style $ -> target .-firstElementChild .-style
-                      style $ .-style target
+                      target $ unsafe-coerce (.-firstElementChild el) 'JsObject
+                      card-style $ unsafe-coerce
+                        .-style $ unsafe-coerce (.-firstElementChild target) 'JsObject
+                        , 'JsObject
+                      style $ unsafe-coerce (.-style target) 'JsObject
                     set! (.-opacity style) 0
                     set! (.-transform card-style) "|scale(0.94) translate(0px,-20px)"
                     js/setTimeout
@@ -882,12 +887,14 @@
               case-default action nil
                 :before-update $ if show? nil
                   if
-                    some? $ .-firstElementChild el
+                    js-present? $ .-firstElementChild el
                     let
-                        target $ .-firstElementChild el
-                        cloned $ .!cloneNode target true
-                        style $ .-style cloned
-                        card-style $ -> cloned .-firstElementChild .-style
+                        target $ unsafe-coerce (.-firstElementChild el) 'JsObject
+                        cloned $ unsafe-coerce (.!cloneNode target true) 'JsObject
+                        style $ unsafe-coerce (.-style cloned) 'JsObject
+                        card-style $ unsafe-coerce
+                          .-style $ unsafe-coerce (.-firstElementChild cloned) 'JsObject
+                          , 'JsObject
                       js/document.body.appendChild cloned
                       js/setTimeout
                         fn ()
@@ -900,9 +907,11 @@
                         , 240
                 :update $ if show?
                   let
-                      target $ .-firstElementChild el
-                      card-style $ -> target .-firstElementChild .-style
-                      style $ .-style target
+                      target $ unsafe-coerce (.-firstElementChild el) 'JsObject
+                      card-style $ unsafe-coerce
+                        .-style $ unsafe-coerce (.-firstElementChild target) 'JsObject
+                        , 'JsObject
+                      style $ unsafe-coerce (.-style target) 'JsObject
                     set! (.-opacity style) 0
                     set! (.-transform card-style) "|translate(100%,0px)"
                     js/setTimeout
@@ -933,6 +942,14 @@
             def prompt-actions-plugin $ impl-traits PluginNodeCursorStateTask %prompt-actions
           :examples $ []
           :schema $ :: 'Dynamic
+        |read-field $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn read-field (value field)
+              if (struct? value) (&struct:get value field) (&map:get value field)
+          :examples $ []
+          :schema $ :: 'Fn
+            {} (:return 'Dynamic)
+              :args $ [] 'Dynamic 'Tag
         |style-clear $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defstyle style-clear $ {}
@@ -991,16 +1008,16 @@
           :code $ quote
             defplugin use-alert (states options)
               let
-                  cursor $ :cursor states
-                  state $ either (:data states)
+                  cursor $ respo-alerts.core/read-field states :cursor
+                  state $ either (respo-alerts.core/read-field states :data)
                     {} (:show? false)
-                      :text $ :text options
-                  on-read $ either (:on-read options)
+                      :text $ respo-alerts.core/read-field options :text
+                  on-read $ either (respo-alerts.core/read-field options :on-read)
                     fn (e d!)
                       d! cursor $ assoc state :show? false
                   node $ comp-alert-modal
-                    assoc options :text $ :text state
-                    :show? state
+                    assoc options :text $ respo-alerts.core/read-field state :text
+                    respo-alerts.core/read-field state :show?
                     , on-read
                       fn (d!)
                         d! cursor $ assoc state :show? false
@@ -1020,15 +1037,15 @@
           :code $ quote
             defplugin use-confirm (states options)
               let
-                  cursor $ :cursor states
-                  state $ either (:data states)
+                  cursor $ respo-alerts.core/read-field states :cursor
+                  state $ either (respo-alerts.core/read-field states :data)
                     {} (:show? false) (:text nil)
-                  *next-confirm-task $ anchor-state (identity-path confirm)
+                  *next-confirm-task $ atom nil
                   node $ comp-confirm-modal
                     if
-                      blank? $ :text state
-                      , options $ assoc options :text (:text state)
-                    :show? state
+                      blank? $ respo-alerts.core/read-field state :text
+                      , options $ assoc options :text (respo-alerts.core/read-field state :text)
+                    respo-alerts.core/read-field state :show?
                     fn (e d!)
                       if (some? @*next-confirm-task) (@*next-confirm-task)
                       .set! *next-confirm-task nil
@@ -1060,10 +1077,10 @@
           :code $ quote
             defn use-drawer (states options)
               let
-                  cursor $ :cursor states
-                  state $ either (:data states)
+                  cursor $ respo-alerts.core/read-field states :cursor
+                  state $ either (respo-alerts.core/read-field states :data)
                     {} $ :show? false
-                  node $ comp-drawer options (:show? state)
+                  node $ comp-drawer options (respo-alerts.core/read-field state :show?)
                     fn (d!)
                       d! cursor $ assoc state :show? false
                 %:: drawer-actions-plugin :plugin node cursor state
@@ -1085,10 +1102,10 @@
           :code $ quote
             defn use-modal (states options)
               let
-                  cursor $ :cursor states
-                  state $ either (:data states)
+                  cursor $ respo-alerts.core/read-field states :cursor
+                  state $ either (respo-alerts.core/read-field states :data)
                     {} $ :show? false
-                  node $ comp-modal options (:show? state)
+                  node $ comp-modal options (respo-alerts.core/read-field state :show?)
                     fn (d!)
                       d! cursor $ assoc state :show? false
                 %:: modal-actions-plugin :plugin node cursor state
@@ -1109,14 +1126,14 @@
           :code $ quote
             defn use-modal-menu (states options)
               let
-                  cursor $ :cursor states
-                  state $ either (:data states)
+                  cursor $ respo-alerts.core/read-field states :cursor
+                  state $ either (respo-alerts.core/read-field states :data)
                     {} $ :show? false
-                  node $ comp-modal-menu options (:show? state)
+                  node $ comp-modal-menu options (respo-alerts.core/read-field state :show?)
                     fn (d!)
                       d! cursor $ assoc state :show? false
                     fn (result d!)
-                      (:on-result options) result d!
+                      (respo-alerts.core/read-field options :on-result) result d!
                       d! cursor $ assoc state :show? false
                 %:: modal-menu-actions-plugin :plugin node cursor state
           :examples $ []
@@ -1136,11 +1153,11 @@
           :code $ quote
             defplugin use-prompt (states options)
               let
-                  cursor $ :cursor states
-                  state $ either (:data states)
+                  cursor $ respo-alerts.core/read-field states :cursor
+                  state $ either (respo-alerts.core/read-field states :data)
                     {} (:show? false) (:failure nil)
-                  *next-prompt-task $ anchor-state (identity-path prompt)
-                  node $ comp-prompt-modal (>> states :modal) options (:show? state)
+                  *next-prompt-task $ atom nil
+                  node $ comp-prompt-modal (>> states :modal) options (respo-alerts.core/read-field state :show?)
                     fn (text d!)
                       if (some? @*next-prompt-task) (@*next-prompt-task text)
                       .set! *next-prompt-task nil
@@ -1175,7 +1192,6 @@
             respo-alerts.style :as style
             respo-alerts.schema :as schema
             respo-alerts.util :refer $ focus-element! select-element!
-            memof.anchor :refer $ anchor-state identity-path
     |respo-alerts.main $ %{} 'FileEntry
       :defs $ {}
         |*reel $ %{} 'CodeEntry (:doc |)
@@ -1321,7 +1337,7 @@
                 , el $ div
                   {}
                     :class-name $ str-spaced style-trigger (if show? style-trigger-active)
-                    :style $ merge (get options :trigger-style)
+                    :style $ merge (respo-alerts.core/read-field options :trigger-style)
                       if show? $ get options :trigger-active-style
           :examples $ []
             quote $ comp-trigger show?
