@@ -994,7 +994,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
-    "@calcit/procs": "npm:^0.13.9"
+    "@calcit/procs": "npm:^0.13.10"
     "@calcit/std": "npm:^0.0.3"
     bottom-tip: "npm:^0.1.5"
     vite: "npm:^8.0.11"
