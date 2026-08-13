@@ -221,12 +221,13 @@
                   , node
               .show $ fn (self d! ? text)
                 hint-fn $ {}
-                  :args $ [] 'Dynamic 'Fn (:: 'Optional 'String)
+                  :args $ [] 'Dynamic 'Fn (:: Option 'String)
                   :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state
-                  if (some? text)
-                    d! cursor $ -> state (assoc :show? true) (assoc :text text)
+                  if (option:some? text)
+                    d! cursor $ -> state (assoc :show? true)
+                      assoc :text $ option:unwrap-or text |
                     d! cursor $ assoc state :show? true
               .close $ fn (self d!)
                 hint-fn $ {}
