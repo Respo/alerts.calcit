@@ -38,7 +38,7 @@ jobs:
     - name: "compiles to js"
       run: >
         cr calcit.cirru
-        && yarn && yarn vite build --base=./
+        && yarn vite build --base=./
 
     - name: Deploy to server
       id: deploy
