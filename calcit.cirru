@@ -262,7 +262,7 @@
                 tag-match self $
                   :plugin node cursor state *next-confirm-task
                   do (.set! *next-confirm-task next-task)
-                    d! cursor $ -> state (assoc :show? true) (assoc :text nil)
+                    d! cursor $ -> state (assoc :show? true) (assoc :text |)
               .show-with-text $ fn (self d! text next-task)
                 hint-fn $ {}
                   :args $ [] 'Dynamic 'Fn 'String 'Fn
