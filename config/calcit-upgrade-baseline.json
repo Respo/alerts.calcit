@@ -1,0 +1,10 @@
+{
+  "typeNone": 35,
+  "typeNotFull": 54,
+  "schemaDynamic": 77,
+  "codeDynamic": 0,
+  "codeNil": 48,
+  "unresolved": 125,
+  "declaredOptional": 0,
+  "deprecatedCalls": 0
+}
