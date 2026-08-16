@@ -480,8 +480,8 @@
                       :style $ get options :backdrop-style
                       :on-click $ fn (e d!)
                         let
-                            event $ read-field e :event
-                          .!stopPropagation event
+                            event $ .-event e
+                          if (js-present? event) (.!stopPropagation event) %none
                           on-read! e d!
                           on-close! d!
                     div
@@ -558,8 +558,8 @@
                       :style $ read-field options :backdrop-style
                       :on-click $ fn (e d!)
                         let
-                            event $ read-field e :event
-                          .!stopPropagation event
+                            event $ .-event e
+                          if (js-present? event) (.!stopPropagation event) %none
                           on-close d!
                     div
                       {}
@@ -612,8 +612,8 @@
                       :style $ read-field options :backdrop-style
                       :on-click $ fn (e d!)
                         let
-                            event $ read-field e :event
-                          .!stopPropagation event
+                            event $ .-event e
+                          if (js-present? event) (.!stopPropagation event) %none
                           on-close d!
                     div
                       {}
@@ -654,8 +654,8 @@
                       :style $ read-field options :backdrop-style
                       :on-click $ fn (e d!)
                         let
-                            event $ read-field e :event
-                          .!stopPropagation event
+                            event $ .-event e
+                          if (js-present? event) (.!stopPropagation event) %none
                           on-close! d!
                     div
                       {}
@@ -741,20 +741,22 @@
                         let
                             props $ {} (:value text)
                               :on-input $ fn (e d!)
-                                d! cursor $ assoc state :text (read-field e :value)
+                                if (js-present? e)
+                                  d! cursor $ assoc state :text (.-value e)
+                                  %none
                               :on-keydown $ fn (e d!)
-                                cond
-                                    and
-                                      not= 229 $ read-field e :keycode
-                                      = (read-field e :key) |Enter
-                                    if (read-field options :multiline?)
-                                      when
-                                        .-metaKey $ read-field e :event
+                                if (js-present? e)
+                                  cond
+                                      and
+                                        not= 229 $ .-keyCode e
+                                        = (.-key e) |Enter
+                                      if (read-field options :multiline?)
+                                        when (.-metaKey e) (check-submit! d!)
                                         check-submit! d!
-                                      check-submit! d!
-                                  (= (read-field e :key) |Escape)
-                                    on-close! d!
-                                  true nil
+                                    (= (.-key e) |Escape)
+                                      on-close! d!
+                                    true nil
+                                  %none
                               :placeholder $ either (read-field options :placeholder) |
                           if (read-field options :multiline?)
                             textarea $ merge props
