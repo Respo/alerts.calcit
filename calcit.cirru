@@ -1,7 +1,8 @@
 
-{} (:about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `cr query` to inspect and `cr edit`/`cr tree` to modify. Run `cr docs agents --full` first. Manual edits must follow format and schema conventions, then run `cr edit format`.") (:package |respo-alerts) (:version |0.10.18)
+{} (:about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `cr query` to inspect and `cr edit`/`cr tree` to modify. Run `cr docs agents --full` first. Manual edits must follow format and schema conventions, then run `cr edit format`.") (:package |respo-alerts)
   :entries $ {}
     :default $ {} (:description |) (:init-fn 'respo-alerts.main/main!) (:mode :js) (:reload-fn 'respo-alerts.main/reload!)
+      :feature-policy $ {}
       :modules $ [] |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
       :type-slots $ {}
   :files $ {}
@@ -417,6 +418,11 @@
                 tag-match self $
                   :plugin node cursor state *next
                   read-field state :show?
+          :examples $ []
+          :schema $ :: 'Dynamic
+        |*prompt-tasks $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defatom *prompt-tasks $ {}
           :examples $ []
           :schema $ :: 'Dynamic
         |AlertActions $ %{} 'CodeEntry (:doc |)
@@ -928,6 +934,19 @@
             {} (:return 'Dynamic)
               :args $ [] 'Dynamic
               :features $ #{} :js-ffi
+        |get-prompt-task-ref $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn get-prompt-task-ref (cursor)
+              let
+                  current $ option:unwrap-or
+                    &map:get (deref *prompt-tasks) cursor
+                    , nil
+                if (some? current) current $ let
+                    next-ref $ atom nil
+                  reset! *prompt-tasks $ assoc (deref *prompt-tasks) cursor next-ref
+                  , next-ref
+          :examples $ []
+          :schema $ :: 'Dynamic
         |modal-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def modal-actions-plugin $ impl-traits PluginNodeCursorState %modal-actions
@@ -1149,16 +1168,18 @@
                   cursor $ read-field states :cursor
                   state $ either (read-field states :data)
                     {} (:show? false) (:failure nil)
-                  *next-prompt-task $ atom nil
+                  task-ref $ get-prompt-task-ref cursor
                   node $ comp-prompt-modal (>> states :modal) options (read-field state :show?)
                     fn (text d!)
-                      if (some? @*next-prompt-task) (@*next-prompt-task text)
-                      reset! *next-prompt-task nil
+                      if
+                        some? $ deref task-ref
+                        (deref task-ref) text
+                      reset! task-ref nil
                       d! cursor $ assoc state :show? false
                     fn (d!)
                       d! cursor $ assoc state :show? false
-                      reset! *next-prompt-task nil
-                %:: prompt-actions-plugin :plugin node cursor state *next-prompt-task
+                      reset! task-ref nil
+                %:: prompt-actions-plugin :plugin node cursor state task-ref
           :examples $ []
             quote $ let
                 prompt-plugin $ use-prompt (>> states :prompt)
