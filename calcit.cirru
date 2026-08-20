@@ -1408,7 +1408,7 @@
           :code $ quote
             defn read-field (value field)
               if (struct? value) (&struct:get value field)
-                if (map? value) (&map:get value field) nil
+                if (map? value) (&map:get value field)
           :examples $ []
           :schema $ :: 'Fn
             {} (:return 'Dynamic)
