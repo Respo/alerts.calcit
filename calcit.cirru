@@ -401,8 +401,7 @@
                   :return 'Dynamic
                 tag-match self $
                   :plugin node cursor state *next-prompt-task
-                  do (reset! *next-prompt-task next-task)
-                    d! cursor $ assoc state :show? true
+                  d! cursor $ assoc (assoc state :show? true) :next-task next-task
               .close $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] 'Dynamic 'Fn
@@ -419,11 +418,6 @@
                   read-field state :show?
           :examples $ []
           :schema $ :: 'Impl
-        |*prompt-tasks $ %{} 'CodeEntry (:doc |)
-          :code $ quote
-            defatom *prompt-tasks $ {}
-          :examples $ []
-          :schema $ :: 'Dynamic
         |AlertActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait AlertActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
@@ -933,19 +927,6 @@
             {} (:return 'Dynamic)
               :args $ [] 'Dynamic
               :features $ #{} :js-ffi
-        |get-prompt-task-ref $ %{} 'CodeEntry (:doc |)
-          :code $ quote
-            defn get-prompt-task-ref (cursor)
-              let
-                  current $ option:unwrap-or
-                    &map:get (deref *prompt-tasks) cursor
-                    , nil
-                if (some? current) current $ let
-                    next-ref $ atom nil
-                  reset! *prompt-tasks $ assoc (deref *prompt-tasks) cursor next-ref
-                  , next-ref
-          :examples $ []
-          :schema $ :: 'Dynamic
         |modal-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def modal-actions-plugin $ impl-traits PluginNodeCursorState %modal-actions
@@ -1167,18 +1148,15 @@
                   cursor $ read-field states :cursor
                   state $ either (read-field states :data)
                     {} (:show? false) (:failure nil)
-                  task-ref $ get-prompt-task-ref cursor
                   node $ comp-prompt-modal (>> states :modal) options (read-field state :show?)
                     fn (text d!)
                       if
-                        some? $ deref task-ref
-                        (deref task-ref) text
-                      reset! task-ref nil
-                      d! cursor $ assoc state :show? false
+                        some? $ read-field state :next-task
+                        (read-field state :next-task) text
+                      d! cursor $ assoc (assoc state :show? false) :next-task nil
                     fn (d!)
-                      d! cursor $ assoc state :show? false
-                      reset! task-ref nil
-                %:: prompt-actions-plugin :plugin node cursor state task-ref
+                      d! cursor $ assoc (assoc state :show? false) :next-task nil
+                %:: prompt-actions-plugin :plugin node cursor state $ atom nil
           :examples $ []
             quote $ let
                 prompt-plugin $ use-prompt (>> states :prompt)
