@@ -1,5 +1,5 @@
 
-{} (:about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `cr query` to inspect and `cr edit`/`cr tree` to modify. Run `cr docs agents --full` first. Manual edits must follow format and schema conventions, then run `cr edit format`.") (:package |respo-alerts)
+{} (:about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `cr query` to inspect and `cr edit`/`cr tree` to modify. Run `cr docs agents --full` first. Manual edits must follow format and schema conventions, then run `cr edit format`.") (:package |respo-alerts) (:version |0.0.0)
   :entries $ {}
     :default $ {} (:description |) (:init-fn 'respo-alerts.main/main!) (:mode :js) (:reload-fn 'respo-alerts.main/reload!)
       :feature-policy $ {}
@@ -454,12 +454,12 @@
           :code $ quote
             defenum PluginNodeCursorState $ :plugin 'Enum 'List 'Map
           :examples $ []
-          :schema $ :: 'EnumDef
+          :schema $ :: 'Enum
         |PluginNodeCursorStateTask $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defenum PluginNodeCursorStateTask $ :plugin 'Enum 'List 'Map 'Ref
           :examples $ []
-          :schema $ :: 'EnumDef
+          :schema $ :: 'Enum
         |PromptActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait PromptActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
