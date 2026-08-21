@@ -1,8 +1,9 @@
 
-{} (:about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `cr query` to inspect and `cr edit`/`cr tree` to modify. Run `cr docs agents --full` first. Manual edits must follow format and schema conventions, then run `cr edit format`.") (:package |respo-alerts) (:version |0.10.17)
+{} (:about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `cr query` to inspect and `cr edit`/`cr tree` to modify. Run `cr docs agents --full` first. Manual edits must follow format and schema conventions, then run `cr edit format`.") (:package |respo-alerts)
   :entries $ {}
     :default $ {} (:description |) (:init-fn 'respo-alerts.main/main!) (:mode :js) (:reload-fn 'respo-alerts.main/reload!)
-      :modules $ [] |respo.calcit/ |respo-ui.calcit/ |reel.calcit/
+      :feature-policy $ {}
+      :modules $ [] |respo.calcit/ |respo-ui.calcit/ |reel.calcit/ |js-ffi/
       :type-slots $ {}
   :files $ {}
     |respo-alerts.comp.container $ %{} 'FileEntry
@@ -244,7 +245,7 @@
                   :plugin node cursor state
                   read-field state :show?
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Impl
         |%confirm-actions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defimpl %confirm-actions ConfirmActions
@@ -286,7 +287,7 @@
                   :plugin node cursor state
                   read-field state :show?
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Impl
         |%drawer-actions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defimpl %drawer-actions DrawerActions
@@ -319,7 +320,7 @@
                   :plugin node cursor state
                   read-field state :show?
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Impl
         |%modal-actions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defimpl %modal-actions ModalActions
@@ -352,7 +353,7 @@
                   :plugin node cursor state
                   read-field state :show?
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Impl
         |%modal-menu-actions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defimpl %modal-menu-actions ModalMenuActions
@@ -385,7 +386,7 @@
                   :plugin node cursor state
                   read-field state :show?
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Impl
         |%prompt-actions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defimpl %prompt-actions PromptActions
@@ -419,47 +420,47 @@
                   :plugin node cursor state *next
                   read-field state :show?
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Impl
         |AlertActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait AlertActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Trait
         |ConfirmActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait ConfirmActions (.render :fn) (.show :fn) (.show-with-text :fn) (.close :fn) (.show? :fn)
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Trait
         |DrawerActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait DrawerActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Trait
         |ModalActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait ModalActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Trait
         |ModalMenuActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait ModalMenuActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Trait
         |PluginNodeCursorState $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defenum PluginNodeCursorState $ :plugin 'Enum 'List 'Map
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Enum
         |PluginNodeCursorStateTask $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defenum PluginNodeCursorStateTask $ :plugin 'Enum 'List 'Map 'Ref
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Enum
         |PromptActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait PromptActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Trait
         |alert-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def alert-actions-plugin $ impl-traits PluginNodeCursorState %alert-actions
