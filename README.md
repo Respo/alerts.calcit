@@ -201,7 +201,7 @@ let
 
 ### Practical component pattern
 
-From real demo usage in `compact.cirru`, a common pattern is: create plugins with `>> states :key`, trigger them in `on-click`, then render plugin nodes at the end.
+From real demo usage in `calcit.cirru`, a common pattern is: create plugins with `>> states :key`, trigger them in `on-click`, then render plugin nodes at the end.
 
 ```cirru.no-run
 ns app.main
