@@ -489,7 +489,7 @@
                       {}
                         :class-name $ str-spaced style-modal-card css/global css/column (get options :card-class)
                         :style $ get options :card-style
-                        :on-click $ fn (e d!) nil
+                        :on-click $ fn (e d!) &unit
                       div ({})
                         <> $ either (get options :text) |Alert!
                       =< nil 8
@@ -526,7 +526,7 @@
                       {}
                         :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
                         :style $ read-field options :card-style
-                        :on-click $ fn (e d!) nil
+                        :on-click $ fn (e d!) &unit
                       div ({})
                         <> $ either (read-field options :text) |Confirm?
                       =< nil 8
@@ -568,7 +568,7 @@
                         :style $ merge
                           {} $ :padding 0
                           read-field options :style
-                        :on-click $ fn (e d!) nil
+                        :on-click $ fn (e d!) &unit
                       let
                           title $ read-field options :title
                         if (some? title)
@@ -623,7 +623,7 @@
                           {} $ :padding 0
                           read-field options :style
                           read-field options :card-style
-                        :on-click $ fn (e d!) nil
+                        :on-click $ fn (e d!) &unit
                       let
                           title $ read-field options :title
                         if (some? title)
@@ -664,7 +664,7 @@
                         :style $ merge
                           {} $ :padding 0
                           read-field options :style
-                        :on-click $ fn (e d!) nil
+                        :on-click $ fn (e d!) &unit
                       let
                           title $ read-field options :title
                         if (some? title)
@@ -735,7 +735,7 @@
                         {}
                           :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
                           :style $ read-field options :card-style
-                          :on-click $ fn (e d!) nil
+                          :on-click $ fn (e d!) &unit
                         div ({})
                           <> $ either (read-field options :text) "|Type in text"
                         =< nil 8
@@ -1401,8 +1401,8 @@
                 if (js-present? target)
                   do
                     .!focus $ unsafe-coerce target JsObject
-                    ;nil
-                  ;nil
+                    , &unit
+                  , &unit
           :examples $ []
           :schema $ :: 'Fn
             {} (:return 'Unit)
@@ -1430,8 +1430,8 @@
                 if (js-present? target)
                   do
                     .!select $ unsafe-coerce target JsObject
-                    ;nil
-                  ;nil
+                    , &unit
+                  , &unit
           :examples $ []
           :schema $ :: 'Fn
             {} (:return 'Unit)
