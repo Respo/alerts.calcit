@@ -141,13 +141,7 @@
                     =< 8 nil
                     button $ {} (:inner-text "|show confirm with text") (:class-name css/button)
                       :on-click $ fn (e d!)
-                        let
-                            text $ js/prompt "|Input confirm text"
-                          if
-                            and (js-present? text)
-                              not $ blank? (unsafe-coerce text 'String)
-                            .show-with-text confirm-plugin d! (str "|Confirmed: " text)
-                              fn () $ println "|after confirmed"
+                        .show-with-text confirm-plugin d! |Confirmed-demo $ fn () (println |after-confirmed)
                     =< 8 nil
                     button $ {} (:inner-text "|show prompt") (:class-name css/button)
                       :on-click $ fn (e d!)
@@ -222,13 +216,12 @@
                   , node
               .show $ fn (self d! ? text)
                 hint-fn $ {}
-                  :args $ [] 'Dynamic 'Fn (:: Option 'String)
+                  :args $ [] 'Dynamic 'Fn (:: 'Optional 'String)
                   :return 'Dynamic
                 match self $
                   :plugin node cursor state
-                  if (option:some? text)
-                    d! cursor $ -> state (assoc :show? true)
-                      assoc :text $ option:unwrap-or text |
+                  if (some? text)
+                    d! cursor $ -> state (assoc :show? true) (assoc :text text)
                     d! cursor $ assoc state :show? true
               .close $ fn (self d!)
                 hint-fn $ {}
@@ -254,31 +247,34 @@
                   :args $ [] 'Dynamic
                   :return 'Dynamic
                 match self $
-                  :plugin node cursor state *next
+                  :plugin node cursor state
                   , node
               .show $ fn (self d! next-task)
                 hint-fn $ {}
                   :args $ [] 'Dynamic 'Fn 'Fn
                   :return 'Dynamic
                 match self $
-                  :plugin node cursor state *next-confirm-task
-                  do (.set! *next-confirm-task next-task)
+                  :plugin node cursor state
+                  do
+                    store-prompt-task! cursor $ fn (ignored) (next-task)
                     d! cursor $ -> state (assoc :show? true) (assoc :text |)
               .show-with-text $ fn (self d! text next-task)
                 hint-fn $ {}
                   :args $ [] 'Dynamic 'Fn 'String 'Fn
                   :return 'Dynamic
                 match self $
-                  :plugin node cursor state *next-confirm-task
-                  do (.set! *next-confirm-task next-task)
+                  :plugin node cursor state
+                  do
+                    store-prompt-task! cursor $ fn (ignored) (next-task)
                     d! cursor $ -> state (assoc :show? true) (assoc :text text)
               .close $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] 'Dynamic 'Fn
                   :return 'Dynamic
                 match self $
-                  :plugin node cursor state *next
-                  d! cursor $ assoc state :show? false
+                  :plugin node cursor state
+                  do (clear-prompt-task! cursor)
+                    d! cursor $ assoc state :show? false
               .show? $ fn (self)
                 hint-fn $ {}
                   :args $ [] 'Dynamic
@@ -472,11 +468,6 @@
             defenum PluginNodeCursorState $ :plugin 'Enum 'List 'Map
           :examples $ []
           :schema $ :: 'Enum
-        'PluginNodeCursorStateTask $ %{} 'CodeEntry (:doc |)
-          :code $ quote
-            defenum PluginNodeCursorStateTask $ :plugin 'Enum 'List 'Map 'Ref
-          :examples $ []
-          :schema $ :: 'Enum
         'PromptActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait PromptActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
@@ -523,8 +514,8 @@
                     {} $ :position :absolute
                   if show? $ div
                     {}
-                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
-                      :style $ get options :backdrop-style
+                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (read-field options :backdrop-class)
+                      :style $ read-field options :backdrop-style
                       :on-click $ fn (e d!)
                         let
                             event $ .-event e
@@ -533,21 +524,21 @@
                           on-close! d!
                     div
                       {}
-                        :class-name $ str-spaced style-modal-card css/global css/column (get options :card-class)
-                        :style $ get options :card-style
+                        :class-name $ str-spaced style-modal-card css/global css/column (read-field options :card-class)
+                        :style $ read-field options :card-style
                         :on-click $ fn (e d!) &unit
                       div ({})
-                        <> $ either (get options :text) |Alert!
+                        <> $ either (read-field options :text) |Alert!
                       =< nil 8
                       div
                         {} $ :class-name css/row-parted
                         span $ {}
                         button
                           {}
-                            :class-name $ str-spaced css/button schema/confirm-button-name (get options :confirm-class)
-                            :style $ get options :confirm-style
+                            :class-name $ str-spaced css/button schema/confirm-button-name (read-field options :confirm-class)
+                            :style $ read-field options :confirm-style
                             :on-click $ fn (e d!) (on-read! e d!) (on-close! d!)
-                          <> $ either (get options :confirm-text) |Read
+                          <> $ either (read-field options :confirm-text) |Read
                     comp-esc-listener show? on-close!
           :examples $ []
             quote $ comp-alert-modal
@@ -565,12 +556,12 @@
                     {} $ :position :absolute
                   if show? $ div
                     {}
-                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
+                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (read-field options :backdrop-class)
                       :style $ read-field options :backdrop-style
                       :on-click $ fn (e d!) (on-close! d!)
                     div
                       {}
-                        :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
+                        :class-name $ str-spaced css/global css/column style-modal-card (read-field options :card-class)
                         :style $ read-field options :card-style
                         :on-click $ fn (e d!) &unit
                       div ({})
@@ -581,7 +572,7 @@
                         span $ {}
                         button
                           {}
-                            :class-name $ str-spaced css/button schema/confirm-button-name (get options :confirm-class)
+                            :class-name $ str-spaced css/button schema/confirm-button-name (read-field options :confirm-class)
                             :on-click $ fn (e d!) (on-confirm! e d!) (on-close! d!)
                           <> $ either (read-field options :button-text) |Confirm
                     comp-esc-listener show? on-close!
@@ -601,7 +592,7 @@
                       read-field options :container-style
                   if show? $ div
                     {}
-                      :class-name $ str-spaced css/fullscreen style-drawer-backdrop (get options :backdrop-class)
+                      :class-name $ str-spaced css/fullscreen style-drawer-backdrop (read-field options :backdrop-class)
                       :style $ read-field options :backdrop-style
                       :on-click $ fn (e d!)
                         let
@@ -610,7 +601,7 @@
                           on-close d!
                     div
                       {}
-                        :class-name $ str-spaced css/global css/column style-drawer-card (get options :card-class)
+                        :class-name $ str-spaced css/global css/column style-drawer-card (read-field options :card-class)
                         :style $ merge
                           {} $ :padding 0
                           read-field options :style
@@ -655,7 +646,7 @@
                       read-field options :container-style
                   if show? $ div
                     {}
-                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
+                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (read-field options :backdrop-class)
                       :style $ read-field options :backdrop-style
                       :on-click $ fn (e d!)
                         let
@@ -664,7 +655,7 @@
                           on-close d!
                     div
                       {}
-                        :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
+                        :class-name $ str-spaced css/global css/column style-modal-card (read-field options :card-class)
                         :style $ merge
                           {} $ :padding 0
                           read-field options :style
@@ -697,7 +688,7 @@
                 div ({})
                   if show? $ div
                     {}
-                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
+                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (read-field options :backdrop-class)
                       :style $ read-field options :backdrop-style
                       :on-click $ fn (e d!)
                         let
@@ -706,7 +697,7 @@
                           on-close! d!
                     div
                       {}
-                        :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
+                        :class-name $ str-spaced css/global css/column style-modal-card (read-field options :card-class)
                         :style $ merge
                           {} $ :padding 0
                           read-field options :style
@@ -774,7 +765,7 @@
                       {} $ :position :absolute
                     if show? $ div
                       {}
-                        :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
+                        :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (read-field options :backdrop-class)
                         :style $ merge
                           {} $ :line-height |32px
                           read-field options :backdrop-style
@@ -782,7 +773,7 @@
                           d! cursor $ -> state (assoc :text |) (assoc :failure |)
                       div
                         {}
-                          :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
+                          :class-name $ str-spaced css/global css/column style-modal-card (read-field options :card-class)
                           :style $ read-field options :card-style
                           :on-click $ fn (e d!) &unit
                         div ({})
@@ -808,13 +799,13 @@
                           if (read-field options :multiline?)
                             textarea $ merge props
                               {}
-                                :class-name $ str-spaced schema/input-box-name css/textarea (get options :input-class)
+                                :class-name $ str-spaced schema/input-box-name css/textarea (read-field options :input-class)
                                 :style $ merge
                                   {} (:width |100%) (:min-height 120) (:max-height |50vh)
                                   read-field options :input-style
                             input $ merge props
                               {}
-                                :class-name $ str-spaced schema/input-box-name css/input (get options :input-class)
+                                :class-name $ str-spaced schema/input-box-name css/input (read-field options :input-class)
                                 :style $ merge
                                   {} $ :width |100%
                                   read-field options :input-style
@@ -832,7 +823,7 @@
                               span $ {}
                           button
                             {}
-                              :class-name $ str-spaced css/button (get options :confirm-class)
+                              :class-name $ str-spaced css/button (read-field options :confirm-class)
                               :on-click $ fn (e d!) (check-submit! d!)
                             <> $ either (read-field options :button-text) |Finish
                       comp-esc-listener show? on-close!
@@ -843,9 +834,9 @@
           :schema $ :: 'Dynamic
         'confirm-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
-            def confirm-actions-plugin $ impl-traits PluginNodeCursorStateTask %confirm-actions
+            def confirm-actions-plugin $ impl-traits PluginNodeCursorState %confirm-actions
           :examples $ []
-          :schema $ :: 'respo-alerts.core/PluginNodeCursorStateTask
+          :schema $ :: 'respo-alerts.core/PluginNodeCursorState
         'drawer-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def drawer-actions-plugin $ impl-traits PluginNodeCursorState %drawer-actions
@@ -1259,20 +1250,26 @@
               let
                   cursor $ read-field states :cursor
                   state $ either (read-field states :data)
-                    {} (:show? false) (:text nil)
-                  *next-confirm-task $ atom nil
+                    {} (:show? false) (:text |)
                   node $ comp-confirm-modal
                     if
                       blank? $ read-field state :text
                       , options $ assoc options :text (read-field state :text)
                     read-field state :show?
                     fn (e d!)
-                      if (some? @*next-confirm-task) (@*next-confirm-task)
-                      .set! *next-confirm-task nil
-                    fn (d!)
+                      option:fold (take-prompt-task! cursor)
+                        fn () &unit
+                        fn (task)
+                          hint-fn $ {}
+                            :args $ []
+                              :: 'Fn $ {}
+                                :args $ [] 'String
+                                :return 'Unit
+                            :return 'Unit
+                          task |
+                    fn (d!) (clear-prompt-task! cursor)
                       d! cursor $ assoc state :show? false
-                      .set! *next-confirm-task nil
-                %:: confirm-actions-plugin :plugin node cursor state *next-confirm-task
+                %:: confirm-actions-plugin :plugin node cursor state
           :examples $ []
             quote $ let
                 confirm-plugin $ use-confirm (>> states :confirm)
@@ -1566,7 +1563,7 @@
                   {}
                     :class-name $ str-spaced style-trigger (if show? style-trigger-active)
                     :style $ merge (read-field options :trigger-style)
-                      if show? $ get options :trigger-active-style
+                      if show? $ read-field options :trigger-active-style
           :examples $ []
             quote $ comp-trigger show?
               button
@@ -1642,7 +1639,8 @@
         'read-field $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn read-field (value field)
-              if (struct? value) (&struct:get value field) (&map:get value field)
+              if (struct? value) (&struct:get value field)
+                if (map? value) (&map:get value field) nil
           :examples $ []
           :schema $ :: 'Fn
             {} (:return 'Dynamic)
@@ -1653,6 +1651,9 @@
                 assert= 1 $ read-field
                   {} $ :value 1
                   , :value
+            %{} 'TestEntry (:name |handles-absent-options)
+              :code $ quote
+                assert= nil $ read-field nil :trigger-style
         'select-element! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn select-element! (query)
