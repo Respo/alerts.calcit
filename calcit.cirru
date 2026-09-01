@@ -395,14 +395,14 @@
                   :args $ [] 'Dynamic
                   :return 'Dynamic
                 match self $
-                  :plugin node cursor state *next
+                  :plugin node cursor state
                   , node
               .show $ fn (self d! next-task)
                 hint-fn $ {}
                   :args $ [] 'Dynamic 'Fn 'Fn
                   :return 'Dynamic
                 match self $
-                  :plugin node cursor state *next-prompt-task
+                  :plugin node cursor state
                   do (store-prompt-task! cursor next-task)
                     d! cursor $ assoc state :show? true
               .close $ fn (self d!)
@@ -410,15 +410,15 @@
                   :args $ [] 'Dynamic 'Fn
                   :return 'Dynamic
                 match self $
-                  :plugin node cursor state *next
-                  do (take-prompt-task! cursor)
+                  :plugin node cursor state
+                  do (clear-prompt-task! cursor)
                     d! cursor $ assoc state :show? false
               .show? $ fn (self)
                 hint-fn $ {}
                   :args $ [] 'Dynamic
                   :return 'Bool
                 match self $
-                  :plugin node cursor state *next
+                  :plugin node cursor state
                   read-field state :show?
           :examples $ []
           :schema $ :: 'Impl
@@ -427,19 +427,21 @@
               :code $ quote
                 let
                     cursor $ [] :action-test
-                    plugin $ %:: prompt-actions-plugin :plugin (%:: _ :node) cursor ({}) (atom nil)
+                    plugin $ %:: prompt-actions-plugin :plugin (%:: _ :node) cursor ({})
                     next-task $ fn (text) &unit
                     d! $ fn (cursor state) &unit
                   do (.show plugin d! next-task)
-                    is $ fn?
-                      option:unwrap-or (get @*prompt-tasks cursor) nil
-                    take-prompt-task! cursor
+                    is $ option:some? (get @*prompt-tasks cursor)
+                    clear-prompt-task! cursor
               :tags $ #{} :regression :unit
         '*prompt-tasks $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defatom *prompt-tasks $ {}
           :examples $ []
           :schema $ :: 'Ref
+            :: 'Map 'List $ :: 'Fn
+              {} (:return 'Unit)
+                :args $ [] 'String
         'AlertActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait AlertActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
@@ -480,11 +482,31 @@
             deftrait PromptActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
           :schema $ :: 'Trait
+        'PromptEvent $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defstruct PromptEvent (:text 'String) (:keycode 'Number) (:meta? 'Bool)
+          :examples $ []
+          :schema $ :: 'StructDef
+        'PromptPluginNodeCursorState $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defenum PromptPluginNodeCursorState $ :plugin 'Enum 'List 'Map
+          :examples $ []
+          :schema $ :: 'Enum
         'alert-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def alert-actions-plugin $ impl-traits PluginNodeCursorState %alert-actions
           :examples $ []
           :schema $ :: 'Dynamic
+        'clear-prompt-task! $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn clear-prompt-task! (cursor)
+              do
+                reset! *prompt-tasks $ dissoc @*prompt-tasks cursor
+                , &unit
+          :examples $ []
+          :schema $ :: 'Fn
+            {} (:return 'Unit)
+              :args $ [] 'List
         'comp-alert-modal $ %{} 'CodeEntry (:doc "||Alert modal component. Shows a simple message dialog with a confirm button. Used internally by use-alert hook.")
           :code $ quote
             defcomp comp-alert-modal (options show? on-read! on-close!)
@@ -726,16 +748,19 @@
                   initial-text $ either (read-field options :initial) |
                   cursor $ read-field states :cursor
                   state $ either (read-field states :data)
-                    {} (:text initial-text) (:failure nil)
+                    {} (:text initial-text) (:failure |)
                   text $ either (read-field state :text) initial-text
                   check-submit! $ fn (d!)
                     let
                         validator $ read-field options :validator
-                        result $ if (fn? validator) (validator text) nil
-                      if (some? result)
+                        result $ if (fn? validator)
+                          prompt-validation-error $ validator text
+                          , |
+                      if
+                        not $ blank? result
                         d! cursor $ assoc state :failure result
                         do (on-finish! text d!) (on-close! d!)
-                          d! cursor $ -> state (assoc :text nil) (assoc :failure nil)
+                          d! cursor $ -> state (assoc :text |) (assoc :failure |)
                 []
                   effect-select (str |. schema/input-box-name) show?
                   effect-fade show?
@@ -749,7 +774,7 @@
                           {} $ :line-height |32px
                           read-field options :backdrop-style
                         :on-click $ fn (e d!) (on-close! d!)
-                          d! cursor $ -> state (assoc :text nil) (assoc :failure nil)
+                          d! cursor $ -> state (assoc :text |) (assoc :failure |)
                       div
                         {}
                           :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
@@ -764,15 +789,16 @@
                                 d! cursor $ assoc state :text (prompt-event-text e)
                               :on-keydown $ fn (e d!)
                                 let
-                                    keycode $ option:unwrap-or (get e :keycode) 0
-                                    meta? $ option:unwrap-or (get e :meta?) false
+                                    event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
+                                    keycode $ :keycode event-info
+                                    meta? $ :meta? event-info
                                   cond
                                       and (not= 229 keycode) (= 13 keycode)
                                       if (read-field options :multiline?)
                                         when meta? $ check-submit! d!
                                         check-submit! d!
                                     (= 27 keycode) (on-close! d!)
-                                    true nil
+                                    true &unit
                               :placeholder $ either (read-field options :placeholder) |
                           if (read-field options :multiline?)
                             textarea $ merge props
@@ -791,8 +817,9 @@
                         div
                           {} $ :class-name css/row-parted
                           let
-                              failure $ read-field state :failure
-                            if (some? failure)
+                              failure $ either (read-field state :failure) |
+                            if
+                              not $ blank? failure
                               span $ {}
                                 :style $ merge ui/flex
                                   {} (:color :red) (:line-height |20px)
@@ -959,17 +986,19 @@
           :schema $ :: 'Dynamic
         'prompt-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
-            def prompt-actions-plugin $ impl-traits PluginNodeCursorStateTask %prompt-actions
+            def prompt-actions-plugin $ impl-traits PromptPluginNodeCursorState %prompt-actions
           :examples $ []
           :schema $ :: 'Dynamic
         'prompt-event-text $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn prompt-event-text (event)
-              str $ option:unwrap-or (get event :value) |
+              let
+                  event-info $ unsafe-coerce (read-prompt-event event) 'respo-alerts.core/PromptEvent
+                :text event-info
           :examples $ []
           :schema $ :: 'Fn
             {} (:return 'String)
-              :args $ [] 'Map
+              :args $ [] (:: 'Map 'Tag 'Dynamic)
           :tests $ []
             %{} 'TestEntry (:name |reads-respo-event-map)
               :code $ quote
@@ -981,14 +1010,57 @@
                 is $ = |
                   prompt-event-text $ {}
               :tags $ #{} :regression :unit
+        'prompt-validation-error $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn prompt-validation-error (value)
+              if (string? value) (unsafe-coerce value 'String) |
+          :examples $ []
+          :schema $ :: 'Fn
+            {} (:return 'String)
+              :args $ [] 'Dynamic
+              :features $ #{} :js-ffi
+          :tests $ []
+            %{} 'TestEntry (:name |accepts-string)
+              :code $ quote
+                is $ = |Required (prompt-validation-error |Required)
+              :tags $ #{} :unit
+            %{} 'TestEntry (:name |rejects-absence)
+              :code $ quote
+                is $ = | (prompt-validation-error nil)
+              :tags $ #{} :regression :unit
+        'read-prompt-event $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn read-prompt-event (event)
+              let
+                  text $ option:fold (get event :value)
+                    fn () |
+                    fn (value)
+                      if (string? value) (unsafe-coerce value 'String) |
+                  keycode $ option:fold (get event :keycode)
+                    fn () 0
+                    fn (value)
+                      if (number? value) (unsafe-coerce value 'Number) 0
+                  meta? $ option:fold (get event :meta?)
+                    fn () false
+                    fn (value)
+                      if (bool? value) (unsafe-coerce value 'Bool) false
+                %{} PromptEvent (:text text) (:keycode keycode) (:meta? meta?)
+          :examples $ []
+          :schema $ :: 'Fn
+            {} (:return 'respo-alerts.core/PromptEvent)
+              :args $ [] (:: 'Map 'Tag 'Dynamic)
         'store-prompt-task! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn store-prompt-task! (cursor task)
-              reset! *prompt-tasks $ assoc @*prompt-tasks cursor task
+              do
+                reset! *prompt-tasks $ assoc @*prompt-tasks cursor task
+                , &unit
           :examples $ []
           :schema $ :: 'Fn
-            {} (:return 'Dynamic)
-              :args $ [] 'List 'Fn
+            {} (:return 'Unit)
+              :args $ [] 'List
+                :: 'Fn $ {} (:return 'Unit)
+                  :args $ [] 'String
         'style-clear $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defstyle style-clear $ {}
@@ -1047,26 +1119,37 @@
           :code $ quote
             defn take-prompt-task! (cursor)
               let
-                  task $ option:unwrap-or (get @*prompt-tasks cursor) nil
-                reset! *prompt-tasks $ dissoc @*prompt-tasks cursor
+                  task $ get @*prompt-tasks cursor
+                clear-prompt-task! cursor
                 , task
           :examples $ []
           :schema $ :: 'Fn
-            {} (:return 'Dynamic)
+            {}
               :args $ [] 'List
+              :return $ :: 'Option
+                :: 'Fn $ {} (:return 'Unit)
+                  :args $ [] 'String
           :tests $ []
             %{} 'TestEntry (:name |persists-across-renders)
               :code $ quote
                 let
                     cursor $ [] :prompt-test
                     *called $ atom |
-                    callback $ fn (text) (reset! *called text)
+                    callback $ fn (text)
+                      do (reset! *called text) &unit
                   store-prompt-task! cursor callback
-                  let
-                      task $ take-prompt-task! cursor
-                    when (fn? task) (task |hello)
+                  option:fold (take-prompt-task! cursor)
+                    fn () &unit
+                    fn (task)
+                      hint-fn $ {}
+                        :args $ []
+                          :: 'Fn $ {}
+                            :args $ [] 'String
+                            :return 'Unit
+                        :return 'Unit
+                      task |hello
                   is $ = |hello @*called
-                  is $ nil? (take-prompt-task! cursor)
+                  is $ option:none? (take-prompt-task! cursor)
               :tags $ #{} :regression :unit
         'use-alert $ %{} 'CodeEntry (:doc "||Alert dialog hook. Shows a simple message box. Returns a plugin object with .show method to display the alert.")
           :code $ quote
@@ -1219,16 +1302,24 @@
               let
                   cursor $ read-field states :cursor
                   state $ either (read-field states :data)
-                    {} (:show? false) (:failure nil)
+                    {} $ :show? false
                   node $ comp-prompt-modal (>> states :modal) options (read-field state :show?)
                     fn (text d!)
-                      let
-                          task $ take-prompt-task! cursor
-                        when (fn? task) (task text)
+                      do
+                        option:fold (take-prompt-task! cursor)
+                          fn () &unit
+                          fn (task)
+                            hint-fn $ {}
+                              :args $ []
+                                :: 'Fn $ {}
+                                  :args $ [] 'String
+                                  :return 'Unit
+                              :return 'Unit
+                            task text
                         d! cursor $ assoc state :show? false
-                    fn (d!) (take-prompt-task! cursor)
+                    fn (d!) (clear-prompt-task! cursor)
                       d! cursor $ assoc state :show? false
-                %:: prompt-actions-plugin :plugin node cursor state $ atom nil
+                %:: prompt-actions-plugin :plugin node cursor state
           :examples $ []
             quote $ let
                 prompt-plugin $ use-prompt (>> states :prompt)
