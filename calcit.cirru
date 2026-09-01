@@ -520,8 +520,8 @@
                         let
                             event $ .-event e
                           if (js-present? event) (.!stopPropagation event) %none
-                          on-read! e d!
                           on-close! d!
+                          on-read! e d!
                     div
                       {}
                         :class-name $ str-spaced style-modal-card css/global css/column (read-field options :card-class)
@@ -537,7 +537,7 @@
                           {}
                             :class-name $ str-spaced css/button schema/confirm-button-name (read-field options :confirm-class)
                             :style $ read-field options :confirm-style
-                            :on-click $ fn (e d!) (on-read! e d!) (on-close! d!)
+                            :on-click $ fn (e d!) (on-close! d!) (on-read! e d!)
                           <> $ either (read-field options :confirm-text) |Read
                     comp-esc-listener show? on-close!
           :examples $ []
@@ -1257,6 +1257,7 @@
                       , options $ assoc options :text (read-field state :text)
                     read-field state :show?
                     fn (e d!)
+                      d! cursor $ assoc state :show? false
                       option:fold (take-prompt-task! cursor)
                         fn () &unit
                         fn (task)
@@ -1376,6 +1377,7 @@
                   node $ comp-prompt-modal (>> states :modal) options (read-field state :show?)
                     fn (text d!)
                       do
+                        d! cursor $ assoc state :show? false
                         option:fold (take-prompt-task! cursor)
                           fn () &unit
                           fn (task)
@@ -1386,7 +1388,6 @@
                                   :return 'Unit
                               :return 'Unit
                             task text
-                        d! cursor $ assoc state :show? false
                     fn (d!) (clear-prompt-task! cursor)
                       d! cursor $ assoc state :show? false
                 %:: prompt-actions-plugin :plugin node cursor state
