@@ -753,22 +753,18 @@
                         let
                             props $ {} (:value text)
                               :on-input $ fn (e d!)
-                                if (js-present? e)
-                                  d! cursor $ assoc state :text (.-value e)
-                                  %none
+                                d! cursor $ assoc state :text (prompt-event-text e)
                               :on-keydown $ fn (e d!)
-                                if (js-present? e)
+                                let
+                                    keycode $ option:unwrap-or (get e :keycode) 0
+                                    meta? $ option:unwrap-or (get e :meta?) false
                                   cond
-                                      and
-                                        not= 229 $ .-keyCode e
-                                        = (.-key e) |Enter
+                                      and (not= 229 keycode) (= 13 keycode)
                                       if (read-field options :multiline?)
-                                        when (.-metaKey e) (check-submit! d!)
+                                        when meta? $ check-submit! d!
                                         check-submit! d!
-                                    (= (.-key e) |Escape)
-                                      on-close! d!
+                                    (= 27 keycode) (on-close! d!)
                                     true nil
-                                  %none
                               :placeholder $ either (read-field options :placeholder) |
                           if (read-field options :multiline?)
                             textarea $ merge props
@@ -958,6 +954,25 @@
             def prompt-actions-plugin $ impl-traits PluginNodeCursorStateTask %prompt-actions
           :examples $ []
           :schema $ :: 'Dynamic
+        'prompt-event-text $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn prompt-event-text (event)
+              str $ option:unwrap-or (get event :value) |
+          :examples $ []
+          :schema $ :: 'Fn
+            {} (:return 'String)
+              :args $ [] 'Map
+          :tests $ []
+            %{} 'TestEntry (:name |reads-respo-event-map)
+              :code $ quote
+                is $ = |hello
+                  prompt-event-text $ {} (:value |hello)
+              :tags $ #{} :regression :unit
+            %{} 'TestEntry (:name |defaults-missing-value)
+              :code $ quote
+                is $ = |
+                  prompt-event-text $ {}
+              :tags $ #{} :regression :unit
         'style-clear $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defstyle style-clear $ {}
