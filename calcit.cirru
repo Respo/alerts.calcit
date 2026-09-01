@@ -501,7 +501,7 @@
           :code $ quote
             def alert-actions-plugin $ impl-traits PluginNodeCursorState %alert-actions
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'respo-alerts.core/PluginNodeCursorState
         'clear-prompt-task! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn clear-prompt-task! (cursor)
@@ -845,12 +845,12 @@
           :code $ quote
             def confirm-actions-plugin $ impl-traits PluginNodeCursorStateTask %confirm-actions
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'respo-alerts.core/PluginNodeCursorStateTask
         'drawer-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def drawer-actions-plugin $ impl-traits PluginNodeCursorState %drawer-actions
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'respo-alerts.core/PluginNodeCursorState
         'effect-fade $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defeffect effect-fade (show?) (action el at-place?)
@@ -983,17 +983,17 @@
           :code $ quote
             def modal-actions-plugin $ impl-traits PluginNodeCursorState %modal-actions
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'respo-alerts.core/PluginNodeCursorState
         'modal-menu-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def modal-menu-actions-plugin $ impl-traits PluginNodeCursorState %modal-menu-actions
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'respo-alerts.core/PluginNodeCursorState
         'prompt-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def prompt-actions-plugin $ impl-traits PromptPluginNodeCursorState %prompt-actions
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'respo-alerts.core/PromptPluginNodeCursorState
         'prompt-event-text $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn prompt-event-text (event)
@@ -1032,7 +1032,9 @@
                   %:: PromptKeyAction :submit
                   %:: PromptKeyAction :ignore
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Fn
+            {} (:return 'respo-alerts.core/PromptKeyAction)
+              :args $ [] 'respo-alerts.core/PromptEvent 'Bool
           :tests $ []
             %{} 'TestEntry (:name |keyboard-matrix)
               :code $ quote
@@ -1067,8 +1069,9 @@
           :examples $ []
           :schema $ :: 'Fn
             {} (:return 'String)
-              :args $ [] 'Dynamic
+              :args $ [] 'T
               :features $ #{} :js-ffi
+              :generics $ [] 'T
           :tests $ []
             %{} 'TestEntry (:name |accepts-string)
               :code $ quote
