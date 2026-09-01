@@ -107,6 +107,10 @@
                     {} $ :title |demo
                   confirm-plugin $ use-confirm (>> states :confirm)
                     {} $ :title |demo
+                  confirm-prompt-plugin $ use-prompt (>> states :confirm-prompt)
+                    {} (:text "|Input confirm text") (:placeholder "|Confirm text")
+                      :validator $ fn (text)
+                        if (blank? text) "|Please enter text" |
                   prompt-plugin $ use-prompt (>> states :prompt)
                     {} $ :title |demo
                   prompt-multilines-plugin $ use-prompt (>> states :multilines-prompt)
@@ -121,10 +125,7 @@
                       :style $ {}
                       :input-class css/font-code!
                       :multiline? true
-                      :validator $ fn (x)
-                        try
-                          do (parse-cirru x) nil
-                          fn (e) (str e)
+                      :validator validate-cirru-source
                 div ({})
                   div ({}) (<> |Hooks)
                   div ({})
@@ -141,7 +142,9 @@
                     =< 8 nil
                     button $ {} (:inner-text "|show confirm with text") (:class-name css/button)
                       :on-click $ fn (e d!)
-                        .show-with-text confirm-plugin d! |Confirmed-demo $ fn () (println |after-confirmed)
+                        .show confirm-prompt-plugin d! $ fn (text)
+                          .show-with-text confirm-plugin d! (str "|Confirmed: " text)
+                            fn () $ println |after-confirmed
                     =< 8 nil
                     button $ {} (:inner-text "|show prompt") (:class-name css/button)
                       :on-click $ fn (e d!)
@@ -160,6 +163,7 @@
                             println "|read from prompt" $ to-lispy-string text
                   .render alert-plugin
                   .render confirm-plugin
+                  .render confirm-prompt-plugin
                   .render prompt-plugin
                   .render prompt-multilines-plugin
                   .render prompt-validation-plugin
@@ -172,6 +176,27 @@
               |& $ {} (:width 120)
           :examples $ []
           :schema $ :: 'Dynamic
+        'validate-cirru-source $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn validate-cirru-source (source)
+              try
+                let
+                    forms $ parse-cirru-list source
+                  if (empty? forms) "|Expected at least one Cirru form" |
+                fn (error) (str error)
+          :examples $ []
+          :schema $ :: 'Fn
+            {} (:return 'String)
+              :args $ [] 'String
+          :tests $ []
+            %{} 'TestEntry (:name |rejects-empty-and-invalid-parse-results)
+              :code $ quote
+                do
+                  assert= | $ validate-cirru-source |a
+                  assert= false $ blank?
+                    validate-cirru-source $ char-from-code 40
+                  assert= false $ blank?
+                    validate-cirru-source $ char-from-code 34
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote
           ns respo-alerts.comp.container $ :require (respo-ui.core :as ui)
