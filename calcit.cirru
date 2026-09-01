@@ -403,7 +403,7 @@
                   :return 'Dynamic
                 match self $
                   :plugin node cursor state *next-prompt-task
-                  do (.set! *next-prompt-task next-task)
+                  do (reset! *next-prompt-task next-task)
                     d! cursor $ assoc state :show? true
               .close $ fn (self d!)
                 hint-fn $ {}
@@ -421,6 +421,17 @@
                   read-field state :show?
           :examples $ []
           :schema $ :: 'Impl
+          :tests $ []
+            %{} 'TestEntry (:name |stores-callback-from-empty-ref)
+              :code $ quote
+                let
+                    *next $ atom nil
+                    plugin $ %:: prompt-actions-plugin :plugin (%:: _ :node) ([]) ({}) *next
+                    next-task $ fn (text) &unit
+                    d! $ fn (cursor state) &unit
+                  do (.show plugin d! next-task)
+                    is $ some? @*next
+              :tags $ #{} :regression :unit
         'AlertActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait AlertActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
@@ -1157,11 +1168,11 @@
                   node $ comp-prompt-modal (>> states :modal) options (read-field state :show?)
                     fn (text d!)
                       if (some? @*next-prompt-task) (@*next-prompt-task text)
-                      .set! *next-prompt-task nil
+                      reset! *next-prompt-task nil
                       d! cursor $ assoc state :show? false
                     fn (d!)
                       d! cursor $ assoc state :show? false
-                      .set! *next-prompt-task nil
+                      reset! *next-prompt-task nil
                 %:: prompt-actions-plugin :plugin node cursor state *next-prompt-task
           :examples $ []
             quote $ let
@@ -1189,6 +1200,7 @@
             respo-alerts.style :as style
             respo-alerts.schema :as schema
             respo-alerts.util :refer $ focus-element! select-element! read-field
+            calcit.test :refer $ is
     'respo-alerts.main $ %{} 'FileEntry
       :defs $ {}
         '*reel $ %{} 'CodeEntry (:doc |)
