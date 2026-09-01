@@ -484,9 +484,14 @@
           :schema $ :: 'Trait
         'PromptEvent $ %{} 'CodeEntry (:doc |)
           :code $ quote
-            defstruct PromptEvent (:text 'String) (:keycode 'Number) (:meta? 'Bool)
+            defstruct PromptEvent (:text 'String) (:keycode 'Number) (:meta? 'Bool) (:ctrl? 'Bool)
           :examples $ []
           :schema $ :: 'StructDef
+        'PromptKeyAction $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defenum PromptKeyAction (:submit) (:close) (:ignore)
+          :examples $ []
+          :schema $ :: 'EnumDef
         'PromptPluginNodeCursorState $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defenum PromptPluginNodeCursorState $ :plugin 'Enum 'List 'Map
@@ -790,15 +795,13 @@
                               :on-keydown $ fn (e d!)
                                 let
                                     event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
-                                    keycode $ :keycode event-info
-                                    meta? $ :meta? event-info
-                                  cond
-                                      and (not= 229 keycode) (= 13 keycode)
-                                      if (read-field options :multiline?)
-                                        when meta? $ check-submit! d!
-                                        check-submit! d!
-                                    (= 27 keycode) (on-close! d!)
-                                    true &unit
+                                    action $ unsafe-coerce
+                                      prompt-key-action event-info $ read-field options :multiline?
+                                      , 'respo-alerts.core/PromptKeyAction
+                                  match action
+                                    (:submit) (check-submit! d!)
+                                    (:close) (on-close! d!)
+                                    (:ignore) &unit
                               :placeholder $ either (read-field options :placeholder) |
                           if (read-field options :multiline?)
                             textarea $ merge props
@@ -1010,6 +1013,51 @@
                 is $ = |
                   prompt-event-text $ {}
               :tags $ #{} :regression :unit
+        'prompt-key-action $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn prompt-key-action (event multiline?)
+              hint-fn $ {}
+                :args $ [] 'respo-alerts.core/PromptEvent 'Bool
+                :return 'respo-alerts.core/PromptKeyAction
+              if
+                = 27 $ :keycode event
+                %:: PromptKeyAction :close
+                if
+                  and
+                    = 13 $ :keycode event
+                    not= 229 $ :keycode event
+                    or (not multiline?) (:meta? event) (:ctrl? event)
+                  %:: PromptKeyAction :submit
+                  %:: PromptKeyAction :ignore
+          :examples $ []
+          :schema $ :: 'Dynamic
+          :tests $ []
+            %{} 'TestEntry (:name |keyboard-matrix)
+              :code $ quote
+                let
+                    enter $ %{} PromptEvent (:text |) (:keycode 13) (:meta? false) (:ctrl? false)
+                    escape $ assoc enter :keycode 27
+                    composing $ assoc enter :keycode 229
+                  is $ match (prompt-key-action enter false)
+                    (:submit) true
+                    _ false
+                  is $ match (prompt-key-action enter true)
+                    (:ignore) true
+                    _ false
+                  is $ match
+                    prompt-key-action (assoc enter :meta? true) true
+                    (:submit) true
+                    _ false
+                  is $ match
+                    prompt-key-action (assoc enter :ctrl? true) true
+                    (:submit) true
+                    _ false
+                  is $ match (prompt-key-action escape false)
+                    (:close) true
+                    _ false
+                  is $ match (prompt-key-action composing false)
+                    (:ignore) true
+                    _ false
         'prompt-validation-error $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn prompt-validation-error (value)
@@ -1044,11 +1092,25 @@
                     fn () false
                     fn (value)
                       if (bool? value) (unsafe-coerce value 'Bool) false
-                %{} PromptEvent (:text text) (:keycode keycode) (:meta? meta?)
+                  ctrl? $ option:fold (get event :ctrl?)
+                    fn () false
+                    fn (value)
+                      if (bool? value) (unsafe-coerce value 'Bool) false
+                %{} PromptEvent (:text text) (:keycode keycode) (:meta? meta?) (:ctrl? ctrl?)
           :examples $ []
           :schema $ :: 'Fn
             {} (:return 'respo-alerts.core/PromptEvent)
               :args $ [] (:: 'Map 'Tag 'Dynamic)
+          :tests $ []
+            %{} 'TestEntry (:name |reads-key-modifiers)
+              :code $ quote
+                let
+                    event $ unsafe-coerce
+                      read-prompt-event $ {} (:value |hello) (:keycode 13) (:meta? true) (:ctrl? true)
+                      , 'respo-alerts.core/PromptEvent
+                  is $ = 13 (:keycode event)
+                  is $ :meta? event
+                  is $ :ctrl? event
         'store-prompt-task! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn store-prompt-task! (cursor task)
