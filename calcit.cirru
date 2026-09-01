@@ -107,6 +107,10 @@
                     {} $ :title |demo
                   confirm-plugin $ use-confirm (>> states :confirm)
                     {} $ :title |demo
+                  confirm-prompt-plugin $ use-prompt (>> states :confirm-prompt)
+                    {} (:text "|Input confirm text") (:placeholder "|Confirm text")
+                      :validator $ fn (text)
+                        if (blank? text) "|Please enter text" |
                   prompt-plugin $ use-prompt (>> states :prompt)
                     {} $ :title |demo
                   prompt-multilines-plugin $ use-prompt (>> states :multilines-prompt)
@@ -121,10 +125,7 @@
                       :style $ {}
                       :input-class css/font-code!
                       :multiline? true
-                      :validator $ fn (x)
-                        try
-                          do (parse-cirru x) nil
-                          fn (e) (str e)
+                      :validator validate-cirru-source
                 div ({})
                   div ({}) (<> |Hooks)
                   div ({})
@@ -141,13 +142,9 @@
                     =< 8 nil
                     button $ {} (:inner-text "|show confirm with text") (:class-name css/button)
                       :on-click $ fn (e d!)
-                        let
-                            text $ js/prompt "|Input confirm text"
-                          if
-                            and (js-present? text)
-                              not $ blank? (unsafe-coerce text 'String)
-                            .show-with-text confirm-plugin d! (str "|Confirmed: " text)
-                              fn () $ println "|after confirmed"
+                        .show confirm-prompt-plugin d! $ fn (text)
+                          .show-with-text confirm-plugin d! (str "|Confirmed: " text)
+                            fn () $ println |after-confirmed
                     =< 8 nil
                     button $ {} (:inner-text "|show prompt") (:class-name css/button)
                       :on-click $ fn (e d!)
@@ -166,6 +163,7 @@
                             println "|read from prompt" $ to-lispy-string text
                   .render alert-plugin
                   .render confirm-plugin
+                  .render confirm-prompt-plugin
                   .render prompt-plugin
                   .render prompt-multilines-plugin
                   .render prompt-validation-plugin
@@ -178,6 +176,27 @@
               |& $ {} (:width 120)
           :examples $ []
           :schema $ :: 'Dynamic
+        'validate-cirru-source $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn validate-cirru-source (source)
+              try
+                let
+                    forms $ parse-cirru-list source
+                  if (empty? forms) "|Expected at least one Cirru form" |
+                fn (error) (str error)
+          :examples $ []
+          :schema $ :: 'Fn
+            {} (:return 'String)
+              :args $ [] 'String
+          :tests $ []
+            %{} 'TestEntry (:name |rejects-empty-and-invalid-parse-results)
+              :code $ quote
+                do
+                  assert= | $ validate-cirru-source |a
+                  assert= false $ blank?
+                    validate-cirru-source $ char-from-code 40
+                  assert= false $ blank?
+                    validate-cirru-source $ char-from-code 34
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote
           ns respo-alerts.comp.container $ :require (respo-ui.core :as ui)
@@ -222,13 +241,12 @@
                   , node
               .show $ fn (self d! ? text)
                 hint-fn $ {}
-                  :args $ [] 'Dynamic 'Fn (:: Option 'String)
+                  :args $ [] 'Dynamic 'Fn (:: 'Optional 'String)
                   :return 'Dynamic
                 match self $
                   :plugin node cursor state
-                  if (option:some? text)
-                    d! cursor $ -> state (assoc :show? true)
-                      assoc :text $ option:unwrap-or text |
+                  if (some? text)
+                    d! cursor $ -> state (assoc :show? true) (assoc :text text)
                     d! cursor $ assoc state :show? true
               .close $ fn (self d!)
                 hint-fn $ {}
@@ -254,31 +272,34 @@
                   :args $ [] 'Dynamic
                   :return 'Dynamic
                 match self $
-                  :plugin node cursor state *next
+                  :plugin node cursor state
                   , node
               .show $ fn (self d! next-task)
                 hint-fn $ {}
                   :args $ [] 'Dynamic 'Fn 'Fn
                   :return 'Dynamic
                 match self $
-                  :plugin node cursor state *next-confirm-task
-                  do (.set! *next-confirm-task next-task)
+                  :plugin node cursor state
+                  do
+                    store-prompt-task! cursor $ fn (ignored) (next-task)
                     d! cursor $ -> state (assoc :show? true) (assoc :text |)
               .show-with-text $ fn (self d! text next-task)
                 hint-fn $ {}
                   :args $ [] 'Dynamic 'Fn 'String 'Fn
                   :return 'Dynamic
                 match self $
-                  :plugin node cursor state *next-confirm-task
-                  do (.set! *next-confirm-task next-task)
+                  :plugin node cursor state
+                  do
+                    store-prompt-task! cursor $ fn (ignored) (next-task)
                     d! cursor $ -> state (assoc :show? true) (assoc :text text)
               .close $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] 'Dynamic 'Fn
                   :return 'Dynamic
                 match self $
-                  :plugin node cursor state *next
-                  d! cursor $ assoc state :show? false
+                  :plugin node cursor state
+                  do (clear-prompt-task! cursor)
+                    d! cursor $ assoc state :show? false
               .show? $ fn (self)
                 hint-fn $ {}
                   :args $ [] 'Dynamic
@@ -395,43 +416,53 @@
                   :args $ [] 'Dynamic
                   :return 'Dynamic
                 match self $
-                  :plugin node cursor state *next
+                  :plugin node cursor state
                   , node
               .show $ fn (self d! next-task)
                 hint-fn $ {}
                   :args $ [] 'Dynamic 'Fn 'Fn
                   :return 'Dynamic
                 match self $
-                  :plugin node cursor state *next-prompt-task
-                  do (reset! *next-prompt-task next-task)
+                  :plugin node cursor state
+                  do (store-prompt-task! cursor next-task)
                     d! cursor $ assoc state :show? true
               .close $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] 'Dynamic 'Fn
                   :return 'Dynamic
                 match self $
-                  :plugin node cursor state *next
-                  d! cursor $ assoc state :show? false
+                  :plugin node cursor state
+                  do (clear-prompt-task! cursor)
+                    d! cursor $ assoc state :show? false
               .show? $ fn (self)
                 hint-fn $ {}
                   :args $ [] 'Dynamic
                   :return 'Bool
                 match self $
-                  :plugin node cursor state *next
+                  :plugin node cursor state
                   read-field state :show?
           :examples $ []
           :schema $ :: 'Impl
           :tests $ []
-            %{} 'TestEntry (:name |stores-callback-from-empty-ref)
+            %{} 'TestEntry (:name |stores-callback-across-render)
               :code $ quote
                 let
-                    *next $ atom nil
-                    plugin $ %:: prompt-actions-plugin :plugin (%:: _ :node) ([]) ({}) *next
+                    cursor $ [] :action-test
+                    plugin $ %:: prompt-actions-plugin :plugin (%:: _ :node) cursor ({})
                     next-task $ fn (text) &unit
                     d! $ fn (cursor state) &unit
                   do (.show plugin d! next-task)
-                    is $ some? @*next
+                    is $ option:some? (get @*prompt-tasks cursor)
+                    clear-prompt-task! cursor
               :tags $ #{} :regression :unit
+        '*prompt-tasks $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defatom *prompt-tasks $ {}
+          :examples $ []
+          :schema $ :: 'Ref
+            :: 'Map 'List $ :: 'Fn
+              {} (:return 'Unit)
+                :args $ [] 'String
         'AlertActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait AlertActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
@@ -462,21 +493,41 @@
             defenum PluginNodeCursorState $ :plugin 'Enum 'List 'Map
           :examples $ []
           :schema $ :: 'Enum
-        'PluginNodeCursorStateTask $ %{} 'CodeEntry (:doc |)
-          :code $ quote
-            defenum PluginNodeCursorStateTask $ :plugin 'Enum 'List 'Map 'Ref
-          :examples $ []
-          :schema $ :: 'Enum
         'PromptActions $ %{} 'CodeEntry (:doc |)
           :code $ quote
             deftrait PromptActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
           :schema $ :: 'Trait
+        'PromptEvent $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defstruct PromptEvent (:text 'String) (:keycode 'Number) (:meta? 'Bool) (:ctrl? 'Bool)
+          :examples $ []
+          :schema $ :: 'StructDef
+        'PromptKeyAction $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defenum PromptKeyAction (:submit) (:close) (:ignore)
+          :examples $ []
+          :schema $ :: 'EnumDef
+        'PromptPluginNodeCursorState $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defenum PromptPluginNodeCursorState $ :plugin 'Enum 'List 'Map
+          :examples $ []
+          :schema $ :: 'Enum
         'alert-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def alert-actions-plugin $ impl-traits PluginNodeCursorState %alert-actions
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'respo-alerts.core/PluginNodeCursorState
+        'clear-prompt-task! $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn clear-prompt-task! (cursor)
+              do
+                reset! *prompt-tasks $ dissoc @*prompt-tasks cursor
+                , &unit
+          :examples $ []
+          :schema $ :: 'Fn
+            {} (:return 'Unit)
+              :args $ [] 'List
         'comp-alert-modal $ %{} 'CodeEntry (:doc "||Alert modal component. Shows a simple message dialog with a confirm button. Used internally by use-alert hook.")
           :code $ quote
             defcomp comp-alert-modal (options show? on-read! on-close!)
@@ -488,31 +539,31 @@
                     {} $ :position :absolute
                   if show? $ div
                     {}
-                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
-                      :style $ get options :backdrop-style
+                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (read-field options :backdrop-class)
+                      :style $ read-field options :backdrop-style
                       :on-click $ fn (e d!)
                         let
                             event $ .-event e
                           if (js-present? event) (.!stopPropagation event) %none
-                          on-read! e d!
                           on-close! d!
+                          on-read! e d!
                     div
                       {}
-                        :class-name $ str-spaced style-modal-card css/global css/column (get options :card-class)
-                        :style $ get options :card-style
+                        :class-name $ str-spaced style-modal-card css/global css/column (read-field options :card-class)
+                        :style $ read-field options :card-style
                         :on-click $ fn (e d!) &unit
                       div ({})
-                        <> $ either (get options :text) |Alert!
+                        <> $ either (read-field options :text) |Alert!
                       =< nil 8
                       div
                         {} $ :class-name css/row-parted
                         span $ {}
                         button
                           {}
-                            :class-name $ str-spaced css/button schema/confirm-button-name (get options :confirm-class)
-                            :style $ get options :confirm-style
-                            :on-click $ fn (e d!) (on-read! e d!) (on-close! d!)
-                          <> $ either (get options :confirm-text) |Read
+                            :class-name $ str-spaced css/button schema/confirm-button-name (read-field options :confirm-class)
+                            :style $ read-field options :confirm-style
+                            :on-click $ fn (e d!) (on-close! d!) (on-read! e d!)
+                          <> $ either (read-field options :confirm-text) |Read
                     comp-esc-listener show? on-close!
           :examples $ []
             quote $ comp-alert-modal
@@ -530,12 +581,12 @@
                     {} $ :position :absolute
                   if show? $ div
                     {}
-                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
+                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (read-field options :backdrop-class)
                       :style $ read-field options :backdrop-style
                       :on-click $ fn (e d!) (on-close! d!)
                     div
                       {}
-                        :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
+                        :class-name $ str-spaced css/global css/column style-modal-card (read-field options :card-class)
                         :style $ read-field options :card-style
                         :on-click $ fn (e d!) &unit
                       div ({})
@@ -546,7 +597,7 @@
                         span $ {}
                         button
                           {}
-                            :class-name $ str-spaced css/button schema/confirm-button-name (get options :confirm-class)
+                            :class-name $ str-spaced css/button schema/confirm-button-name (read-field options :confirm-class)
                             :on-click $ fn (e d!) (on-confirm! e d!) (on-close! d!)
                           <> $ either (read-field options :button-text) |Confirm
                     comp-esc-listener show? on-close!
@@ -566,7 +617,7 @@
                       read-field options :container-style
                   if show? $ div
                     {}
-                      :class-name $ str-spaced css/fullscreen style-drawer-backdrop (get options :backdrop-class)
+                      :class-name $ str-spaced css/fullscreen style-drawer-backdrop (read-field options :backdrop-class)
                       :style $ read-field options :backdrop-style
                       :on-click $ fn (e d!)
                         let
@@ -575,7 +626,7 @@
                           on-close d!
                     div
                       {}
-                        :class-name $ str-spaced css/global css/column style-drawer-card (get options :card-class)
+                        :class-name $ str-spaced css/global css/column style-drawer-card (read-field options :card-class)
                         :style $ merge
                           {} $ :padding 0
                           read-field options :style
@@ -620,7 +671,7 @@
                       read-field options :container-style
                   if show? $ div
                     {}
-                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
+                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (read-field options :backdrop-class)
                       :style $ read-field options :backdrop-style
                       :on-click $ fn (e d!)
                         let
@@ -629,7 +680,7 @@
                           on-close d!
                     div
                       {}
-                        :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
+                        :class-name $ str-spaced css/global css/column style-modal-card (read-field options :card-class)
                         :style $ merge
                           {} $ :padding 0
                           read-field options :style
@@ -662,7 +713,7 @@
                 div ({})
                   if show? $ div
                     {}
-                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
+                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (read-field options :backdrop-class)
                       :style $ read-field options :backdrop-style
                       :on-click $ fn (e d!)
                         let
@@ -671,7 +722,7 @@
                           on-close! d!
                     div
                       {}
-                        :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
+                        :class-name $ str-spaced css/global css/column style-modal-card (read-field options :card-class)
                         :style $ merge
                           {} $ :padding 0
                           read-field options :style
@@ -718,16 +769,19 @@
                   initial-text $ either (read-field options :initial) |
                   cursor $ read-field states :cursor
                   state $ either (read-field states :data)
-                    {} (:text initial-text) (:failure nil)
+                    {} (:text initial-text) (:failure |)
                   text $ either (read-field state :text) initial-text
                   check-submit! $ fn (d!)
                     let
                         validator $ read-field options :validator
-                        result $ if (fn? validator) (validator text) nil
-                      if (some? result)
+                        result $ if (fn? validator)
+                          prompt-validation-error $ validator text
+                          , |
+                      if
+                        not $ blank? result
                         d! cursor $ assoc state :failure result
                         do (on-finish! text d!) (on-close! d!)
-                          d! cursor $ -> state (assoc :text nil) (assoc :failure nil)
+                          d! cursor $ -> state (assoc :text |) (assoc :failure |)
                 []
                   effect-select (str |. schema/input-box-name) show?
                   effect-fade show?
@@ -736,15 +790,15 @@
                       {} $ :position :absolute
                     if show? $ div
                       {}
-                        :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (get options :backdrop-class)
+                        :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop (read-field options :backdrop-class)
                         :style $ merge
                           {} $ :line-height |32px
                           read-field options :backdrop-style
                         :on-click $ fn (e d!) (on-close! d!)
-                          d! cursor $ -> state (assoc :text nil) (assoc :failure nil)
+                          d! cursor $ -> state (assoc :text |) (assoc :failure |)
                       div
                         {}
-                          :class-name $ str-spaced css/global css/column style-modal-card (get options :card-class)
+                          :class-name $ str-spaced css/global css/column style-modal-card (read-field options :card-class)
                           :style $ read-field options :card-style
                           :on-click $ fn (e d!) &unit
                         div ({})
@@ -753,33 +807,30 @@
                         let
                             props $ {} (:value text)
                               :on-input $ fn (e d!)
-                                if (js-present? e)
-                                  d! cursor $ assoc state :text (.-value e)
-                                  %none
+                                d! cursor $ assoc state :text (prompt-event-text e)
                               :on-keydown $ fn (e d!)
-                                if (js-present? e)
-                                  cond
-                                      and
-                                        not= 229 $ .-keyCode e
-                                        = (.-key e) |Enter
-                                      if (read-field options :multiline?)
-                                        when (.-metaKey e) (check-submit! d!)
-                                        check-submit! d!
-                                    (= (.-key e) |Escape)
-                                      on-close! d!
-                                    true nil
-                                  %none
+                                let
+                                    event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
+                                    action $ unsafe-coerce
+                                      prompt-key-action event-info $ read-field options :multiline?
+                                      , 'respo-alerts.core/PromptKeyAction
+                                  match action
+                                    (:submit) (check-submit! d!)
+                                    (:close)
+                                      do (on-close! d!)
+                                        d! cursor $ -> state (assoc :text |) (assoc :failure |)
+                                    (:ignore) &unit
                               :placeholder $ either (read-field options :placeholder) |
                           if (read-field options :multiline?)
                             textarea $ merge props
                               {}
-                                :class-name $ str-spaced schema/input-box-name css/textarea (get options :input-class)
+                                :class-name $ str-spaced schema/input-box-name css/textarea (read-field options :input-class)
                                 :style $ merge
                                   {} (:width |100%) (:min-height 120) (:max-height |50vh)
                                   read-field options :input-style
                             input $ merge props
                               {}
-                                :class-name $ str-spaced schema/input-box-name css/input (get options :input-class)
+                                :class-name $ str-spaced schema/input-box-name css/input (read-field options :input-class)
                                 :style $ merge
                                   {} $ :width |100%
                                   read-field options :input-style
@@ -787,8 +838,9 @@
                         div
                           {} $ :class-name css/row-parted
                           let
-                              failure $ read-field state :failure
-                            if (some? failure)
+                              failure $ either (read-field state :failure) |
+                            if
+                              not $ blank? failure
                               span $ {}
                                 :style $ merge ui/flex
                                   {} (:color :red) (:line-height |20px)
@@ -796,7 +848,7 @@
                               span $ {}
                           button
                             {}
-                              :class-name $ str-spaced css/button (get options :confirm-class)
+                              :class-name $ str-spaced css/button (read-field options :confirm-class)
                               :on-click $ fn (e d!) (check-submit! d!)
                             <> $ either (read-field options :button-text) |Finish
                       comp-esc-listener show? on-close!
@@ -807,19 +859,19 @@
           :schema $ :: 'Dynamic
         'confirm-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
-            def confirm-actions-plugin $ impl-traits PluginNodeCursorStateTask %confirm-actions
+            def confirm-actions-plugin $ impl-traits PluginNodeCursorState %confirm-actions
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'respo-alerts.core/PluginNodeCursorState
         'drawer-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def drawer-actions-plugin $ impl-traits PluginNodeCursorState %drawer-actions
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'respo-alerts.core/PluginNodeCursorState
         'effect-fade $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defeffect effect-fade (show?) (action el at-place?)
               case-default action nil
-                :before-update $ if show? nil
+                :before-update $ if show?
                   if
                     js-present? $ .-firstElementChild el
                     let
@@ -839,6 +891,7 @@
                       js/setTimeout
                         fn () $ .!remove cloned
                         , 240
+                  , nil
                 :update $ if show?
                   let
                       target $ unsafe-coerce (.-firstElementChild el) 'JsObject
@@ -901,7 +954,7 @@
           :code $ quote
             defeffect effect-slide (show?) (action el at-place?)
               case-default action nil
-                :before-update $ if show? nil
+                :before-update $ if show?
                   if
                     js-present? $ .-firstElementChild el
                     let
@@ -921,6 +974,7 @@
                       js/setTimeout
                         fn () $ .!remove cloned
                         , 240
+                  , nil
                 :update $ if show?
                   let
                       target $ unsafe-coerce (.-firstElementChild el) 'JsObject
@@ -947,17 +1001,157 @@
           :code $ quote
             def modal-actions-plugin $ impl-traits PluginNodeCursorState %modal-actions
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'respo-alerts.core/PluginNodeCursorState
         'modal-menu-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
             def modal-menu-actions-plugin $ impl-traits PluginNodeCursorState %modal-menu-actions
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'respo-alerts.core/PluginNodeCursorState
         'prompt-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote
-            def prompt-actions-plugin $ impl-traits PluginNodeCursorStateTask %prompt-actions
+            def prompt-actions-plugin $ impl-traits PromptPluginNodeCursorState %prompt-actions
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'respo-alerts.core/PromptPluginNodeCursorState
+        'prompt-event-text $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn prompt-event-text (event)
+              let
+                  event-info $ unsafe-coerce (read-prompt-event event) 'respo-alerts.core/PromptEvent
+                :text event-info
+          :examples $ []
+          :schema $ :: 'Fn
+            {} (:return 'String)
+              :args $ [] (:: 'Map 'Tag 'Dynamic)
+          :tests $ []
+            %{} 'TestEntry (:name |reads-respo-event-map)
+              :code $ quote
+                is $ = |hello
+                  prompt-event-text $ {} (:value |hello)
+              :tags $ #{} :regression :unit
+            %{} 'TestEntry (:name |defaults-missing-value)
+              :code $ quote
+                is $ = |
+                  prompt-event-text $ {}
+              :tags $ #{} :regression :unit
+        'prompt-key-action $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn prompt-key-action (event multiline?)
+              hint-fn $ {}
+                :args $ [] 'respo-alerts.core/PromptEvent 'Bool
+                :return 'respo-alerts.core/PromptKeyAction
+              if
+                = 27 $ :keycode event
+                %:: PromptKeyAction :close
+                if
+                  and
+                    = 13 $ :keycode event
+                    not= 229 $ :keycode event
+                    or (not multiline?) (:meta? event) (:ctrl? event)
+                  %:: PromptKeyAction :submit
+                  %:: PromptKeyAction :ignore
+          :examples $ []
+          :schema $ :: 'Fn
+            {} (:return 'respo-alerts.core/PromptKeyAction)
+              :args $ [] 'respo-alerts.core/PromptEvent 'Bool
+          :tests $ []
+            %{} 'TestEntry (:name |keyboard-matrix)
+              :code $ quote
+                let
+                    enter $ %{} PromptEvent (:text |) (:keycode 13) (:meta? false) (:ctrl? false)
+                    escape $ assoc enter :keycode 27
+                    composing $ assoc enter :keycode 229
+                  is $ match (prompt-key-action enter false)
+                    (:submit) true
+                    _ false
+                  is $ match (prompt-key-action enter true)
+                    (:ignore) true
+                    _ false
+                  is $ match
+                    prompt-key-action (assoc enter :meta? true) true
+                    (:submit) true
+                    _ false
+                  is $ match
+                    prompt-key-action (assoc enter :ctrl? true) true
+                    (:submit) true
+                    _ false
+                  is $ match (prompt-key-action escape false)
+                    (:close) true
+                    _ false
+                  is $ match (prompt-key-action composing false)
+                    (:ignore) true
+                    _ false
+        'prompt-validation-error $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn prompt-validation-error (value)
+              if (string? value) (unsafe-coerce value 'String) |
+          :examples $ []
+          :schema $ :: 'Fn
+            {} (:return 'String)
+              :args $ [] 'T
+              :features $ #{} :js-ffi
+              :generics $ [] 'T
+          :tests $ []
+            %{} 'TestEntry (:name |accepts-string)
+              :code $ quote
+                is $ = |Required (prompt-validation-error |Required)
+              :tags $ #{} :unit
+            %{} 'TestEntry (:name |rejects-absence)
+              :code $ quote
+                is $ = | (prompt-validation-error nil)
+              :tags $ #{} :regression :unit
+        'read-prompt-event $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn read-prompt-event (event)
+              let
+                  text $ option:fold (get event :value)
+                    fn () |
+                    fn (value)
+                      if (string? value) (unsafe-coerce value 'String) |
+                  keycode-value $ option:unwrap-or (get event :key-code)
+                    option:unwrap-or (get event :keycode) 0
+                  keycode $ if (number? keycode-value) (unsafe-coerce keycode-value 'Number) 0
+                  meta? $ option:fold (get event :meta?)
+                    fn () false
+                    fn (value)
+                      if (bool? value) (unsafe-coerce value 'Bool) false
+                  ctrl? $ option:fold (get event :ctrl?)
+                    fn () false
+                    fn (value)
+                      if (bool? value) (unsafe-coerce value 'Bool) false
+                %{} PromptEvent (:text text) (:keycode keycode) (:meta? meta?) (:ctrl? ctrl?)
+          :examples $ []
+          :schema $ :: 'Fn
+            {} (:return 'respo-alerts.core/PromptEvent)
+              :args $ [] (:: 'Map 'Tag 'Dynamic)
+          :tests $ []
+            %{} 'TestEntry (:name |reads-key-modifiers)
+              :code $ quote
+                let
+                    event $ unsafe-coerce
+                      read-prompt-event $ {} (:value |hello) (:keycode 13) (:meta? true) (:ctrl? true)
+                      , 'respo-alerts.core/PromptEvent
+                  is $ = 13 (:keycode event)
+                  is $ :meta? event
+                  is $ :ctrl? event
+            %{} 'TestEntry (:name |prefers-canonical-key-code)
+              :code $ quote
+                let
+                    event $ unsafe-coerce
+                      read-prompt-event $ {} (:key-code 27) (:keycode 13)
+                      , 'respo-alerts.core/PromptEvent
+                  is $ = 27 (:keycode event)
+        'store-prompt-task! $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn store-prompt-task! (cursor task)
+              do
+                reset! *prompt-tasks $ assoc @*prompt-tasks cursor task
+                , &unit
+          :examples $ []
+          :schema $ :: 'Fn
+            {} (:return 'Unit)
+              :args $ [] 'List
+                :: 'Fn $ {} (:return 'Unit)
+                  :args $ [] 'String
         'style-clear $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defstyle style-clear $ {}
@@ -1012,6 +1206,42 @@
               |& $ {} (:padding |8px)
           :examples $ []
           :schema $ :: 'Dynamic
+        'take-prompt-task! $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            defn take-prompt-task! (cursor)
+              let
+                  task $ get @*prompt-tasks cursor
+                clear-prompt-task! cursor
+                , task
+          :examples $ []
+          :schema $ :: 'Fn
+            {}
+              :args $ [] 'List
+              :return $ :: 'Option
+                :: 'Fn $ {} (:return 'Unit)
+                  :args $ [] 'String
+          :tests $ []
+            %{} 'TestEntry (:name |persists-across-renders)
+              :code $ quote
+                let
+                    cursor $ [] :prompt-test
+                    *called $ atom |
+                    callback $ fn (text)
+                      do (reset! *called text) &unit
+                  store-prompt-task! cursor callback
+                  option:fold (take-prompt-task! cursor)
+                    fn () &unit
+                    fn (task)
+                      hint-fn $ {}
+                        :args $ []
+                          :: 'Fn $ {}
+                            :args $ [] 'String
+                            :return 'Unit
+                        :return 'Unit
+                      task |hello
+                  is $ = |hello @*called
+                  is $ option:none? (take-prompt-task! cursor)
+              :tags $ #{} :regression :unit
         'use-alert $ %{} 'CodeEntry (:doc "||Alert dialog hook. Shows a simple message box. Returns a plugin object with .show method to display the alert.")
           :code $ quote
             defplugin use-alert (states options)
@@ -1047,20 +1277,27 @@
               let
                   cursor $ read-field states :cursor
                   state $ either (read-field states :data)
-                    {} (:show? false) (:text nil)
-                  *next-confirm-task $ atom nil
+                    {} (:show? false) (:text |)
                   node $ comp-confirm-modal
                     if
                       blank? $ read-field state :text
                       , options $ assoc options :text (read-field state :text)
                     read-field state :show?
                     fn (e d!)
-                      if (some? @*next-confirm-task) (@*next-confirm-task)
-                      .set! *next-confirm-task nil
-                    fn (d!)
                       d! cursor $ assoc state :show? false
-                      .set! *next-confirm-task nil
-                %:: confirm-actions-plugin :plugin node cursor state *next-confirm-task
+                      option:fold (take-prompt-task! cursor)
+                        fn () &unit
+                        fn (task)
+                          hint-fn $ {}
+                            :args $ []
+                              :: 'Fn $ {}
+                                :args $ [] 'String
+                                :return 'Unit
+                            :return 'Unit
+                          task |
+                    fn (d!) (clear-prompt-task! cursor)
+                      d! cursor $ assoc state :show? false
+                %:: confirm-actions-plugin :plugin node cursor state
           :examples $ []
             quote $ let
                 confirm-plugin $ use-confirm (>> states :confirm)
@@ -1163,17 +1400,24 @@
               let
                   cursor $ read-field states :cursor
                   state $ either (read-field states :data)
-                    {} (:show? false) (:failure nil)
-                  *next-prompt-task $ atom nil
+                    {} $ :show? false
                   node $ comp-prompt-modal (>> states :modal) options (read-field state :show?)
                     fn (text d!)
-                      if (some? @*next-prompt-task) (@*next-prompt-task text)
-                      reset! *next-prompt-task nil
+                      do
+                        d! cursor $ assoc state :show? false
+                        option:fold (take-prompt-task! cursor)
+                          fn () &unit
+                          fn (task)
+                            hint-fn $ {}
+                              :args $ []
+                                :: 'Fn $ {}
+                                  :args $ [] 'String
+                                  :return 'Unit
+                              :return 'Unit
+                            task text
+                    fn (d!) (clear-prompt-task! cursor)
                       d! cursor $ assoc state :show? false
-                    fn (d!)
-                      d! cursor $ assoc state :show? false
-                      reset! *next-prompt-task nil
-                %:: prompt-actions-plugin :plugin node cursor state *next-prompt-task
+                %:: prompt-actions-plugin :plugin node cursor state
           :examples $ []
             quote $ let
                 prompt-plugin $ use-prompt (>> states :prompt)
@@ -1347,7 +1591,7 @@
                   {}
                     :class-name $ str-spaced style-trigger (if show? style-trigger-active)
                     :style $ merge (read-field options :trigger-style)
-                      if show? $ get options :trigger-active-style
+                      if show? $ read-field options :trigger-active-style
           :examples $ []
             quote $ comp-trigger show?
               button
@@ -1423,7 +1667,8 @@
         'read-field $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn read-field (value field)
-              if (struct? value) (&struct:get value field) (&map:get value field)
+              if (struct? value) (&struct:get value field)
+                if (map? value) (&map:get value field) nil
           :examples $ []
           :schema $ :: 'Fn
             {} (:return 'Dynamic)
@@ -1434,6 +1679,9 @@
                 assert= 1 $ read-field
                   {} $ :value 1
                   , :value
+            %{} 'TestEntry (:name |handles-absent-options)
+              :code $ quote
+                assert= nil $ read-field nil :trigger-style
         'select-element! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn select-element! (query)
