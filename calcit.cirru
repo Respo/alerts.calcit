@@ -800,7 +800,9 @@
                                       , 'respo-alerts.core/PromptKeyAction
                                   match action
                                     (:submit) (check-submit! d!)
-                                    (:close) (on-close! d!)
+                                    (:close)
+                                      do (on-close! d!)
+                                        d! cursor $ -> state (assoc :text |) (assoc :failure |)
                                     (:ignore) &unit
                               :placeholder $ either (read-field options :placeholder) |
                           if (read-field options :multiline?)
@@ -1084,10 +1086,9 @@
                     fn () |
                     fn (value)
                       if (string? value) (unsafe-coerce value 'String) |
-                  keycode $ option:fold (get event :keycode)
-                    fn () 0
-                    fn (value)
-                      if (number? value) (unsafe-coerce value 'Number) 0
+                  keycode-value $ option:unwrap-or (get event :key-code)
+                    option:unwrap-or (get event :keycode) 0
+                  keycode $ if (number? keycode-value) (unsafe-coerce keycode-value 'Number) 0
                   meta? $ option:fold (get event :meta?)
                     fn () false
                     fn (value)
@@ -1111,6 +1112,13 @@
                   is $ = 13 (:keycode event)
                   is $ :meta? event
                   is $ :ctrl? event
+            %{} 'TestEntry (:name |prefers-canonical-key-code)
+              :code $ quote
+                let
+                    event $ unsafe-coerce
+                      read-prompt-event $ {} (:key-code 27) (:keycode 13)
+                      , 'respo-alerts.core/PromptEvent
+                  is $ = 27 (:keycode event)
         'store-prompt-task! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn store-prompt-task! (cursor task)
