@@ -846,7 +846,7 @@
           :code $ quote
             defeffect effect-fade (show?) (action el at-place?)
               case-default action nil
-                :before-update $ if show? nil
+                :before-update $ if show?
                   if
                     js-present? $ .-firstElementChild el
                     let
@@ -866,6 +866,7 @@
                       js/setTimeout
                         fn () $ .!remove cloned
                         , 240
+                  , nil
                 :update $ if show?
                   let
                       target $ unsafe-coerce (.-firstElementChild el) 'JsObject
@@ -928,7 +929,7 @@
           :code $ quote
             defeffect effect-slide (show?) (action el at-place?)
               case-default action nil
-                :before-update $ if show? nil
+                :before-update $ if show?
                   if
                     js-present? $ .-firstElementChild el
                     let
@@ -948,6 +949,7 @@
                       js/setTimeout
                         fn () $ .!remove cloned
                         , 240
+                  , nil
                 :update $ if show?
                   let
                       target $ unsafe-coerce (.-firstElementChild el) 'JsObject
