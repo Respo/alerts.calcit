@@ -805,35 +805,35 @@
                           <> $ either (read-field options :text) "|Type in text"
                         =< nil 8
                         let
-                            props $ {} (:value text)
-                              :on-input $ fn (e d!)
+                            props $ respo-schema/DomProps :value text :on-input
+                              fn (e d!)
                                 d! cursor $ assoc state :text (prompt-event-text e)
-                              :on-keydown $ fn (e d!)
-                                let
-                                    event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
-                                    action $ unsafe-coerce
-                                      prompt-key-action event-info $ read-field options :multiline?
-                                      , 'respo-alerts.core/PromptKeyAction
-                                  match action
-                                    (:submit) (check-submit! d!)
-                                    (:close)
-                                      do (on-close! d!)
-                                        d! cursor $ -> state (assoc :text |) (assoc :failure |)
-                                    (:ignore) &unit
-                              :placeholder $ either (read-field options :placeholder) |
+                              , :on-keydown
+                                fn (e d!)
+                                  let
+                                      event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
+                                      action $ unsafe-coerce
+                                        prompt-key-action event-info $ read-field options :multiline?
+                                        , 'respo-alerts.core/PromptKeyAction
+                                    match action
+                                      (:submit) (check-submit! d!)
+                                      (:close)
+                                        do (on-close! d!)
+                                          d! cursor $ -> state (assoc :text |) (assoc :failure |)
+                                      (:ignore) &unit
+                                , :placeholder
+                                  either (read-field options :placeholder) |
                           if (read-field options :multiline?)
-                            textarea $ merge props
-                              {}
-                                :class-name $ str-spaced schema/input-box-name css/textarea (read-field options :input-class)
-                                :style $ merge
-                                  {} (:width |100%) (:min-height 120) (:max-height |50vh)
-                                  read-field options :input-style
-                            input $ merge props
-                              {}
-                                :class-name $ str-spaced schema/input-box-name css/input (read-field options :input-class)
-                                :style $ merge
-                                  {} $ :width |100%
-                                  read-field options :input-style
+                            textarea $ struct-with props
+                              :class-name $ str-spaced schema/input-box-name css/textarea (read-field options :input-class)
+                              :style $ merge
+                                {} (:width |100%) (:min-height 120) (:max-height |50vh)
+                                read-field options :input-style
+                            input $ struct-with props
+                              :class-name $ str-spaced schema/input-box-name css/input (read-field options :input-class)
+                              :style $ merge
+                                {} $ :width |100%
+                                read-field options :input-style
                         =< nil 16
                         div
                           {} $ :class-name css/row-parted
@@ -928,7 +928,9 @@
                 :mount $ let
                     f $ fn (event)
                       if
-                        = (.-key event) |Escape
+                        =
+                          .-key $ assert-type event 'respo.dom/DomKeyboardEvent
+                          , |Escape
                         let
                             new-event $ new js/MouseEvent (.-type event) event
                           .!dispatchEvent el new-event
@@ -1269,7 +1271,7 @@
                   fn (e d!) (.show alert-plugin d!)
                 <> |Show
           :schema $ :: 'Fn
-            {} (:return 'Enum)
+            {} (:return 'respo-alerts.core/alert-actions-plugin)
               :args $ [] 'Map 'Map
         'use-confirm $ %{} 'CodeEntry (:doc "||Confirm dialog hook. Shows a dialog with confirm/cancel buttons. Returns a plugin object, call .show with a callback function that executes after confirmation.")
           :code $ quote
@@ -1316,7 +1318,7 @@
                     .show-with-text confirm-plugin d! "|Confirm with dynamic text?" $ fn () (println |Confirmed!)
                 <> "|Show with text"
           :schema $ :: 'Fn
-            {} (:return 'Enum)
+            {} (:return 'respo-alerts.core/confirm-actions-plugin)
               :args $ [] 'Map 'Map
         'use-drawer $ %{} 'CodeEntry (:doc "||Drawer hook. Shows a panel sliding from the side. Use :render function in options to customize content. Supports :style for width and other styles.")
           :code $ quote
@@ -1341,7 +1343,7 @@
                   fn (e d!) (.show drawer-plugin d!)
                 <> "|Open Drawer"
           :schema $ :: 'Fn
-            {} (:return 'Enum)
+            {} (:return 'respo-alerts.core/drawer-actions-plugin)
               :args $ [] 'Map 'Map
         'use-modal $ %{} 'CodeEntry (:doc "||Modal dialog hook. Shows a modal with custom content. Use :render function in options to customize content. Returns a plugin object.")
           :code $ quote
@@ -1365,7 +1367,7 @@
                   fn (e d!) (.show modal-plugin d!)
                 <> |Open
           :schema $ :: 'Fn
-            {} (:return 'Enum)
+            {} (:return 'respo-alerts.core/modal-actions-plugin)
               :args $ [] 'Map 'Map
         'use-modal-menu $ %{} 'CodeEntry (:doc "||Modal menu hook. Shows a modal dialog with a list of options. Define options via :items and handle selection via :on-result in options.")
           :code $ quote
@@ -1392,7 +1394,7 @@
                   fn (e d!) (.show menu-plugin d!)
                 <> |Menu
           :schema $ :: 'Fn
-            {} (:return 'Enum)
+            {} (:return 'respo-alerts.core/modal-menu-actions-plugin)
               :args $ [] 'Map 'Map
         'use-prompt $ %{} 'CodeEntry (:doc "||Prompt dialog hook. Shows a dialog with text input. Returns a plugin object, call .show with a callback function to receive user input text.")
           :code $ quote
@@ -1428,7 +1430,7 @@
                     .show prompt-plugin d! $ fn (text) (println |got: text)
                 <> |Input
           :schema $ :: 'Fn
-            {} (:return 'Enum)
+            {} (:return 'respo-alerts.core/prompt-actions-plugin)
               :args $ [] 'Map 'Map
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote
@@ -1457,13 +1459,15 @@
             defn dispatch! (op)
               do
                 when
-                  and config/dev? $ not= :states op
+                  and config/dev? $ match op
+                    (:states ignored-cursor ignored-state) false
+                    _ true
                   js/console.log |Dispatch: op
                 reset! *reel $ reel-updater updater @*reel op
           :examples $ []
           :schema $ :: 'Fn
             {} (:return 'Tag)
-              :args $ [] 'List
+              :args $ [] 'Enum
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn main! ()
