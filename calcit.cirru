@@ -1460,7 +1460,7 @@
               do
                 when
                   and config/dev? $ match op
-                    (:states _ _) false
+                    (:states ignored-cursor ignored-state) false
                     _ true
                   js/console.log |Dispatch: op
                 reset! *reel $ reel-updater updater @*reel op
