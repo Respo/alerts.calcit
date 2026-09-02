@@ -1269,7 +1269,7 @@
                   fn (e d!) (.show alert-plugin d!)
                 <> |Show
           :schema $ :: 'Fn
-            {} (:return 'Enum)
+            {} (:return 'respo-alerts.core/alert-actions-plugin)
               :args $ [] 'Map 'Map
         'use-confirm $ %{} 'CodeEntry (:doc "||Confirm dialog hook. Shows a dialog with confirm/cancel buttons. Returns a plugin object, call .show with a callback function that executes after confirmation.")
           :code $ quote
@@ -1316,7 +1316,7 @@
                     .show-with-text confirm-plugin d! "|Confirm with dynamic text?" $ fn () (println |Confirmed!)
                 <> "|Show with text"
           :schema $ :: 'Fn
-            {} (:return 'Enum)
+            {} (:return 'respo-alerts.core/confirm-actions-plugin)
               :args $ [] 'Map 'Map
         'use-drawer $ %{} 'CodeEntry (:doc "||Drawer hook. Shows a panel sliding from the side. Use :render function in options to customize content. Supports :style for width and other styles.")
           :code $ quote
@@ -1341,7 +1341,7 @@
                   fn (e d!) (.show drawer-plugin d!)
                 <> "|Open Drawer"
           :schema $ :: 'Fn
-            {} (:return 'Enum)
+            {} (:return 'respo-alerts.core/drawer-actions-plugin)
               :args $ [] 'Map 'Map
         'use-modal $ %{} 'CodeEntry (:doc "||Modal dialog hook. Shows a modal with custom content. Use :render function in options to customize content. Returns a plugin object.")
           :code $ quote
@@ -1365,7 +1365,7 @@
                   fn (e d!) (.show modal-plugin d!)
                 <> |Open
           :schema $ :: 'Fn
-            {} (:return 'Enum)
+            {} (:return 'respo-alerts.core/modal-actions-plugin)
               :args $ [] 'Map 'Map
         'use-modal-menu $ %{} 'CodeEntry (:doc "||Modal menu hook. Shows a modal dialog with a list of options. Define options via :items and handle selection via :on-result in options.")
           :code $ quote
@@ -1392,7 +1392,7 @@
                   fn (e d!) (.show menu-plugin d!)
                 <> |Menu
           :schema $ :: 'Fn
-            {} (:return 'Enum)
+            {} (:return 'respo-alerts.core/modal-menu-actions-plugin)
               :args $ [] 'Map 'Map
         'use-prompt $ %{} 'CodeEntry (:doc "||Prompt dialog hook. Shows a dialog with text input. Returns a plugin object, call .show with a callback function to receive user input text.")
           :code $ quote
@@ -1428,7 +1428,7 @@
                     .show prompt-plugin d! $ fn (text) (println |got: text)
                 <> |Input
           :schema $ :: 'Fn
-            {} (:return 'Enum)
+            {} (:return 'respo-alerts.core/prompt-actions-plugin)
               :args $ [] 'Map 'Map
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote
