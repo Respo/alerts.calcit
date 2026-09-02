@@ -805,35 +805,35 @@
                           <> $ either (read-field options :text) "|Type in text"
                         =< nil 8
                         let
-                            props $ {} (:value text)
-                              :on-input $ fn (e d!)
+                            props $ respo-schema/DomProps :value text :on-input
+                              fn (e d!)
                                 d! cursor $ assoc state :text (prompt-event-text e)
-                              :on-keydown $ fn (e d!)
-                                let
-                                    event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
-                                    action $ unsafe-coerce
-                                      prompt-key-action event-info $ read-field options :multiline?
-                                      , 'respo-alerts.core/PromptKeyAction
-                                  match action
-                                    (:submit) (check-submit! d!)
-                                    (:close)
-                                      do (on-close! d!)
-                                        d! cursor $ -> state (assoc :text |) (assoc :failure |)
-                                    (:ignore) &unit
-                              :placeholder $ either (read-field options :placeholder) |
+                              , :on-keydown
+                                fn (e d!)
+                                  let
+                                      event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
+                                      action $ unsafe-coerce
+                                        prompt-key-action event-info $ read-field options :multiline?
+                                        , 'respo-alerts.core/PromptKeyAction
+                                    match action
+                                      (:submit) (check-submit! d!)
+                                      (:close)
+                                        do (on-close! d!)
+                                          d! cursor $ -> state (assoc :text |) (assoc :failure |)
+                                      (:ignore) &unit
+                                , :placeholder
+                                  either (read-field options :placeholder) |
                           if (read-field options :multiline?)
-                            textarea $ merge props
-                              {}
-                                :class-name $ str-spaced schema/input-box-name css/textarea (read-field options :input-class)
-                                :style $ merge
-                                  {} (:width |100%) (:min-height 120) (:max-height |50vh)
-                                  read-field options :input-style
-                            input $ merge props
-                              {}
-                                :class-name $ str-spaced schema/input-box-name css/input (read-field options :input-class)
-                                :style $ merge
-                                  {} $ :width |100%
-                                  read-field options :input-style
+                            textarea $ struct-with props
+                              :class-name $ str-spaced schema/input-box-name css/textarea (read-field options :input-class)
+                              :style $ merge
+                                {} (:width |100%) (:min-height 120) (:max-height |50vh)
+                                read-field options :input-style
+                            input $ struct-with props
+                              :class-name $ str-spaced schema/input-box-name css/input (read-field options :input-class)
+                              :style $ merge
+                                {} $ :width |100%
+                                read-field options :input-style
                         =< nil 16
                         div
                           {} $ :class-name css/row-parted
@@ -928,7 +928,9 @@
                 :mount $ let
                     f $ fn (event)
                       if
-                        = (.-key event) |Escape
+                        =
+                          .-key $ assert-type event 'respo.dom/DomKeyboardEvent
+                          , |Escape
                         let
                             new-event $ new js/MouseEvent (.-type event) event
                           .!dispatchEvent el new-event
@@ -1457,13 +1459,15 @@
             defn dispatch! (op)
               do
                 when
-                  and config/dev? $ not= :states op
+                  and config/dev? $ match op
+                    (:states _ _) false
+                    _ true
                   js/console.log |Dispatch: op
                 reset! *reel $ reel-updater updater @*reel op
           :examples $ []
           :schema $ :: 'Fn
             {} (:return 'Tag)
-              :args $ [] 'List
+              :args $ [] 'Enum
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn main! ()
