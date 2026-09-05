@@ -805,7 +805,7 @@
                           <> $ either (read-field options :text) "|Type in text"
                         =< nil 8
                         let
-                            props $ %{}? DomProps (:value text)
+                            props $ %{} DomProps (:value text) (:class-name js/undefined) (:style js/undefined) (:inner-text js/undefined) (:id js/undefined) (:type js/undefined) (:href js/undefined) (:src js/undefined) (:name js/undefined) (:title js/undefined) (:disabled js/undefined) (:checked js/undefined) (:spell-check js/undefined) (:spellcheck js/undefined) (:autofocus js/undefined) (:tab-index js/undefined) (:read-only js/undefined) (:data-name js/undefined) (:data-comp js/undefined) (:role js/undefined) (:aria-label js/undefined) (:aria-labelledby js/undefined) (:aria-describedby js/undefined) (:aria-hidden js/undefined) (:selected js/undefined) (:target js/undefined) (:on-click js/undefined) (:on-focus js/undefined) (:on-blur js/undefined) (:on-keyup js/undefined) (:on-change js/undefined) (:on-mousedown js/undefined) (:on-mouseup js/undefined) (:innerHTML js/undefined) (:rel js/undefined) (:defer js/undefined) (:on js/undefined) (:alt js/undefined) (:draggable js/undefined) (:content js/undefined) (:charset js/undefined) (:multiple js/undefined) (:accept js/undefined) (:ref js/undefined)
                               :on-input $ fn (e d!)
                                 d! cursor $ assoc state :text (prompt-event-text e)
                               :on-keydown $
