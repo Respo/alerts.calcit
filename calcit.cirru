@@ -808,20 +808,19 @@
                             props $ %{} DomProps (:value text) (:class-name js/undefined) (:style js/undefined) (:inner-text js/undefined) (:id js/undefined) (:type js/undefined) (:href js/undefined) (:src js/undefined) (:name js/undefined) (:title js/undefined) (:disabled js/undefined) (:checked js/undefined) (:spell-check js/undefined) (:spellcheck js/undefined) (:autofocus js/undefined) (:tab-index js/undefined) (:read-only js/undefined) (:data-name js/undefined) (:data-comp js/undefined) (:role js/undefined) (:aria-label js/undefined) (:aria-labelledby js/undefined) (:aria-describedby js/undefined) (:aria-hidden js/undefined) (:selected js/undefined) (:target js/undefined) (:on-click js/undefined) (:on-focus js/undefined) (:on-blur js/undefined) (:on-keyup js/undefined) (:on-change js/undefined) (:on-mousedown js/undefined) (:on-mouseup js/undefined) (:innerHTML js/undefined) (:rel js/undefined) (:defer js/undefined) (:on js/undefined) (:alt js/undefined) (:draggable js/undefined) (:content js/undefined) (:charset js/undefined) (:multiple js/undefined) (:accept js/undefined) (:ref js/undefined)
                               :on-input $ fn (e d!)
                                 d! cursor $ assoc state :text (prompt-event-text e)
-                              :on-keydown $
-                                fn (e d!)
-                                  let
-                                      event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
-                                      action $ unsafe-coerce
-                                        prompt-key-action event-info $ read-field options :multiline?
-                                        , 'respo-alerts.core/PromptKeyAction
-                                    match action
-                                      (:submit) (check-submit! d!)
-                                      (:close)
-                                        do (on-close! d!)
-                                          d! cursor $ -> state (assoc :text |) (assoc :failure |)
-                                      (:ignore) &unit
-                              :placeholder $ either (read-field options :placeholder) |
+                              :on-keydown $ fn (e d!)
+                                let
+                                    event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
+                                    action $ unsafe-coerce
+                                      prompt-key-action event-info $ read-field options :multiline?
+                                      , 'respo-alerts.core/PromptKeyAction
+                                  match action
+                                    (:submit) (check-submit! d!)
+                                    (:close)
+                                      do (on-close! d!)
+                                        d! cursor $ -> state (assoc :text |) (assoc :failure |)
+                                    (:ignore) &unit
+                              :placeholder $ either (read-field options :placeholder) js/undefined
                           if (read-field options :multiline?)
                             textarea $ struct-with props
                               :class-name $ str-spaced schema/input-box-name css/textarea (read-field options :input-class)
