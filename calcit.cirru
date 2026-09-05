@@ -805,10 +805,10 @@
                           <> $ either (read-field options :text) "|Type in text"
                         =< nil 8
                         let
-                            props $ respo-schema/DomProps :value text :on-input
-                              fn (e d!)
+                            props $ %{}? DomProps (:value text)
+                              :on-input $ fn (e d!)
                                 d! cursor $ assoc state :text (prompt-event-text e)
-                              , :on-keydown
+                              :on-keydown $
                                 fn (e d!)
                                   let
                                       event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
@@ -821,8 +821,7 @@
                                         do (on-close! d!)
                                           d! cursor $ -> state (assoc :text |) (assoc :failure |)
                                       (:ignore) &unit
-                                , :placeholder
-                                  either (read-field options :placeholder) |
+                              :placeholder $ either (read-field options :placeholder) |
                           if (read-field options :multiline?)
                             textarea $ struct-with props
                               :class-name $ str-spaced schema/input-box-name css/textarea (read-field options :input-class)
@@ -1436,7 +1435,7 @@
         :code $ quote
           ns respo-alerts.core $ :require
             respo.util.format :refer $ hsl
-            respo.schema :as respo-schema
+            respo.schema :refer $ DomProps
             respo-ui.core :as ui
             respo-ui.css :as css
             respo.core :refer $ defcomp defplugin list-> <> >> div button textarea span input a defeffect
@@ -1464,9 +1463,10 @@
                     _ true
                   js/console.log |Dispatch: op
                 reset! *reel $ reel-updater updater @*reel op
+                , &unit
           :examples $ []
           :schema $ :: 'Fn
-            {} (:return 'Tag)
+            {} (:return 'Unit)
               :args $ [] 'Enum
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote
