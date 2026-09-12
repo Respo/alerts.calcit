@@ -1,5 +1,5 @@
 
-{} (:about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `calcit query` to inspect and `calcit edit`/`calcit tree` to modify. Run `calcit docs agents --full` first. Manual edits must follow format and schema conventions, then run `calcit edit format`.") (:package |respo-alerts)
+{} (:about "|Machine-generated snapshot. Do not edit directly — changes will be overwritten. Use `calcit query` to inspect and `calcit edit`/`calcit tree` to modify. Run `calcit docs agents --contract` before mutations; use `--full` for first orientation or changed contract digest. Manual edits must follow format and schema conventions, then run `calcit edit format`.") (:package |respo-alerts)
   :entries $ {}
     :default $ {} (:description |) (:init-fn 'respo-alerts.main/main!) (:mode :js) (:reload-fn 'respo-alerts.main/reload!)
       :feature-policy $ {}
@@ -490,7 +490,7 @@
           :schema $ :: 'Trait
         'PluginNodeCursorState $ %{} 'CodeEntry (:doc |)
           :code $ quote
-            defenum PluginNodeCursorState $ :plugin 'Enum 'List 'Map
+            defenum PluginNodeCursorState $ :plugin 'Enum 'List (:: 'Map 'Dynamic 'Dynamic)
           :examples $ []
           :schema $ :: 'Enum
         'PromptActions $ %{} 'CodeEntry (:doc |)
@@ -510,7 +510,7 @@
           :schema $ :: 'EnumDef
         'PromptPluginNodeCursorState $ %{} 'CodeEntry (:doc |)
           :code $ quote
-            defenum PromptPluginNodeCursorState $ :plugin 'Enum 'List 'Map
+            defenum PromptPluginNodeCursorState $ :plugin 'Enum 'List (:: 'Map 'Dynamic 'Dynamic)
           :examples $ []
           :schema $ :: 'Enum
         'alert-actions-plugin $ %{} 'CodeEntry (:doc |)
@@ -1270,7 +1270,7 @@
                 <> |Show
           :schema $ :: 'Fn
             {} (:return 'respo-alerts.core/alert-actions-plugin)
-              :args $ [] 'Map 'Map
+              :args $ [] (:: 'Map 'Dynamic 'Dynamic) (:: 'Map 'Dynamic 'Dynamic)
         'use-confirm $ %{} 'CodeEntry (:doc "||Confirm dialog hook. Shows a dialog with confirm/cancel buttons. Returns a plugin object, call .show with a callback function that executes after confirmation.")
           :code $ quote
             defplugin use-confirm (states options)
@@ -1317,7 +1317,7 @@
                 <> "|Show with text"
           :schema $ :: 'Fn
             {} (:return 'respo-alerts.core/confirm-actions-plugin)
-              :args $ [] 'Map 'Map
+              :args $ [] (:: 'Map 'Dynamic 'Dynamic) (:: 'Map 'Dynamic 'Dynamic)
         'use-drawer $ %{} 'CodeEntry (:doc "||Drawer hook. Shows a panel sliding from the side. Use :render function in options to customize content. Supports :style for width and other styles.")
           :code $ quote
             defn use-drawer (states options)
@@ -1342,7 +1342,7 @@
                 <> "|Open Drawer"
           :schema $ :: 'Fn
             {} (:return 'respo-alerts.core/drawer-actions-plugin)
-              :args $ [] 'Map 'Map
+              :args $ [] (:: 'Map 'Dynamic 'Dynamic) (:: 'Map 'Dynamic 'Dynamic)
         'use-modal $ %{} 'CodeEntry (:doc "||Modal dialog hook. Shows a modal with custom content. Use :render function in options to customize content. Returns a plugin object.")
           :code $ quote
             defn use-modal (states options)
@@ -1366,7 +1366,7 @@
                 <> |Open
           :schema $ :: 'Fn
             {} (:return 'respo-alerts.core/modal-actions-plugin)
-              :args $ [] 'Map 'Map
+              :args $ [] (:: 'Map 'Dynamic 'Dynamic) (:: 'Map 'Dynamic 'Dynamic)
         'use-modal-menu $ %{} 'CodeEntry (:doc "||Modal menu hook. Shows a modal dialog with a list of options. Define options via :items and handle selection via :on-result in options.")
           :code $ quote
             defn use-modal-menu (states options)
@@ -1393,7 +1393,7 @@
                 <> |Menu
           :schema $ :: 'Fn
             {} (:return 'respo-alerts.core/modal-menu-actions-plugin)
-              :args $ [] 'Map 'Map
+              :args $ [] (:: 'Map 'Dynamic 'Dynamic) (:: 'Map 'Dynamic 'Dynamic)
         'use-prompt $ %{} 'CodeEntry (:doc "||Prompt dialog hook. Shows a dialog with text input. Returns a plugin object, call .show with a callback function to receive user input text.")
           :code $ quote
             defplugin use-prompt (states options)
@@ -1429,7 +1429,7 @@
                 <> |Input
           :schema $ :: 'Fn
             {} (:return 'respo-alerts.core/prompt-actions-plugin)
-              :args $ [] 'Map 'Map
+              :args $ [] (:: 'Map 'Dynamic 'Dynamic) (:: 'Map 'Dynamic 'Dynamic)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote
           ns respo-alerts.core $ :require
@@ -1498,7 +1498,10 @@
               js/localStorage.setItem (:storage-key config/site)
                 format-cirru-edn $ :store @*reel
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Fn
+            {} (:rest 'Dynamic) (:return 'Dynamic)
+              :args $ []
+              :features $ #{} :js-ffi
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn reload! () $ if (nil? build-errors)
@@ -1508,12 +1511,18 @@
                 hud! |ok~ |Ok
               hud! |error build-errors
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Fn
+            {} (:return 'Dynamic)
+              :args $ []
+              :features $ #{} :js-ffi
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn render-app! () $ render! mount-target (comp-container @*reel) dispatch!
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Fn
+            {} (:return 'Dynamic)
+              :args $ []
+              :features $ #{} :js-ffi
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote
           ns respo-alerts.main $ :require
@@ -1643,8 +1652,9 @@
                 _ $ do (js/console.warn "|Unknown op:" op) store
           :examples $ []
           :schema $ :: 'Fn
-            {} (:return 'Map)
-              :args $ [] 'Map 'Enum 'String 'Number
+            {}
+              :args $ [] (:: 'Map 'Dynamic 'Dynamic) 'Enum 'String 'Number
+              :return $ :: 'Map 'Dynamic 'Dynamic
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote
           ns respo-alerts.updater $ :require
@@ -1670,7 +1680,8 @@
         'read-field $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn read-field (value field)
-              if (struct? value) (&struct:get value field)
+              if (struct? value)
+                &map:get (&struct:to-map value) field
                 if (map? value) (&map:get value field) nil
           :examples $ []
           :schema $ :: 'Fn
