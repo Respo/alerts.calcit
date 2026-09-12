@@ -246,15 +246,15 @@
                 match self $
                   :plugin node cursor state
                   if (some? text)
-                    d! cursor $ -> state (assoc :show? true) (assoc :text text)
-                    d! cursor $ assoc state :show? true
+                    d! cursor $ -> state (&map:assoc :show? true) (&map:assoc :text text)
+                    d! cursor $ &map:assoc state :show? true
               .close $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] 'Dynamic 'Fn
                   :return 'Dynamic
                 match self $
                   :plugin node cursor state
-                  d! cursor $ assoc state :show? false
+                  d! cursor $ &map:assoc state :show? false
               .show? $ fn (self)
                 hint-fn $ {}
                   :args $ [] 'Dynamic
@@ -282,7 +282,7 @@
                   :plugin node cursor state
                   do
                     store-prompt-task! cursor $ fn (ignored) (next-task)
-                    d! cursor $ -> state (assoc :show? true) (assoc :text |)
+                    d! cursor $ -> state (&map:assoc :show? true) (&map:assoc :text |)
               .show-with-text $ fn (self d! text next-task)
                 hint-fn $ {}
                   :args $ [] 'Dynamic 'Fn 'String 'Fn
@@ -291,7 +291,7 @@
                   :plugin node cursor state
                   do
                     store-prompt-task! cursor $ fn (ignored) (next-task)
-                    d! cursor $ -> state (assoc :show? true) (assoc :text text)
+                    d! cursor $ -> state (&map:assoc :show? true) (&map:assoc :text text)
               .close $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] 'Dynamic 'Fn
@@ -299,7 +299,7 @@
                 match self $
                   :plugin node cursor state
                   do (clear-prompt-task! cursor)
-                    d! cursor $ assoc state :show? false
+                    d! cursor $ &map:assoc state :show? false
               .show? $ fn (self)
                 hint-fn $ {}
                   :args $ [] 'Dynamic
@@ -325,14 +325,14 @@
                   :return 'Dynamic
                 match self $
                   :plugin node cursor state
-                  d! cursor $ assoc state :show? true
+                  d! cursor $ &map:assoc state :show? true
               .close $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] 'Dynamic 'Fn
                   :return 'Dynamic
                 match self $
                   :plugin node cursor state
-                  d! cursor $ assoc state :show? false
+                  d! cursor $ &map:assoc state :show? false
               .show? $ fn (self)
                 hint-fn $ {}
                   :args $ [] 'Dynamic
@@ -358,14 +358,14 @@
                   :return 'Dynamic
                 match self $
                   :plugin node cursor state
-                  d! cursor $ assoc state :show? true
+                  d! cursor $ &map:assoc state :show? true
               .close $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] 'Dynamic 'Fn
                   :return 'Dynamic
                 match self $
                   :plugin node cursor state
-                  d! cursor $ assoc state :show? false
+                  d! cursor $ &map:assoc state :show? false
               .show? $ fn (self)
                 hint-fn $ {}
                   :args $ [] 'Dynamic
@@ -391,14 +391,14 @@
                   :return 'Dynamic
                 match self $
                   :plugin node cursor state
-                  d! cursor $ assoc state :show? true
+                  d! cursor $ &map:assoc state :show? true
               .close $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] 'Dynamic 'Fn
                   :return 'Dynamic
                 match self $
                   :plugin node cursor state
-                  d! cursor $ assoc state :show? false
+                  d! cursor $ &map:assoc state :show? false
               .show? $ fn (self)
                 hint-fn $ {}
                   :args $ [] 'Dynamic
@@ -425,7 +425,7 @@
                 match self $
                   :plugin node cursor state
                   do (store-prompt-task! cursor next-task)
-                    d! cursor $ assoc state :show? true
+                    d! cursor $ &map:assoc state :show? true
               .close $ fn (self d!)
                 hint-fn $ {}
                   :args $ [] 'Dynamic 'Fn
@@ -433,7 +433,7 @@
                 match self $
                   :plugin node cursor state
                   do (clear-prompt-task! cursor)
-                    d! cursor $ assoc state :show? false
+                    d! cursor $ &map:assoc state :show? false
               .show? $ fn (self)
                 hint-fn $ {}
                   :args $ [] 'Dynamic
@@ -544,7 +544,9 @@
                       :on-click $ fn (e d!)
                         let
                             event $ .-event e
-                          if (js-present? event) (.!stopPropagation event) %none
+                          if (js-present? event)
+                            .stop-propagation $ unsafe-coerce event respo-alerts.util/AlertsDom
+                            , %none
                           on-close! d!
                           on-read! e d!
                     div
@@ -622,7 +624,9 @@
                       :on-click $ fn (e d!)
                         let
                             event $ .-event e
-                          if (js-present? event) (.!stopPropagation event) %none
+                          if (js-present? event)
+                            .stop-propagation $ unsafe-coerce event respo-alerts.util/AlertsDom
+                            , %none
                           on-close d!
                     div
                       {}
@@ -676,7 +680,9 @@
                       :on-click $ fn (e d!)
                         let
                             event $ .-event e
-                          if (js-present? event) (.!stopPropagation event) %none
+                          if (js-present? event)
+                            .stop-propagation $ unsafe-coerce event respo-alerts.util/AlertsDom
+                            , %none
                           on-close d!
                     div
                       {}
@@ -718,7 +724,9 @@
                       :on-click $ fn (e d!)
                         let
                             event $ .-event e
-                          if (js-present? event) (.!stopPropagation event) %none
+                          if (js-present? event)
+                            .stop-propagation $ unsafe-coerce event respo-alerts.util/AlertsDom
+                            , %none
                           on-close! d!
                     div
                       {}
@@ -779,9 +787,9 @@
                           , |
                       if
                         not $ blank? result
-                        d! cursor $ assoc state :failure result
+                        d! cursor $ &map:assoc state :failure result
                         do (on-finish! text d!) (on-close! d!)
-                          d! cursor $ -> state (assoc :text |) (assoc :failure |)
+                          d! cursor $ -> state (&map:assoc :text |) (&map:assoc :failure |)
                 []
                   effect-select (str |. schema/input-box-name) show?
                   effect-fade show?
@@ -795,7 +803,7 @@
                           {} $ :line-height |32px
                           read-field options :backdrop-style
                         :on-click $ fn (e d!) (on-close! d!)
-                          d! cursor $ -> state (assoc :text |) (assoc :failure |)
+                          d! cursor $ -> state (&map:assoc :text |) (&map:assoc :failure |)
                       div
                         {}
                           :class-name $ str-spaced css/global css/column style-modal-card (read-field options :card-class)
@@ -807,7 +815,7 @@
                         let
                             props $ %{} DomProps (:value text) (:class-name js/undefined) (:style js/undefined) (:inner-text js/undefined) (:id js/undefined) (:type js/undefined) (:href js/undefined) (:src js/undefined) (:name js/undefined) (:title js/undefined) (:disabled js/undefined) (:checked js/undefined) (:spell-check js/undefined) (:spellcheck js/undefined) (:autofocus js/undefined) (:tab-index js/undefined) (:read-only js/undefined) (:data-name js/undefined) (:data-comp js/undefined) (:role js/undefined) (:aria-label js/undefined) (:aria-labelledby js/undefined) (:aria-describedby js/undefined) (:aria-hidden js/undefined) (:selected js/undefined) (:target js/undefined) (:on-click js/undefined) (:on-focus js/undefined) (:on-blur js/undefined) (:on-keyup js/undefined) (:on-change js/undefined) (:on-mousedown js/undefined) (:on-mouseup js/undefined) (:innerHTML js/undefined) (:rel js/undefined) (:defer js/undefined) (:on js/undefined) (:alt js/undefined) (:draggable js/undefined) (:content js/undefined) (:charset js/undefined) (:multiple js/undefined) (:accept js/undefined) (:ref js/undefined)
                               :on-input $ fn (e d!)
-                                d! cursor $ assoc state :text (prompt-event-text e)
+                                d! cursor $ &map:assoc state :text (prompt-event-text e)
                               :on-keydown $ fn (e d!)
                                 let
                                     event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
@@ -818,7 +826,7 @@
                                     (:submit) (check-submit! d!)
                                     (:close)
                                       do (on-close! d!)
-                                        d! cursor $ -> state (assoc :text |) (assoc :failure |)
+                                        d! cursor $ -> state (&map:assoc :text |) (&map:assoc :failure |)
                                     (:ignore) &unit
                               :placeholder $ either (read-field options :placeholder) js/undefined
                           if (read-field options :multiline?)
@@ -871,38 +879,42 @@
               case-default action nil
                 :before-update $ if show?
                   if
-                    js-present? $ .-firstElementChild el
+                    js-present? $ .-first-element-child (unsafe-coerce el respo-alerts.util/AlertsDom)
                     let
-                        target $ unsafe-coerce (.-firstElementChild el) 'JsObject
-                        cloned $ unsafe-coerce (.!cloneNode target true) 'JsObject
-                        style $ unsafe-coerce (.-style cloned) 'JsObject
+                        target $ unsafe-coerce
+                          .-first-element-child $ unsafe-coerce el respo-alerts.util/AlertsDom
+                          , respo-alerts.util/AlertsDom
+                        cloned $ .clone-node target true
+                        style $ .-style cloned
                         card-style $ unsafe-coerce
-                          .-style $ unsafe-coerce (.-firstElementChild cloned) 'JsObject
-                          , 'JsObject
+                          .-style $ .-first-element-child cloned
+                          , respo-alerts.util/AlertsDomStyle
                       js/document.body.appendChild cloned
                       js/setTimeout
                         fn ()
                           set! (.-opacity style) 0
-                          set! (.-transitionDuration card-style) |240ms
+                          set! (.-transition-duration card-style) |240ms
                           set! (.-transform card-style) "|scale(0.94) translate(0px,-20px)"
                         , 10
                       js/setTimeout
-                        fn () $ .!remove cloned
+                        fn () $ .remove cloned
                         , 240
                   , nil
                 :update $ if show?
                   let
-                      target $ unsafe-coerce (.-firstElementChild el) 'JsObject
+                      target $ unsafe-coerce
+                        .-first-element-child $ unsafe-coerce el respo-alerts.util/AlertsDom
+                        , respo-alerts.util/AlertsDom
                       card-style $ unsafe-coerce
-                        .-style $ unsafe-coerce (.-firstElementChild target) 'JsObject
-                        , 'JsObject
-                      style $ unsafe-coerce (.-style target) 'JsObject
+                        .-style $ .-first-element-child target
+                        , respo-alerts.util/AlertsDomStyle
+                      style $ .-style target
                     set! (.-opacity style) 0
                     set! (.-transform card-style) "|scale(0.94) translate(0px,-20px)"
                     js/setTimeout
                       fn ()
-                        set! (.-transitionDuration style) |240ms
-                        set! (.-transitionDuration card-style) |240ms
+                        set! (.-transition-duration style) |240ms
+                        set! (.-transition-duration card-style) |240ms
                         set! (.-opacity style) 1
                         set! (.-transform card-style) "|scale(1) translate(0px,0px)"
                       , 10
@@ -931,7 +943,7 @@
                           , |Escape
                         let
                             new-event $ new js/MouseEvent (.-type event) event
-                          .!dispatchEvent el new-event
+                          .dispatch-event el new-event
                   js/window.addEventListener |keydown f
                   aset el |_listener f
                 :unmount $ let
@@ -956,38 +968,42 @@
               case-default action nil
                 :before-update $ if show?
                   if
-                    js-present? $ .-firstElementChild el
+                    js-present? $ .-first-element-child (unsafe-coerce el respo-alerts.util/AlertsDom)
                     let
-                        target $ unsafe-coerce (.-firstElementChild el) 'JsObject
-                        cloned $ unsafe-coerce (.!cloneNode target true) 'JsObject
-                        style $ unsafe-coerce (.-style cloned) 'JsObject
+                        target $ unsafe-coerce
+                          .-first-element-child $ unsafe-coerce el respo-alerts.util/AlertsDom
+                          , respo-alerts.util/AlertsDom
+                        cloned $ .clone-node target true
+                        style $ .-style cloned
                         card-style $ unsafe-coerce
-                          .-style $ unsafe-coerce (.-firstElementChild cloned) 'JsObject
-                          , 'JsObject
+                          .-style $ .-first-element-child cloned
+                          , respo-alerts.util/AlertsDomStyle
                       js/document.body.appendChild cloned
                       js/setTimeout
                         fn ()
                           set! (.-opacity style) 0
-                          set! (.-transitionDuration card-style) |240ms
+                          set! (.-transition-duration card-style) |240ms
                           set! (.-transform card-style) "|translate(100%,0px)"
                         , 10
                       js/setTimeout
-                        fn () $ .!remove cloned
+                        fn () $ .remove cloned
                         , 240
                   , nil
                 :update $ if show?
                   let
-                      target $ unsafe-coerce (.-firstElementChild el) 'JsObject
+                      target $ unsafe-coerce
+                        .-first-element-child $ unsafe-coerce el respo-alerts.util/AlertsDom
+                        , respo-alerts.util/AlertsDom
                       card-style $ unsafe-coerce
-                        .-style $ unsafe-coerce (.-firstElementChild target) 'JsObject
-                        , 'JsObject
-                      style $ unsafe-coerce (.-style target) 'JsObject
+                        .-style $ .-first-element-child target
+                        , respo-alerts.util/AlertsDomStyle
+                      style $ .-style target
                     set! (.-opacity style) 0
                     set! (.-transform card-style) "|translate(100%,0px)"
                     js/setTimeout
                       fn ()
-                        set! (.-transitionDuration style) |240ms
-                        set! (.-transitionDuration card-style) |240ms
+                        set! (.-transition-duration style) |240ms
+                        set! (.-transition-duration card-style) |240ms
                         set! (.-opacity style) 1
                         set! (.-transform card-style) "|translate(0px,0px)"
                       , 10
@@ -1058,8 +1074,8 @@
               :code $ quote
                 let
                     enter $ %{} PromptEvent (:text |) (:keycode 13) (:meta? false) (:ctrl? false)
-                    escape $ assoc enter :keycode 27
-                    composing $ assoc enter :keycode 229
+                    escape $ &map:assoc enter :keycode 27
+                    composing $ &map:assoc enter :keycode 229
                   is $ match (prompt-key-action enter false)
                     (:submit) true
                     _ false
@@ -1067,11 +1083,11 @@
                     (:ignore) true
                     _ false
                   is $ match
-                    prompt-key-action (assoc enter :meta? true) true
+                    prompt-key-action (&map:assoc enter :meta? true) true
                     (:submit) true
                     _ false
                   is $ match
-                    prompt-key-action (assoc enter :ctrl? true) true
+                    prompt-key-action (&map:assoc enter :ctrl? true) true
                     (:submit) true
                     _ false
                   is $ match (prompt-key-action escape false)
@@ -1144,7 +1160,7 @@
           :code $ quote
             defn store-prompt-task! (cursor task)
               do
-                reset! *prompt-tasks $ assoc @*prompt-tasks cursor task
+                reset! *prompt-tasks $ &map:assoc @*prompt-tasks cursor task
                 , &unit
           :examples $ []
           :schema $ :: 'Fn
@@ -1252,13 +1268,13 @@
                       :text $ read-field options :text
                   on-read $ either (read-field options :on-read)
                     fn (e d!)
-                      d! cursor $ assoc state :show? false
+                      d! cursor $ &map:assoc state :show? false
                   node $ comp-alert-modal
-                    assoc options :text $ read-field state :text
+                    &map:assoc options :text $ read-field state :text
                     read-field state :show?
                     , on-read
                       fn (d!)
-                        d! cursor $ assoc state :show? false
+                        d! cursor $ &map:assoc state :show? false
                 %:: alert-actions-plugin :plugin node cursor state
           :examples $ []
             quote $ let
@@ -1281,10 +1297,10 @@
                   node $ comp-confirm-modal
                     if
                       blank? $ read-field state :text
-                      , options $ assoc options :text (read-field state :text)
+                      , options $ &map:assoc options :text (read-field state :text)
                     read-field state :show?
                     fn (e d!)
-                      d! cursor $ assoc state :show? false
+                      d! cursor $ &map:assoc state :show? false
                       option:fold (take-prompt-task! cursor)
                         fn () &unit
                         fn (task)
@@ -1296,7 +1312,7 @@
                             :return 'Unit
                           task |
                     fn (d!) (clear-prompt-task! cursor)
-                      d! cursor $ assoc state :show? false
+                      d! cursor $ &map:assoc state :show? false
                 %:: confirm-actions-plugin :plugin node cursor state
           :examples $ []
             quote $ let
@@ -1327,7 +1343,7 @@
                     {} $ :show? false
                   node $ comp-drawer options (read-field state :show?)
                     fn (d!)
-                      d! cursor $ assoc state :show? false
+                      d! cursor $ &map:assoc state :show? false
                 %:: drawer-actions-plugin :plugin node cursor state
           :examples $ []
             quote $ let
@@ -1352,7 +1368,7 @@
                     {} $ :show? false
                   node $ comp-modal options (read-field state :show?)
                     fn (d!)
-                      d! cursor $ assoc state :show? false
+                      d! cursor $ &map:assoc state :show? false
                 %:: modal-actions-plugin :plugin node cursor state
           :examples $ []
             quote $ let
@@ -1376,10 +1392,10 @@
                     {} $ :show? false
                   node $ comp-modal-menu options (read-field state :show?)
                     fn (d!)
-                      d! cursor $ assoc state :show? false
+                      d! cursor $ &map:assoc state :show? false
                     fn (result d!)
                       (read-field options :on-result) result d!
-                      d! cursor $ assoc state :show? false
+                      d! cursor $ &map:assoc state :show? false
                 %:: modal-menu-actions-plugin :plugin node cursor state
           :examples $ []
             quote $ let
@@ -1404,7 +1420,7 @@
                   node $ comp-prompt-modal (>> states :modal) options (read-field state :show?)
                     fn (text d!)
                       do
-                        d! cursor $ assoc state :show? false
+                        d! cursor $ &map:assoc state :show? false
                         option:fold (take-prompt-task! cursor)
                           fn () &unit
                           fn (task)
@@ -1416,7 +1432,7 @@
                               :return 'Unit
                             task text
                     fn (d!) (clear-prompt-task! cursor)
-                      d! cursor $ assoc state :show? false
+                      d! cursor $ &map:assoc state :show? false
                 %:: prompt-actions-plugin :plugin node cursor state
           :examples $ []
             quote $ let
@@ -1449,7 +1465,7 @@
       :defs $ {}
         '*reel $ %{} 'CodeEntry (:doc |)
           :code $ quote
-            defatom *reel $ -> reel-schema/reel (assoc :base schema/store) (assoc :store schema/store)
+            defatom *reel $ -> reel-schema/reel (&map:assoc :base schema/store) (&map:assoc :store schema/store)
           :examples $ []
           :schema $ :: 'Ref
         'dispatch! $ %{} 'CodeEntry (:doc |)
@@ -1647,7 +1663,7 @@
             defn updater (store op op-id op-time)
               match op
                 (:states cursor s) (update-states store cursor s)
-                (:content c) (assoc store :content c)
+                (:content c) (&map:assoc store :content c)
                 (:hydrate-storage d) d
                 _ $ do (js/console.warn "|Unknown op:" op) store
           :examples $ []
@@ -1662,6 +1678,38 @@
             respo-alerts.config :refer $ dev?
     'respo-alerts.util $ %{} 'FileEntry
       :defs $ {}
+        'AlertsDom $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            deftrait AlertsDom
+              (:first-element-child 'JsNullish 'AlertsDom)
+              (:style 'AlertsDomStyle)
+              .stop-propagation $ :: 'Fn
+                {} (:args []) (:return 'Unit)
+              .clone-node $ :: 'Fn
+                {} (:args [] 'Bool) (:return 'AlertsDom)
+              .remove $ :: 'Fn
+                {} (:args []) (:return 'Unit)
+              .dispatch-event $ :: 'Fn
+                {} (:args [] 'AlertsDom) (:return 'Bool)
+              .focus $ :: 'Fn
+                {} (:args []) (:return 'Unit)
+              .select $ :: 'Fn
+                {} (:args []) (:return 'Unit)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object)
+            :names $ {} (:clone-node |cloneNode) (:dispatch-event |dispatchEvent) (:first-element-child |firstElementChild) (:stop-propagation |stopPropagation)
+          :schema $ :: 'Trait
+        'AlertsDomStyle $ %{} 'CodeEntry (:doc |)
+          :code $ quote
+            deftrait AlertsDomStyle
+              (:opacity 'JsNullish 'Number)
+              (:transition-duration 'JsNullish 'String)
+              (:transform 'JsNullish 'String)
+          :examples $ []
+          :ffi $ {} (:backend :js) (:kind :external-object)
+            :names $ {} (:transition-duration |transitionDuration)
+            :writable $ #{} :opacity :transform :transition-duration
+          :schema $ :: 'Trait
         'focus-element! $ %{} 'CodeEntry (:doc |)
           :code $ quote
             defn focus-element! (query)
@@ -1669,7 +1717,7 @@
                   target $ js/document.querySelector query
                 if (js-present? target)
                   do
-                    .!focus $ unsafe-coerce target JsObject
+                    .focus $ unsafe-coerce target respo-alerts.util/AlertsDom
                     , &unit
                   , &unit
           :examples $ []
@@ -1703,7 +1751,7 @@
                   target $ js/document.querySelector query
                 if (js-present? target)
                   do
-                    .!select $ unsafe-coerce target JsObject
+                    .select $ unsafe-coerce target respo-alerts.util/AlertsDom
                     , &unit
                   , &unit
           :examples $ []
