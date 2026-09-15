@@ -1607,7 +1607,7 @@
             .select $ :: 'Fn $ {} (:args []) (:return 'Unit)
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object)
-            :names $ {} (:clone-node |cloneNode) (:dispatch-event |dispatchEvent) (:first-element-child |firstElementChild) (:stop-propagation |stopPropagation) (:focus |focus) (:select |select) (:remove |remove)
+            :names $ {} (:clone-node |cloneNode) (:dispatch-event |dispatchEvent) (:first-element-child |firstElementChild) (:focus |focus) (:remove |remove) (:select |select) (:stop-propagation |stopPropagation)
           :schema $ :: 'Trait
         'AlertsDomStyle $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait AlertsDomStyle
@@ -1619,70 +1619,59 @@
             :names $ {} $ :transition-duration |transitionDuration
             :writable $ #{} :opacity :transform :transition-duration
           :schema $ :: 'Trait
+        'dom-clone-node $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn dom-clone-node (el flag) (el .clone-node flag)
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'respo-alerts.util/AlertsDom)
+            :args $ [] 'respo-alerts.util/AlertsDom 'Bool
+            :features $ #{} :js-ffi
+        'dom-dispatch-event $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn dom-dispatch-event (el event) (el .dispatch-event event)
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'Bool)
+            :args $ [] 'respo-alerts.util/AlertsDom 'respo-alerts.util/AlertsDom
+            :features $ #{} :js-ffi
         'dom-first-element-child $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn dom-first-element-child (el)
-            el :first-element-child
+          :code $ quote $ defn dom-first-element-child (el) (el :first-element-child)
           :examples $ []
           :schema $ :: 'Fn $ {}
             :args $ [] 'respo-alerts.util/AlertsDom
             :features $ #{} :js-ffi
             :return $ :: 'JsNullish 'respo-alerts.util/AlertsDom
-        'dom-style $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn dom-style (el)
-            el :style
-          :examples $ []
-          :schema $ :: 'Fn $ {}
-            :args $ [] 'respo-alerts.util/AlertsDom
-            :features $ #{} :js-ffi
-            :return 'respo-alerts.util/AlertsDomStyle
-        'dom-stop-propagation! $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn dom-stop-propagation! (el)
-            do (el .stop-propagation) &unit
-          :examples $ []
-          :schema $ :: 'Fn $ {}
-            :args $ [] 'respo-alerts.util/AlertsDom
-            :features $ #{} :js-ffi
-            :return 'Unit
-        'dom-clone-node $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn dom-clone-node (el flag)
-            el .clone-node flag
-          :examples $ []
-          :schema $ :: 'Fn $ {}
-            :args $ [] 'respo-alerts.util/AlertsDom 'Bool
-            :features $ #{} :js-ffi
-            :return 'respo-alerts.util/AlertsDom
-        'dom-remove! $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn dom-remove! (el)
-            do (el .remove) &unit
-          :examples $ []
-          :schema $ :: 'Fn $ {}
-            :args $ [] 'respo-alerts.util/AlertsDom
-            :features $ #{} :js-ffi
-            :return 'Unit
-        'dom-dispatch-event $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn dom-dispatch-event (el event)
-            el .dispatch-event event
-          :examples $ []
-          :schema $ :: 'Fn $ {}
-            :args $ [] 'respo-alerts.util/AlertsDom 'respo-alerts.util/AlertsDom
-            :features $ #{} :js-ffi
-            :return 'Bool
         'dom-focus! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dom-focus! (el)
             do (el .focus) &unit
           :examples $ []
-          :schema $ :: 'Fn $ {}
+          :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'respo-alerts.util/AlertsDom
             :features $ #{} :js-ffi
-            :return 'Unit
+        'dom-remove! $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn dom-remove! (el)
+            do (el .remove) &unit
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'Unit)
+            :args $ [] 'respo-alerts.util/AlertsDom
+            :features $ #{} :js-ffi
         'dom-select! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dom-select! (el)
             do (el .select) &unit
           :examples $ []
-          :schema $ :: 'Fn $ {}
+          :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'respo-alerts.util/AlertsDom
             :features $ #{} :js-ffi
-            :return 'Unit
+        'dom-stop-propagation! $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn dom-stop-propagation! (el)
+            do (el .stop-propagation) &unit
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'Unit)
+            :args $ [] 'respo-alerts.util/AlertsDom
+            :features $ #{} :js-ffi
+        'dom-style $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn dom-style (el) (el :style)
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'respo-alerts.util/AlertsDomStyle)
+            :args $ [] 'respo-alerts.util/AlertsDom
+            :features $ #{} :js-ffi
         'focus-element! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn focus-element! (query)
             let
