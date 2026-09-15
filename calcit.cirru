@@ -869,20 +869,26 @@
                 , nil
               :update $ if show?
                 let
-                    target $ unsafe-coerce
-                      dom-first-element-child $ unsafe-coerce el 'respo-alerts.util/AlertsDom
-                      , respo-alerts.util/AlertsDom
-                    card-style $ dom-style $ unsafe-coerce (dom-first-element-child target) 'respo-alerts.util/AlertsDom
-                    style $ dom-style target
-                  set! (.-opacity style) 0
-                  set! (.-transform card-style) "|scale(0.94) translate(0px,-20px)"
-                  js/setTimeout
-                    fn ()
-                      set! (.-transition-duration style) |240ms
-                      set! (.-transition-duration card-style) |240ms
-                      set! (.-opacity style) 1
-                      set! (.-transform card-style) "|scale(1) translate(0px,0px)"
-                    , 10
+                    target0 $ dom-first-element-child $ unsafe-coerce el 'respo-alerts.util/AlertsDom
+                  if (js-present? target0)
+                    let
+                        target $ unsafe-coerce target0 'respo-alerts.util/AlertsDom
+                        card0 $ dom-first-element-child target
+                      if (js-present? card0)
+                        let
+                            style $ dom-style target
+                            card-style $ dom-style $ unsafe-coerce card0 'respo-alerts.util/AlertsDom
+                          set! (.-opacity style) 0
+                          set! (.-transform card-style) "|scale(0.94) translate(0px,-20px)"
+                          js/setTimeout
+                            fn ()
+                              set! (.-transition-duration style) |240ms
+                              set! (.-transition-duration card-style) |240ms
+                              set! (.-opacity style) 1
+                              set! (.-transform card-style) "|scale(1) translate(0px,0px)"
+                            , 10
+                        , nil
+                    , nil
                 , nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
@@ -946,20 +952,26 @@
                 , nil
               :update $ if show?
                 let
-                    target $ unsafe-coerce
-                      dom-first-element-child $ unsafe-coerce el 'respo-alerts.util/AlertsDom
-                      , respo-alerts.util/AlertsDom
-                    card-style $ dom-style $ unsafe-coerce (dom-first-element-child target) 'respo-alerts.util/AlertsDom
-                    style $ dom-style target
-                  set! (.-opacity style) 0
-                  set! (.-transform card-style) "|translate(100%,0px)"
-                  js/setTimeout
-                    fn ()
-                      set! (.-transition-duration style) |240ms
-                      set! (.-transition-duration card-style) |240ms
-                      set! (.-opacity style) 1
-                      set! (.-transform card-style) "|translate(0px,0px)"
-                    , 10
+                    target0 $ dom-first-element-child $ unsafe-coerce el 'respo-alerts.util/AlertsDom
+                  if (js-present? target0)
+                    let
+                        target $ unsafe-coerce target0 'respo-alerts.util/AlertsDom
+                        card0 $ dom-first-element-child target
+                      if (js-present? card0)
+                        let
+                            style $ dom-style target
+                            card-style $ dom-style $ unsafe-coerce card0 'respo-alerts.util/AlertsDom
+                          set! (.-opacity style) 0
+                          set! (.-transform card-style) "|translate(100%,0px)"
+                          js/setTimeout
+                            fn ()
+                              set! (.-transition-duration style) |240ms
+                              set! (.-transition-duration card-style) |240ms
+                              set! (.-opacity style) 1
+                              set! (.-transform card-style) "|translate(0px,0px)"
+                            , 10
+                        , nil
+                    , nil
                 , nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
