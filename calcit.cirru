@@ -513,7 +513,7 @@
                       let
                           event $ .-event e
                         if (js-present? event)
-                          .stop-propagation $ unsafe-coerce event respo-alerts.util/AlertsDom
+                          dom-stop-propagation! $ unsafe-coerce event 'respo-alerts.util/AlertsDom
                           , %none
                         on-close! d!
                         on-read! e d!
@@ -593,7 +593,7 @@
                       let
                           event $ .-event e
                         if (js-present? event)
-                          .stop-propagation $ unsafe-coerce event respo-alerts.util/AlertsDom
+                          dom-stop-propagation! $ unsafe-coerce event 'respo-alerts.util/AlertsDom
                           , %none
                         on-close d!
                   div
@@ -649,7 +649,7 @@
                       let
                           event $ .-event e
                         if (js-present? event)
-                          .stop-propagation $ unsafe-coerce event respo-alerts.util/AlertsDom
+                          dom-stop-propagation! $ unsafe-coerce event 'respo-alerts.util/AlertsDom
                           , %none
                         on-close d!
                   div
@@ -695,7 +695,7 @@
                       let
                           event $ .-event e
                         if (js-present? event)
-                          .stop-propagation $ unsafe-coerce event respo-alerts.util/AlertsDom
+                          dom-stop-propagation! $ unsafe-coerce event 'respo-alerts.util/AlertsDom
                           , %none
                         on-close! d!
                   div
@@ -848,16 +848,14 @@
             case-default action nil
               :before-update $ if show?
                 if
-                  js-present? $ .-first-element-child $ unsafe-coerce el respo-alerts.util/AlertsDom
+                  js-present? $ dom-first-element-child $ unsafe-coerce el 'respo-alerts.util/AlertsDom
                   let
                       target $ unsafe-coerce
-                        .-first-element-child $ unsafe-coerce el respo-alerts.util/AlertsDom
+                        dom-first-element-child $ unsafe-coerce el 'respo-alerts.util/AlertsDom
                         , respo-alerts.util/AlertsDom
-                      cloned $ unsafe-coerce (.clone-node target true) respo-alerts.util/AlertsDom
-                      style $ unsafe-coerce (.-style cloned) respo-alerts.util/AlertsDomStyle
-                      card-style $ unsafe-coerce
-                        .-style $ unsafe-coerce (.-first-element-child cloned) respo-alerts.util/AlertsDom
-                        , respo-alerts.util/AlertsDomStyle
+                      cloned $ dom-clone-node target true
+                      style $ dom-style cloned
+                      card-style $ dom-style $ unsafe-coerce (dom-first-element-child cloned) 'respo-alerts.util/AlertsDom
                     js/document.body.appendChild cloned
                     js/setTimeout
                       fn ()
@@ -866,18 +864,16 @@
                         set! (.-transform card-style) "|scale(0.94) translate(0px,-20px)"
                       , 10
                     js/setTimeout
-                      fn () $ .remove cloned
+                      fn () $ dom-remove! cloned
                       , 240
                 , nil
               :update $ if show?
                 let
                     target $ unsafe-coerce
-                      .-first-element-child $ unsafe-coerce el respo-alerts.util/AlertsDom
+                      dom-first-element-child $ unsafe-coerce el 'respo-alerts.util/AlertsDom
                       , respo-alerts.util/AlertsDom
-                    card-style $ unsafe-coerce
-                      .-style $ unsafe-coerce (.-first-element-child target) respo-alerts.util/AlertsDom
-                      , respo-alerts.util/AlertsDomStyle
-                    style $ unsafe-coerce (.-style target) respo-alerts.util/AlertsDomStyle
+                    card-style $ dom-style $ unsafe-coerce (dom-first-element-child target) 'respo-alerts.util/AlertsDom
+                    style $ dom-style target
                   set! (.-opacity style) 0
                   set! (.-transform card-style) "|scale(0.94) translate(0px,-20px)"
                   js/setTimeout
@@ -908,7 +904,7 @@
                         , |Escape
                       let
                           new-event $ new js/MouseEvent (.-type event) event
-                        .dispatch-event (unsafe-coerce el respo-alerts.util/AlertsDom) new-event
+                        dom-dispatch-event (unsafe-coerce el 'respo-alerts.util/AlertsDom) (unsafe-coerce new-event 'respo-alerts.util/AlertsDom)
                 js/window.addEventListener |keydown f
                 aset el |_listener f
               :unmount $ let
@@ -929,16 +925,14 @@
             case-default action nil
               :before-update $ if show?
                 if
-                  js-present? $ .-first-element-child $ unsafe-coerce el respo-alerts.util/AlertsDom
+                  js-present? $ dom-first-element-child $ unsafe-coerce el 'respo-alerts.util/AlertsDom
                   let
                       target $ unsafe-coerce
-                        .-first-element-child $ unsafe-coerce el respo-alerts.util/AlertsDom
+                        dom-first-element-child $ unsafe-coerce el 'respo-alerts.util/AlertsDom
                         , respo-alerts.util/AlertsDom
-                      cloned $ unsafe-coerce (.clone-node target true) respo-alerts.util/AlertsDom
-                      style $ unsafe-coerce (.-style cloned) respo-alerts.util/AlertsDomStyle
-                      card-style $ unsafe-coerce
-                        .-style $ unsafe-coerce (.-first-element-child cloned) respo-alerts.util/AlertsDom
-                        , respo-alerts.util/AlertsDomStyle
+                      cloned $ dom-clone-node target true
+                      style $ dom-style cloned
+                      card-style $ dom-style $ unsafe-coerce (dom-first-element-child cloned) 'respo-alerts.util/AlertsDom
                     js/document.body.appendChild cloned
                     js/setTimeout
                       fn ()
@@ -947,18 +941,16 @@
                         set! (.-transform card-style) "|translate(100%,0px)"
                       , 10
                     js/setTimeout
-                      fn () $ .remove cloned
+                      fn () $ dom-remove! cloned
                       , 240
                 , nil
               :update $ if show?
                 let
                     target $ unsafe-coerce
-                      .-first-element-child $ unsafe-coerce el respo-alerts.util/AlertsDom
+                      dom-first-element-child $ unsafe-coerce el 'respo-alerts.util/AlertsDom
                       , respo-alerts.util/AlertsDom
-                    card-style $ unsafe-coerce
-                      .-style $ unsafe-coerce (.-first-element-child target) respo-alerts.util/AlertsDom
-                      , respo-alerts.util/AlertsDomStyle
-                    style $ unsafe-coerce (.-style target) respo-alerts.util/AlertsDomStyle
+                    card-style $ dom-style $ unsafe-coerce (dom-first-element-child target) 'respo-alerts.util/AlertsDom
+                    style $ dom-style target
                   set! (.-opacity style) 0
                   set! (.-transform card-style) "|translate(100%,0px)"
                   js/setTimeout
@@ -1374,7 +1366,7 @@
             respo-alerts.config :refer $ dev?
             respo-alerts.style :as style
             respo-alerts.schema :as schema
-            respo-alerts.util :refer $ focus-element! select-element! read-field
+            respo-alerts.util :refer $ focus-element! select-element! read-field dom-first-element-child dom-style dom-stop-propagation! dom-clone-node dom-remove! dom-dispatch-event
             calcit.test :refer $ is
     'respo-alerts.main $ %{} 'FileEntry
       :defs $ {}
@@ -1605,8 +1597,8 @@
       :defs $ {}
         'AlertsDom $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait AlertsDom
-            (:first-element-child 'JsNullish 'AlertsDom)
-            (:style 'AlertsDomStyle)
+            :first-element-child $ :: 'JsNullish 'AlertsDom
+            :style 'AlertsDomStyle
             .stop-propagation $ :: 'Fn $ {} (:args []) (:return 'Unit)
             .clone-node $ :: 'Fn $ {} (:args [] 'Bool) (:return 'AlertsDom)
             .remove $ :: 'Fn $ {} (:args []) (:return 'Unit)
@@ -1615,7 +1607,7 @@
             .select $ :: 'Fn $ {} (:args []) (:return 'Unit)
           :examples $ []
           :ffi $ {} (:backend :js) (:kind :external-object)
-            :names $ {} (:clone-node |cloneNode) (:dispatch-event |dispatchEvent) (:first-element-child |firstElementChild) (:stop-propagation |stopPropagation)
+            :names $ {} (:clone-node |cloneNode) (:dispatch-event |dispatchEvent) (:first-element-child |firstElementChild) (:stop-propagation |stopPropagation) (:focus |focus) (:select |select) (:remove |remove)
           :schema $ :: 'Trait
         'AlertsDomStyle $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait AlertsDomStyle
@@ -1627,13 +1619,77 @@
             :names $ {} $ :transition-duration |transitionDuration
             :writable $ #{} :opacity :transform :transition-duration
           :schema $ :: 'Trait
+        'dom-first-element-child $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn dom-first-element-child (el)
+            el :first-element-child
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'respo-alerts.util/AlertsDom
+            :features $ #{} :js-ffi
+            :return $ :: 'JsNullish 'respo-alerts.util/AlertsDom
+        'dom-style $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn dom-style (el)
+            el :style
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'respo-alerts.util/AlertsDom
+            :features $ #{} :js-ffi
+            :return 'respo-alerts.util/AlertsDomStyle
+        'dom-stop-propagation! $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn dom-stop-propagation! (el)
+            do (el .stop-propagation) &unit
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'respo-alerts.util/AlertsDom
+            :features $ #{} :js-ffi
+            :return 'Unit
+        'dom-clone-node $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn dom-clone-node (el flag)
+            el .clone-node flag
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'respo-alerts.util/AlertsDom 'Bool
+            :features $ #{} :js-ffi
+            :return 'respo-alerts.util/AlertsDom
+        'dom-remove! $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn dom-remove! (el)
+            do (el .remove) &unit
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'respo-alerts.util/AlertsDom
+            :features $ #{} :js-ffi
+            :return 'Unit
+        'dom-dispatch-event $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn dom-dispatch-event (el event)
+            el .dispatch-event event
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'respo-alerts.util/AlertsDom 'respo-alerts.util/AlertsDom
+            :features $ #{} :js-ffi
+            :return 'Bool
+        'dom-focus! $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn dom-focus! (el)
+            do (el .focus) &unit
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'respo-alerts.util/AlertsDom
+            :features $ #{} :js-ffi
+            :return 'Unit
+        'dom-select! $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn dom-select! (el)
+            do (el .select) &unit
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'respo-alerts.util/AlertsDom
+            :features $ #{} :js-ffi
+            :return 'Unit
         'focus-element! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn focus-element! (query)
             let
                 target $ js/document.querySelector query
               if (js-present? target)
                 do
-                  .focus $ unsafe-coerce target respo-alerts.util/AlertsDom
+                  dom-focus! $ unsafe-coerce target 'respo-alerts.util/AlertsDom
                   , &unit
                 , &unit
           :examples $ []
@@ -1662,7 +1718,7 @@
                 target $ js/document.querySelector query
               if (js-present? target)
                 do
-                  .select $ unsafe-coerce target respo-alerts.util/AlertsDom
+                  dom-select! $ unsafe-coerce target 'respo-alerts.util/AlertsDom
                   , &unit
                 , &unit
           :examples $ []
