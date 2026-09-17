@@ -218,7 +218,7 @@
           :code $ quote $ def site
             {} (:dev-ui |http://localhost:8100/main-fonts.css) (:release-ui |http://cdn.tiye.me/favored-fonts/main-fonts.css) (:cdn-url |http://cdn.tiye.me/calcit-workflow/) (:title |Alerts) (:icon |http://cdn.tiye.me/logo/respo.png) (:storage-key |respo-alerts)
           :examples $ []
-          :schema $ :: 'Map
+          :schema $ :: 'Map 'Tag 'String
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns respo-alerts.config
     'respo-alerts.core $ %{} 'FileEntry
@@ -491,9 +491,8 @@
           :schema $ :: 'respo-alerts.core/PluginNodeCursorState
         'clear-prompt-task! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn clear-prompt-task! (cursor)
-            do
-              reset! *prompt-tasks $ assert-type (&map:dissoc @*prompt-tasks cursor) (:: 'Map 'Dynamic 'Dynamic)
-              , &unit
+            reset! *prompt-tasks $ assert-type (&map:dissoc @*prompt-tasks cursor) (:: 'Map 'Dynamic 'Dynamic)
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic
@@ -513,8 +512,8 @@
                       let
                           event $ .-event e
                         if (js-present? event)
-                          dom-stop-propagation! $ unsafe-coerce event 'respo-alerts.util/AlertsDom
-                          , %none
+                          browser/event-stop-propagation! $ browser/event-host event
+                          , &unit
                         on-close! d!
                         on-read! e d!
                   div
@@ -593,8 +592,8 @@
                       let
                           event $ .-event e
                         if (js-present? event)
-                          dom-stop-propagation! $ unsafe-coerce event 'respo-alerts.util/AlertsDom
-                          , %none
+                          browser/event-stop-propagation! $ browser/event-host event
+                          , &unit
                         on-close d!
                   div
                     {}
@@ -649,8 +648,8 @@
                       let
                           event $ .-event e
                         if (js-present? event)
-                          dom-stop-propagation! $ unsafe-coerce event 'respo-alerts.util/AlertsDom
-                          , %none
+                          browser/event-stop-propagation! $ browser/event-host event
+                          , &unit
                         on-close d!
                   div
                     {}
@@ -695,8 +694,8 @@
                       let
                           event $ .-event e
                         if (js-present? event)
-                          dom-stop-propagation! $ unsafe-coerce event 'respo-alerts.util/AlertsDom
-                          , %none
+                          browser/event-stop-propagation! $ browser/event-host event
+                          , &unit
                         on-close! d!
                   div
                     {}
@@ -845,51 +844,50 @@
           :schema $ :: 'respo-alerts.core/PluginNodeCursorState
         'effect-fade $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-fade (show?) (action el at-place?)
-            case-default action nil
+            case-default action &unit
               :before-update $ if show?
-                if
-                  js-present? $ dom-first-element-child $ unsafe-coerce el 'respo-alerts.util/AlertsDom
-                  let
-                      target $ unsafe-coerce
-                        dom-first-element-child $ unsafe-coerce el 'respo-alerts.util/AlertsDom
-                        , respo-alerts.util/AlertsDom
-                      cloned $ dom-clone-node target true
-                      style $ dom-style cloned
-                      card-style $ dom-style $ unsafe-coerce (dom-first-element-child cloned) 'respo-alerts.util/AlertsDom
-                    js/document.body.appendChild cloned
-                    js/setTimeout
-                      fn ()
-                        set! (.-opacity style) 0
-                        set! (.-transition-duration card-style) |240ms
-                        set! (.-transform card-style) "|scale(0.94) translate(0px,-20px)"
-                      , 10
-                    js/setTimeout
-                      fn () $ dom-remove! cloned
-                      , 240
-                , nil
-              :update $ if show?
-                let
-                    target0 $ dom-first-element-child $ unsafe-coerce el 'respo-alerts.util/AlertsDom
-                  if (js-present? target0)
+                match
+                  browser/element-first-child $ browser/element-host el
+                  (:none) &unit
+                  (:some target)
                     let
-                        target $ unsafe-coerce target0 'respo-alerts.util/AlertsDom
-                        card0 $ dom-first-element-child target
-                      if (js-present? card0)
-                        let
-                            style $ dom-style target
-                            card-style $ dom-style $ unsafe-coerce card0 'respo-alerts.util/AlertsDom
-                          set! (.-opacity style) 0
-                          set! (.-transform card-style) "|scale(0.94) translate(0px,-20px)"
-                          js/setTimeout
-                            fn ()
-                              set! (.-transition-duration style) |240ms
-                              set! (.-transition-duration card-style) |240ms
-                              set! (.-opacity style) 1
-                              set! (.-transform card-style) "|scale(1) translate(0px,0px)"
-                            , 10
-                        , nil
-                    , nil
-                , nil
+                        cloned $ browser/element-clone target true
+                        card-option $ browser/element-first-child cloned
+                      browser/document-append-body! cloned
+                      browser/set-timeout!
+                        fn () (browser/element-set-style! cloned |opacity |0)
+                          match card-option
+                            (:none) &unit
+                            (:some card)
+                              do (browser/element-set-style! card |transitionDuration |240ms) (browser/element-set-style! card |transform "|scale(0.94) translate(0px,-20px)")
+                          , &unit
+                        , 10
+                      browser/set-timeout!
+                        fn () $ browser/element-remove! cloned
+                        , 240
+                      , &unit
+                , &unit
+              :update $ if show?
+                match
+                  browser/element-first-child $ browser/element-host el
+                  (:none) &unit
+                  (:some target)
+                    let
+                        card-option $ browser/element-first-child target
+                      browser/element-set-style! target |opacity |0
+                      match card-option
+                        (:none) &unit
+                        (:some card) (browser/element-set-style! card |transform "|scale(0.94) translate(0px,-20px)")
+                      browser/set-timeout!
+                        fn () (browser/element-set-style! target |transitionDuration |240ms) (browser/element-set-style! target |opacity |1)
+                          match card-option
+                            (:none) &unit
+                            (:some card)
+                              do (browser/element-set-style! card |transitionDuration |240ms) (browser/element-set-style! card |transform "|scale(1) translate(0px,0px)")
+                          , &unit
+                        , 10
+                      , &unit
+                , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic
@@ -901,22 +899,26 @@
           :schema $ :: 'Dynamic
         'effect-keydown $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-keydown () (action el at?)
-            case-default action nil
+            case-default action &unit
               :mount $ let
-                  f $ fn (event)
+                  listener $ fn (event)
+                    hint-fn $ {}
+                      :args $ [] 'js-ffi.browser/EventHost
+                      :return 'Unit
                     if
                       =
-                        .-key $ assert-type event 'respo.dom/DomKeyboardEvent
+                        browser/keyboard-event-key $ browser/keyboard-event-host event
                         , |Escape
-                      let
-                          new-event $ new js/MouseEvent (.-type event) event
-                        dom-dispatch-event (unsafe-coerce el 'respo-alerts.util/AlertsDom) (unsafe-coerce new-event 'respo-alerts.util/AlertsDom)
-                js/window.addEventListener |keydown f
-                aset el |_listener f
+                      browser/element-dispatch-event! (browser/element-host el) (browser/mouse-event-from-event event)
+                      , &unit
+                browser/add-event-listener! |keydown listener
+                aset el |_listener listener
+                , &unit
               :unmount $ let
-                  f $ aget el |_listener
-                js/window.removeEventListener |keydown f
-                aset el |_listener nil
+                  listener $ browser/event-listener-host $ aget el |_listener
+                browser/remove-event-listener! |keydown listener
+                js-delete el |_listener
+                , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ []
@@ -928,51 +930,50 @@
           :schema $ :: 'Dynamic
         'effect-slide $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-slide (show?) (action el at-place?)
-            case-default action nil
+            case-default action &unit
               :before-update $ if show?
-                if
-                  js-present? $ dom-first-element-child $ unsafe-coerce el 'respo-alerts.util/AlertsDom
-                  let
-                      target $ unsafe-coerce
-                        dom-first-element-child $ unsafe-coerce el 'respo-alerts.util/AlertsDom
-                        , respo-alerts.util/AlertsDom
-                      cloned $ dom-clone-node target true
-                      style $ dom-style cloned
-                      card-style $ dom-style $ unsafe-coerce (dom-first-element-child cloned) 'respo-alerts.util/AlertsDom
-                    js/document.body.appendChild cloned
-                    js/setTimeout
-                      fn ()
-                        set! (.-opacity style) 0
-                        set! (.-transition-duration card-style) |240ms
-                        set! (.-transform card-style) "|translate(100%,0px)"
-                      , 10
-                    js/setTimeout
-                      fn () $ dom-remove! cloned
-                      , 240
-                , nil
-              :update $ if show?
-                let
-                    target0 $ dom-first-element-child $ unsafe-coerce el 'respo-alerts.util/AlertsDom
-                  if (js-present? target0)
+                match
+                  browser/element-first-child $ browser/element-host el
+                  (:none) &unit
+                  (:some target)
                     let
-                        target $ unsafe-coerce target0 'respo-alerts.util/AlertsDom
-                        card0 $ dom-first-element-child target
-                      if (js-present? card0)
-                        let
-                            style $ dom-style target
-                            card-style $ dom-style $ unsafe-coerce card0 'respo-alerts.util/AlertsDom
-                          set! (.-opacity style) 0
-                          set! (.-transform card-style) "|translate(100%,0px)"
-                          js/setTimeout
-                            fn ()
-                              set! (.-transition-duration style) |240ms
-                              set! (.-transition-duration card-style) |240ms
-                              set! (.-opacity style) 1
-                              set! (.-transform card-style) "|translate(0px,0px)"
-                            , 10
-                        , nil
-                    , nil
-                , nil
+                        cloned $ browser/element-clone target true
+                        card-option $ browser/element-first-child cloned
+                      browser/document-append-body! cloned
+                      browser/set-timeout!
+                        fn () (browser/element-set-style! cloned |opacity |0)
+                          match card-option
+                            (:none) &unit
+                            (:some card)
+                              do (browser/element-set-style! card |transitionDuration |240ms) (browser/element-set-style! card |transform "|translate(100%,0px)")
+                          , &unit
+                        , 10
+                      browser/set-timeout!
+                        fn () $ browser/element-remove! cloned
+                        , 240
+                      , &unit
+                , &unit
+              :update $ if show?
+                match
+                  browser/element-first-child $ browser/element-host el
+                  (:none) &unit
+                  (:some target)
+                    let
+                        card-option $ browser/element-first-child target
+                      browser/element-set-style! target |opacity |0
+                      match card-option
+                        (:none) &unit
+                        (:some card) (browser/element-set-style! card |transform "|translate(100%,0px)")
+                      browser/set-timeout!
+                        fn () (browser/element-set-style! target |transitionDuration |240ms) (browser/element-set-style! target |opacity |1)
+                          match card-option
+                            (:none) &unit
+                            (:some card)
+                              do (browser/element-set-style! card |transitionDuration |240ms) (browser/element-set-style! card |transform "|translate(0px,0px)")
+                          , &unit
+                        , 10
+                      , &unit
+                , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic
@@ -1014,22 +1015,22 @@
               :return 'respo-alerts.core/PromptKeyAction
             if
               = 27 $ :keycode event
-              %:: PromptKeyAction :close
+              PromptKeyAction :close
               if
                 and
                   = 13 $ :keycode event
                   not= 229 $ :keycode event
                   or (not multiline?) (:meta? event) (:ctrl? event)
-                %:: PromptKeyAction :submit
-                %:: PromptKeyAction :ignore
+                PromptKeyAction :submit
+                PromptKeyAction :ignore
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo-alerts.core/PromptKeyAction)
             :args $ [] 'respo-alerts.core/PromptEvent 'Bool
           :tests $ [] $ %{} 'TestEntry (:name |keyboard-matrix)
             :code $ quote $ let
                 enter $ %{} PromptEvent (:text |) (:keycode 13) (:meta? false) (:ctrl? false)
-                escape $ &map:assoc enter :keycode 27
-                composing $ &map:assoc enter :keycode 229
+                escape $ assoc enter :keycode 27
+                composing $ assoc enter :keycode 229
               is $ match (prompt-key-action enter false)
                 (:submit) true
                 _ false
@@ -1037,11 +1038,11 @@
                 (:ignore) true
                 _ false
               is $ match
-                prompt-key-action (&map:assoc enter :meta? true) true
+                prompt-key-action (assoc enter :meta? true) true
                 (:submit) true
                 _ false
               is $ match
-                prompt-key-action (&map:assoc enter :ctrl? true) true
+                prompt-key-action (assoc enter :ctrl? true) true
                 (:submit) true
                 _ false
               is $ match (prompt-key-action escape false)
@@ -1079,7 +1080,7 @@
                 meta? $ if (bool? raw-meta) (unsafe-coerce raw-meta 'Bool) false
                 raw-ctrl $ &map:get event :ctrl?
                 ctrl? $ if (bool? raw-ctrl) (unsafe-coerce raw-ctrl 'Bool) false
-              %{} PromptEvent (:text text) (:keycode keycode) (:meta? meta?) (:ctrl? ctrl?)
+              PromptEvent :text text :keycode keycode :meta? meta? :ctrl? ctrl?
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo-alerts.core/PromptEvent)
             :args $ [] $ :: 'Map 'Tag 'Dynamic
@@ -1087,23 +1088,18 @@
           :tests $ []
             %{} 'TestEntry (:name |reads-key-modifiers)
               :code $ quote $ let
-                  event $ unsafe-coerce
-                    read-prompt-event $ {} (:value |hello) (:keycode 13) (:meta? true) (:ctrl? true)
-                    , 'respo-alerts.core/PromptEvent
+                  event $ read-prompt-event $ {} (:value |hello) (:keycode 13) (:meta? true) (:ctrl? true)
                 is $ = 13 $ :keycode event
                 is $ :meta? event
                 is $ :ctrl? event
             %{} 'TestEntry (:name |prefers-canonical-key-code)
               :code $ quote $ let
-                  event $ unsafe-coerce
-                    read-prompt-event $ {} (:key-code 27) (:keycode 13)
-                    , 'respo-alerts.core/PromptEvent
+                  event $ read-prompt-event $ {} (:key-code 27) (:keycode 13)
                 is $ = 27 $ :keycode event
         'store-prompt-task! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn store-prompt-task! (cursor task)
-            do
-              reset! *prompt-tasks $ assert-type (&map:assoc @*prompt-tasks cursor task) (:: 'Map 'Dynamic 'Dynamic)
-              , &unit
+            reset! *prompt-tasks $ assert-type (&map:assoc @*prompt-tasks cursor task) (:: 'Map 'Dynamic 'Dynamic)
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic $ :: 'Fn
@@ -1167,7 +1163,7 @@
           :examples $ []
           :schema $ :: 'Fn $ {}
             :args $ [] 'Dynamic
-            :return $ :: 'Option $ :: 'Fn
+            :return $ :: 'calcit.core/Option $ :: 'Fn
               {} (:return 'Unit)
                 :args $ [] 'String
           :tests $ [] $ %{} 'TestEntry (:name |persists-across-renders)
@@ -1175,7 +1171,11 @@
                 cursor $ [] :prompt-test
                 *called $ atom |
                 callback $ fn (text)
-                  do (reset! *called text) &unit
+                  hint-fn $ {}
+                    :args $ [] 'String
+                    :return 'Unit
+                  reset! *called text
+                  , &unit
               store-prompt-task! cursor callback
               option:fold (take-prompt-task! cursor)
                 fn () &unit
@@ -1340,18 +1340,17 @@
                   {} $ :show? false
                 node $ comp-prompt-modal (>> states :modal) options (read-field state :show?)
                   fn (text d!)
-                    do
-                      d! cursor $ &map:assoc state :show? false
-                      option:fold (take-prompt-task! cursor)
-                        fn () &unit
-                        fn (task)
-                          hint-fn $ {}
-                            :args $ [] $ :: 'Fn
-                              {}
-                                :args $ [] 'String
-                                :return 'Unit
-                            :return 'Unit
-                          task text
+                    d! cursor $ &map:assoc state :show? false
+                    option:fold (take-prompt-task! cursor)
+                      fn () &unit
+                      fn (task)
+                        hint-fn $ {}
+                          :args $ [] $ :: 'Fn
+                            {}
+                              :args $ [] 'String
+                              :return 'Unit
+                          :return 'Unit
+                        task text
                   fn (d!) (clear-prompt-task! cursor)
                     d! cursor $ &map:assoc state :show? false
               %:: prompt-actions-plugin :plugin node cursor state
@@ -1378,25 +1377,24 @@
             respo-alerts.config :refer $ dev?
             respo-alerts.style :as style
             respo-alerts.schema :as schema
-            respo-alerts.util :refer $ focus-element! select-element! read-field dom-first-element-child dom-style dom-stop-propagation! dom-clone-node dom-remove! dom-dispatch-event
             calcit.test :refer $ is
+            respo-alerts.util :refer $ focus-element! select-element! read-field
+            js-ffi.browser :as browser
     'respo-alerts.main $ %{} 'FileEntry
       :defs $ {}
         '*reel $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *reel
-            -> reel-schema/reel (&map:assoc :base schema/store) (&map:assoc :store schema/store)
+          :code $ quote $ defatom *reel (typed/new-reel schema/store)
           :examples $ []
           :schema $ :: 'Ref $ :: 'reel.typed/State 'Enum (:: 'Map 'Dynamic 'Dynamic)
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (op)
-            do
-              when
-                and config/dev? $ match op
-                  (:states ignored-cursor ignored-state) false
-                  _ true
-                js/console.log |Dispatch: op
-              reset! *reel $ next-reel op
-              , &unit
+            when
+              and config/dev? $ match op
+                (:states ignored-cursor ignored-state) false
+                _ true
+              js/console.log |Dispatch: op
+            reset! *reel $ next-reel op
+            , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Enum
@@ -1438,13 +1436,13 @@
             :features $ #{} :js-ffi
             :return $ :: 'reel.typed/State 'Enum $ :: 'Map 'Dynamic 'Dynamic
         'persist-storage! $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn persist-storage! (? e)
-            js/localStorage.setItem (:storage-key config/site)
+          :code $ quote $ defn persist-storage! (& _args)
+            browser/storage-set!
+              option:unwrap $ get config/site :storage-key
               format-cirru-edn $ :store @*reel
           :examples $ []
-          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Unit)
             :args $ []
-            :features $ #{} :js-ffi
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
             if (nil? build-errors)
@@ -1481,12 +1479,11 @@
             respo-alerts.updater :refer $ updater
             respo-alerts.schema :as schema
             reel.util :refer $ listen-devtools! generate-id!
-            reel.core :refer $ reel-updater refresh-reel
-            reel.schema :as reel-schema
             reel.typed :as typed
             respo-alerts.config :as config
             |./calcit.build-errors :default build-errors
             |bottom-tip :default hud!
+            js-ffi.browser :as browser
     'respo-alerts.schema $ %{} 'FileEntry
       :defs $ {}
         'confirm-button-name $ %{} 'CodeEntry (:doc |)
@@ -1607,92 +1604,11 @@
             respo-alerts.config :refer $ dev?
     'respo-alerts.util $ %{} 'FileEntry
       :defs $ {}
-        'AlertsDom $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait AlertsDom
-            :first-element-child $ :: 'JsNullish 'AlertsDom
-            :style 'AlertsDomStyle
-            .stop-propagation $ :: 'Fn $ {} (:args []) (:return 'Unit)
-            .clone-node $ :: 'Fn $ {} (:args [] 'Bool) (:return 'AlertsDom)
-            .remove $ :: 'Fn $ {} (:args []) (:return 'Unit)
-            .dispatch-event $ :: 'Fn $ {} (:args [] 'AlertsDom) (:return 'Bool)
-            .focus $ :: 'Fn $ {} (:args []) (:return 'Unit)
-            .select $ :: 'Fn $ {} (:args []) (:return 'Unit)
-          :examples $ []
-          :ffi $ {} (:backend :js) (:kind :external-object)
-            :names $ {} (:clone-node |cloneNode) (:dispatch-event |dispatchEvent) (:first-element-child |firstElementChild) (:focus |focus) (:remove |remove) (:select |select) (:stop-propagation |stopPropagation)
-          :schema $ :: 'Trait
-        'AlertsDomStyle $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait AlertsDomStyle
-            (:opacity 'Number)
-            (:transition-duration 'String)
-            (:transform 'String)
-          :examples $ []
-          :ffi $ {} (:backend :js) (:kind :external-object)
-            :names $ {} $ :transition-duration |transitionDuration
-            :writable $ #{} :opacity :transform :transition-duration
-          :schema $ :: 'Trait
-        'dom-clone-node $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn dom-clone-node (el flag) (el .clone-node flag)
-          :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo-alerts.util/AlertsDom)
-            :args $ [] 'respo-alerts.util/AlertsDom 'Bool
-            :features $ #{} :js-ffi
-        'dom-dispatch-event $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn dom-dispatch-event (el event) (el .dispatch-event event)
-          :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Bool)
-            :args $ [] 'respo-alerts.util/AlertsDom 'respo-alerts.util/AlertsDom
-            :features $ #{} :js-ffi
-        'dom-first-element-child $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn dom-first-element-child (el) (el :first-element-child)
-          :examples $ []
-          :schema $ :: 'Fn $ {}
-            :args $ [] 'respo-alerts.util/AlertsDom
-            :features $ #{} :js-ffi
-            :return $ :: 'JsNullish 'respo-alerts.util/AlertsDom
-        'dom-focus! $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn dom-focus! (el)
-            do (el .focus) &unit
-          :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'respo-alerts.util/AlertsDom
-            :features $ #{} :js-ffi
-        'dom-remove! $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn dom-remove! (el)
-            do (el .remove) &unit
-          :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'respo-alerts.util/AlertsDom
-            :features $ #{} :js-ffi
-        'dom-select! $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn dom-select! (el)
-            do (el .select) &unit
-          :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'respo-alerts.util/AlertsDom
-            :features $ #{} :js-ffi
-        'dom-stop-propagation! $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn dom-stop-propagation! (el)
-            do (el .stop-propagation) &unit
-          :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Unit)
-            :args $ [] 'respo-alerts.util/AlertsDom
-            :features $ #{} :js-ffi
-        'dom-style $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn dom-style (el) (el :style)
-          :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'respo-alerts.util/AlertsDomStyle)
-            :args $ [] 'respo-alerts.util/AlertsDom
-            :features $ #{} :js-ffi
         'focus-element! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn focus-element! (query)
-            let
-                target $ js/document.querySelector query
-              if (js-present? target)
-                do
-                  dom-focus! $ unsafe-coerce target 'respo-alerts.util/AlertsDom
-                  , &unit
-                , &unit
+            match (browser/query-selector query)
+              (:none) &unit
+              (:some target) (browser/element-focus! target)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'String
@@ -1715,16 +1631,14 @@
               :code $ quote $ assert= nil (read-field nil :trigger-style)
         'select-element! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn select-element! (query)
-            let
-                target $ js/document.querySelector query
-              if (js-present? target)
-                do
-                  dom-select! $ unsafe-coerce target 'respo-alerts.util/AlertsDom
-                  , &unit
-                , &unit
+            match (browser/query-selector query)
+              (:none) &unit
+              (:some target)
+                browser/element-select! $ browser/selectable-element-host target
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'String
             :features $ #{} :js-ffi
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns respo-alerts.util
+          :require $ js-ffi.browser :as browser
