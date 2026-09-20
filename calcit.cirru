@@ -1392,7 +1392,7 @@
               and config/dev? $ match op
                 (:states ignored-cursor ignored-state) false
                 _ true
-              js/console.log |Dispatch: op
+              shared/console-log! $ str |Dispatch: op
             reset! *reel $ next-reel op
             , &unit
           :examples $ []
@@ -1418,7 +1418,10 @@
             :args $ []
             :features $ #{} :js-ffi
         'mount-target $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ def mount-target (js/document.querySelector |.app)
+          :code $ quote $ def mount-target
+            unsafe-coerce
+              option:unwrap $ browser/query-selector |.app
+              , 'Dynamic
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'Dynamic 'Dynamic
@@ -1429,7 +1432,7 @@
               assert-type @*reel $ :: 'reel.typed/State 'Enum $ :: 'Map 'Dynamic 'Dynamic
               assert-type op 'Enum
               generate-id!
-              unsafe-coerce js/Date.now 'Number
+              shared/now-ms
           :examples $ []
           :schema $ :: 'Fn $ {}
             :args $ [] 'Dynamic
@@ -1484,6 +1487,7 @@
             |./calcit.build-errors :default build-errors
             |bottom-tip :default hud!
             js-ffi.browser :as browser
+            js-ffi.shared :as shared
     'respo-alerts.schema $ %{} 'FileEntry
       :defs $ {}
         'confirm-button-name $ %{} 'CodeEntry (:doc |)
@@ -1591,7 +1595,9 @@
               (:states cursor s) (update-states store cursor s)
               (:content c) (&map:assoc store :content c)
               (:hydrate-storage d) d
-              _ $ do (js/console.warn "|Unknown op:" op) store
+              _ $ do
+                shared/console-warn! $ str "|Unknown op:" op
+                , store
           :examples $ []
           :schema $ :: 'Fn $ {}
             :args $ [] (:: 'Map 'Dynamic 'Dynamic) 'Enum 'String 'Number
@@ -1602,6 +1608,7 @@
           :require
             respo.cursor :refer $ update-states
             respo-alerts.config :refer $ dev?
+            js-ffi.shared :as shared
     'respo-alerts.util $ %{} 'FileEntry
       :defs $ {}
         'focus-element! $ %{} 'CodeEntry (:doc |)
