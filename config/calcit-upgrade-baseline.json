@@ -1,6 +1,6 @@
 {
-  "typeNone": 20,
-  "typeNotFull": 54,
+  "typeNone": 10,
+  "typeNotFull": 46,
   "schemaDynamic": 64,
   "codeDynamic": 0,
   "codeNil": 67,
