@@ -33,9 +33,10 @@
                 =< nil 40
                 comp-demo-trigger $ >> states :trigger
                 when dev? $ comp-inspect |states states $ {} (:bottom 0)
-                when dev? $ comp-reel (>> states :reel) reel $ {}
+                when dev? $ comp-typed-reel (>> states :reel) reel $ {}
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
+            :args $ [] $ :: 'reel.typed/State 'Enum (:: 'Map 'Dynamic 'Dynamic)
         'comp-controlled-modals $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-controlled-modals (states)
             let
@@ -79,7 +80,8 @@
                   .render demo-modal-menu
                   .render demo-drawer
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
+            :args $ [] $ :: 'Map 'Tag 'Dynamic
         'comp-demo-trigger $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-demo-trigger (states)
             let
@@ -95,7 +97,8 @@
                         d! cursor $ &map:assoc state :visible? $ not (&map:get state :visible?)
                     , nil
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
+            :args $ [] $ :: 'Map 'Tag 'Dynamic
         'comp-hooks-usages $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-hooks-usages (states)
             let
@@ -171,12 +174,13 @@
                 .render prompt-validation-plugin
                 .render alert-text-plugin
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
+            :args $ [] $ :: 'Map 'Tag 'Dynamic
         'style-logo $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle style-logo
             {} $ |& $ {} (:width 120)
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'String
         'validate-cirru-source $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn validate-cirru-source (source)
             try
@@ -199,7 +203,7 @@
             respo-ui.css :as css
             respo.core :refer $ defcomp >> <> div button textarea span img a
             respo.comp.space :refer $ =<
-            reel.comp.reel :refer $ comp-reel
+            reel.comp.reel :refer $ comp-typed-reel
             respo-alerts.config :refer $ dev?
             respo-alerts.core :refer $ comp-modal comp-modal-menu use-alert use-confirm use-prompt use-modal use-modal-menu use-drawer
             respo.comp.inspect :refer $ comp-inspect
@@ -539,7 +543,7 @@
               {} $ :text "|Hello World"
               , show? on-read! on-close!
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] 'Dynamic 'Dynamic 'Dynamic 'Dynamic
+            :args $ [] 'Dynamic 'Bool 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
         'comp-confirm-modal $ %{} 'CodeEntry
           :doc "||Confirm modal component. Shows a dialog with confirm and cancel buttons. Used internally by use-confirm hook."
@@ -575,7 +579,12 @@
             comp-confirm-modal
               {} $ :text "|Are you sure?"
               , show? on-confirm! on-close!
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
+            :args $ [] (:: 'Map 'Tag 'Dynamic) 'Bool
+              :: 'Fn $ {} (:return 'Unit)
+                :args $ [] 'respo.schema/RespoEvent 'Dynamic
+              :: 'Fn $ {} (:return 'Unit)
+                :args $ [] 'Dynamic
         'comp-drawer $ %{} 'CodeEntry
           :doc "||Drawer component. Renders a sliding panel from the side with custom content via :render function in options."
           :code $ quote $ defcomp comp-drawer (options show? on-close)
@@ -622,7 +631,7 @@
                   div ({}) (<> |Content)
               , show? on-close
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] 'Dynamic 'Dynamic 'Dynamic
+            :args $ [] 'Dynamic 'Bool 'Dynamic
             :features $ #{} :js-ffi
         'comp-esc-listener $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-esc-listener (show? on-close!)
@@ -631,7 +640,10 @@
                 :style $ {} $ :position :absolute
                 :on-keydown $ fn (e d!) (on-close! d!)
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
+            :args $ [] 'Bool $ :: 'Fn
+              {} (:return 'Unit)
+                :args $ [] 'Dynamic
         'comp-modal $ %{} 'CodeEntry
           :doc "||Modal component. Renders a modal dialog with custom content via :render function in options."
           :code $ quote $ defcomp comp-modal (options show? on-close)
@@ -679,7 +691,7 @@
                   div ({}) (<> |Content)
               , show? on-close
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] 'Dynamic 'Dynamic 'Dynamic
+            :args $ [] 'Dynamic 'Bool 'Dynamic
             :features $ #{} :js-ffi
         'comp-modal-menu $ %{} 'CodeEntry
           :doc "||Modal menu component. Shows a modal dialog with a list of selectable items. Define items via :items in options."
@@ -739,7 +751,7 @@
                 :items $ [] (:: :item |a |A) (:: :item |b |B)
               , show? on-close! on-select!
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] 'Dynamic 'Dynamic 'Dynamic 'Dynamic
+            :args $ [] 'Dynamic 'Bool 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
         'comp-prompt-modal $ %{} 'CodeEntry
           :doc "||Prompt modal component. Shows a dialog with text input field and validation. Used internally by use-prompt hook."
@@ -832,7 +844,7 @@
               {} (:text "|Enter name") (:placeholder |name)
               , show? on-finish! on-close!
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] 'Dynamic 'Dynamic 'Dynamic 'Dynamic 'Dynamic
+            :args $ [] 'Dynamic 'Dynamic 'Bool 'Dynamic 'Dynamic
             :features $ #{} :js-ffi
         'confirm-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def confirm-actions-plugin (impl-traits PluginNodeCursorState %confirm-actions)
@@ -889,14 +901,16 @@
                       , &unit
                 , &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
-            :args $ [] 'Dynamic
+          :schema $ :: 'Fn $ {} (:return 'respo.schema/Effect)
+            :args $ [] 'Bool
             :features $ #{} :js-ffi
         'effect-focus $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-focus (query show?) (action el at-place?)
             case-default action nil $ :update $ when show? (focus-element! query)
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Fn $ {} (:return 'respo.schema/Effect)
+            :args $ [] 'String 'Bool
+            :features $ #{} :js-ffi
         'effect-keydown $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-keydown () (action el at?)
             case-default action &unit
@@ -920,14 +934,16 @@
                 js-delete el |_listener
                 , &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'respo.schema/Effect)
             :args $ []
             :features $ #{} :js-ffi
         'effect-select $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-select (query show?) (action el *local)
             case-default action nil $ :update $ when show? (select-element! query)
           :examples $ []
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Fn $ {} (:return 'respo.schema/Effect)
+            :args $ [] 'String 'Bool
+            :features $ #{} :js-ffi
         'effect-slide $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-slide (show?) (action el at-place?)
             case-default action &unit
@@ -975,8 +991,8 @@
                       , &unit
                 , &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
-            :args $ [] 'Dynamic
+          :schema $ :: 'Fn $ {} (:return 'respo.schema/Effect)
+            :args $ [] 'Bool
             :features $ #{} :js-ffi
         'modal-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def modal-actions-plugin (impl-traits PluginNodeCursorState %modal-actions)
@@ -1454,8 +1470,9 @@
                 reset! *reel $ reloaded-reel
                 hud! |ok~ |Ok
               hud! |error build-errors
+            , &unit
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
             :features $ #{} :js-ffi
         'reloaded-reel $ %{} 'CodeEntry (:doc |)
@@ -1471,7 +1488,7 @@
           :code $ quote $ defn render-app! ()
             render! mount-target (comp-container @*reel) dispatch!
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
             :features $ #{} :js-ffi
       :ns $ %{} 'NsEntry (:doc |)
@@ -1562,7 +1579,8 @@
               {}
                 :trigger-style $ {} $ :color |blue
                 :trigger-active-style $ {} $ :color |red
-          :schema $ :: 'Dynamic
+          :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
+            :args $ [] 'Bool 'Struct 'Dynamic
         'style-trigger $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle style-trigger
             {} $ |& $ {} (:border-radius |50%) (:position :absolute) (:transform "|translate(-50%,-50%)") (:top |50%) (:left |50%) (:width 0) (:height 0) (:transition-duration |300ms) (:transition-delay |100ms) (:pointer-events :none) (:z-index |900) (:opacity 1)

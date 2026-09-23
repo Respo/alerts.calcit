@@ -44,8 +44,8 @@ jobs:
         calcit calcit.cirru js
         && yarn vite build --base=./
 
-    - name: Render prompt regression tests
-      run: node --test scripts/prompt-render.test.mjs
+    - name: Render prompt and typed Reel regression tests
+      run: node --test scripts/prompt-render.test.mjs scripts/typed-reel-render.test.mjs
 
     - name: Deploy to server
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
