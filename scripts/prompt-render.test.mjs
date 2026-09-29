@@ -45,9 +45,9 @@ test('prompt reopens with its current initial value after submitting', () => {
   event.chunk[clickIndex + 1]({}, (_cursor, state) => updates.push(state));
 
   assert.deepEqual(submitted, ['saved-text']);
-  assert.equal(updates.at(-1), null, 'closing must discard stale input state');
+  assert.equal(updates.at(-1)?.chunk?.length, 0, 'closing must discard stale input state');
   const updatedOptions = c.parse_cirru_edn('{} (:initial |updated-text)');
-  const reopened = comp_prompt_modal(c.parse_cirru_edn('{} (:cursor $ []) (:data nil)'),
+  const reopened = comp_prompt_modal(c.parse_cirru_edn('{} (:cursor $ []) (:data $ {})'),
     updatedOptions, true, () => {}, () => {});
   assert.match(make_string(reopened), /value="updated-text"/);
 });
