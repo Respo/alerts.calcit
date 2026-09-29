@@ -772,7 +772,7 @@
                       not $ blank? result
                       d! cursor $ &map:assoc state :failure result
                       do (on-finish! text d!) (on-close! d!)
-                        d! cursor $ -> state (&map:assoc :text |) (&map:assoc :failure |)
+                        d! cursor $ {}
               []
                 effect-select (str |. schema/input-box-name) show?
                 effect-fade show?
@@ -785,7 +785,7 @@
                         {} $ :line-height |32px
                         read-field options :backdrop-style
                       :on-click $ fn (e d!) (on-close! d!)
-                        d! cursor $ -> state (&map:assoc :text |) (&map:assoc :failure |)
+                        d! cursor $ {}
                     div
                       {}
                         :class-name $ str-spaced css/global css/column style-modal-card $ read-field options :card-class
@@ -808,7 +808,7 @@
                                   (:submit) (check-submit! d!)
                                   (:close)
                                     do (on-close! d!)
-                                      d! cursor $ -> state (&map:assoc :text |) (&map:assoc :failure |)
+                                      d! cursor $ {}
                                   (:ignore) &unit
                             :placeholder $ either (read-field options :placeholder) nil
                         if (read-field options :multiline?)
