@@ -290,6 +290,12 @@ let
 
 https://github.com/calcit-lang/respo-calcit-workflow
 
+The demo builds with Calcit 0.27.0 and Node.js 24. Its generated frontend assets
+are uploaded and publicly verified at `https://cos-sh.tiye.me/Respo/alerts.calcit/`
+for production and `/pr/` for pull requests. The existing production rsync of
+`dist/*` to `rsync-user@tiye.me:/web-assets/repo/Respo/alerts.calcit` remains
+unchanged; COS only receives frontend build output.
+
 ### License
 
 MIT
