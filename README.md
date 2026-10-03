@@ -292,9 +292,20 @@ https://github.com/calcit-lang/respo-calcit-workflow
 
 The demo builds with Calcit 0.27.0 and Node.js 24. Its generated frontend assets
 are uploaded and publicly verified at `https://cos-sh.tiye.me/Respo/alerts.calcit/`
-for production and `/pr/` for pull requests. The existing production rsync of
+for production and `/pr/<number>/<run>/<attempt>/` for pull requests. The existing production rsync of
 `dist/*` to `rsync-user@tiye.me:/web-assets/repo/Respo/alerts.calcit` remains
 unchanged; COS only receives frontend build output.
+
+COS action 1.2 uses its built-in public verification; no additional upload checker
+is needed. Production jobs queue without cancellation and skip obsolete main
+revisions before COS and rsync; publication is not atomic. Action references use
+formal version tags, which remain mutable and are not immutable supply-chain pins.
+
+Plugin definitions and trait-bearing constructors declare `EnumDef`; hook return
+schemas still describe nominal plugin instances. This corrects the constructor
+metadata rejected by Calcit 0.28 without changing payloads or runtime behavior.
+The demo remains on the published 0.27 toolchain: full 0.28 checking still fails
+on published Respo diagnostics and must not be considered complete.
 
 ### License
 
