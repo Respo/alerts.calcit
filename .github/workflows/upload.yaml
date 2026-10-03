@@ -84,23 +84,9 @@ jobs:
     - name: Render prompt and typed Reel regression tests
       run: node --test scripts/prompt-render.test.mjs scripts/typed-reel-render.test.mjs
 
-    - name: Check current production revision
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      id: production
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        current_sha="$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq '.sha')"
-        if [[ "$GITHUB_SHA" == "$current_sha" ]]; then
-          echo "current=true" >> "$GITHUB_OUTPUT"
-        else
-          echo "current=false" >> "$GITHUB_OUTPUT"
-          echo "::notice::Skip stale production revision ${GITHUB_SHA}; current main is ${current_sha}."
-        fi
-
     - name: Check COS credentials
       id: cos-credentials
-      if: steps.production.outputs.current == 'true' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+      if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
       env:
         COS_BUCKET: ${{ secrets.COS_BUCKET }}
         COS_SECRET_ID: ${{ secrets.COS_SECRET_ID }}
@@ -118,8 +104,22 @@ jobs:
           fi
         fi
 
+    - name: Check current production revision
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      id: production
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        current_sha="$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq '.sha')"
+        if [[ "$GITHUB_SHA" == "$current_sha" ]]; then
+          echo "current=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "current=false" >> "$GITHUB_OUTPUT"
+          echo "::notice::Skip stale production revision ${GITHUB_SHA}; current main is ${current_sha}."
+        fi
+
     - name: Upload and verify frontend assets on COS
-      if: steps.cos-credentials.outputs.available == 'true'
+      if: steps.cos-credentials.outputs.available == 'true' && (steps.production.outputs.current == 'true' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository))
       timeout-minutes: 10
       uses: worktools/cos-upload-action@v1.2.0
       with:
