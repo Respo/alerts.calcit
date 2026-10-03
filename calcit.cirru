@@ -472,7 +472,7 @@
         'PluginNodeCursorState $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defenum PluginNodeCursorState (:plugin 'respo.schema/Component 'Dynamic 'Dynamic)
           :examples $ []
-          :schema $ :: 'Enum
+          :schema $ :: 'EnumDef
         'PromptActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait PromptActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
@@ -488,11 +488,11 @@
         'PromptPluginNodeCursorState $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defenum PromptPluginNodeCursorState (:plugin 'respo.schema/Component 'Dynamic 'Dynamic)
           :examples $ []
-          :schema $ :: 'Enum
+          :schema $ :: 'EnumDef
         'alert-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def alert-actions-plugin (impl-traits PluginNodeCursorState %alert-actions)
           :examples $ []
-          :schema $ :: 'respo-alerts.core/PluginNodeCursorState
+          :schema $ :: 'EnumDef
         'clear-prompt-task! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn clear-prompt-task! (cursor)
             reset! *prompt-tasks $ assert-type (&map:dissoc @*prompt-tasks cursor) (:: 'Map 'Dynamic 'Dynamic)
@@ -849,11 +849,11 @@
         'confirm-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def confirm-actions-plugin (impl-traits PluginNodeCursorState %confirm-actions)
           :examples $ []
-          :schema $ :: 'respo-alerts.core/PluginNodeCursorState
+          :schema $ :: 'EnumDef
         'drawer-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def drawer-actions-plugin (impl-traits PluginNodeCursorState %drawer-actions)
           :examples $ []
-          :schema $ :: 'respo-alerts.core/PluginNodeCursorState
+          :schema $ :: 'EnumDef
         'effect-fade $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-fade (show?) (action el at-place?)
             case-default action &unit
@@ -997,15 +997,15 @@
         'modal-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def modal-actions-plugin (impl-traits PluginNodeCursorState %modal-actions)
           :examples $ []
-          :schema $ :: 'respo-alerts.core/PluginNodeCursorState
+          :schema $ :: 'EnumDef
         'modal-menu-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def modal-menu-actions-plugin (impl-traits PluginNodeCursorState %modal-menu-actions)
           :examples $ []
-          :schema $ :: 'respo-alerts.core/PluginNodeCursorState
+          :schema $ :: 'EnumDef
         'prompt-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def prompt-actions-plugin (impl-traits PromptPluginNodeCursorState %prompt-actions)
           :examples $ []
-          :schema $ :: 'respo-alerts.core/PromptPluginNodeCursorState
+          :schema $ :: 'EnumDef
         'prompt-event-text $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn prompt-event-text (event)
             let
