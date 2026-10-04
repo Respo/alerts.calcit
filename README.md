@@ -310,3 +310,10 @@ on published Respo diagnostics and must not be considered complete.
 ### License
 
 MIT
+
+### 0.10.48 发布准备
+
+此 patch 将 #84 已合并的插件原型 `EnumDef` 声明修复纳入正式模块版本，
+供下游固定 tag 引用；仅更新模块版本，不新增迁移规则、验证脚本或 alpha 依赖。
+发布前仍需维护者合并并创建正式 `0.10.48` tag/release；版本清单更新本身不表示已经发布。
+本模块继续使用原 Calcit 0.27.0 门禁，不能据此宣称共享依赖的完整 0.28 迁移已完成。
