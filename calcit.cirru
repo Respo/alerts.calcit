@@ -242,7 +242,7 @@
                 :return 'Dynamic
               match self $
                 :plugin node cursor state
-                if (some? text)
+                if (non-nil? text)
                   d! cursor $ -> state (&map:assoc :show? true) (&map:assoc :text text)
                   d! cursor $ &map:assoc state :show? true
             .close $ fn (self d!)
@@ -438,7 +438,9 @@
           :tests $ [] $ %{} 'TestEntry (:name |stores-callback-across-render)
             :code $ quote $ let
                 cursor $ [] :action-test
-                plugin $ %:: prompt-actions-plugin :plugin (%:: _ :node) cursor $ {}
+                plugin $ %:: prompt-actions-plugin :plugin
+                  respo.schema/Component :name :test :effects ([]) :listeners ([]) :tree $ Option :none
+                  , cursor $ {}
                 next-task $ fn (text) &unit
                 d! $ fn (cursor state) &unit
               do (.show plugin d! next-task)
@@ -613,14 +615,14 @@
                       :on-click $ fn (e d!) &unit
                     let
                         title $ read-field options :title
-                      if (some? title)
+                      if (non-nil? title)
                         div
                           {} $ :class-name $ str-spaced css/center css/font-fancy! style-modal-title
                           <> title
                     cond
-                        some? $ read-field options :render
+                        non-nil? $ read-field options :render
                         (read-field options :render) on-close
-                      (some? (read-field options :render-body))
+                      (non-nil? (read-field options :render-body))
                         (read-field options :render-body) on-close
                       true "|TODO render body"
                   comp-esc-listener show? on-close
@@ -673,14 +675,14 @@
                       :on-click $ fn (e d!) &unit
                     let
                         title $ read-field options :title
-                      if (some? title)
+                      if (non-nil? title)
                         div
                           {} $ :class-name $ str-spaced css/center css/font-fancy! style-modal-title
                           <> title
                     cond
-                        some? $ read-field options :render
+                        non-nil? $ read-field options :render
                         (read-field options :render) on-close
-                      (some? (read-field options :render-body))
+                      (non-nil? (read-field options :render-body))
                         (read-field options :render-body) on-close
                       true "|TODO render body"
                   comp-esc-listener show? on-close
@@ -712,13 +714,13 @@
                   div
                     {}
                       :class-name $ str-spaced css/global css/column style-modal-card $ read-field options :card-class
-                      :style $ &merge
+                      :style $ merge-optional-styles
                         {} $ :padding 0
                         read-field options :style
                       :on-click $ fn (e d!) &unit
                     let
                         title $ read-field options :title
-                      if (some? title)
+                      if (non-nil? title)
                         div
                           {}
                             :class-name $ str-spaced css/row-parted css/font-fancy!
@@ -729,7 +731,8 @@
                           span $ {} (:inner-text |Clear) (:class-name style-clear)
                             :on-click $ fn (e d!) (on-select! nil d!)
                     list-> ({})
-                      -> (read-field options :items)
+                      ->
+                        menu-items $ read-field options :items
                         map $ fn (info)
                           let
                               item $ cond
@@ -795,22 +798,23 @@
                         <> $ either (read-field options :text) "|Type in text"
                       =< nil 8
                       let
-                          props $ %{} DomProps (:value text) (:class-name nil) (:style nil) (:inner-text nil) (:id nil) (:type nil) (:href nil) (:src nil) (:name nil) (:title nil) (:disabled nil) (:checked nil) (:spell-check nil) (:spellcheck nil) (:autofocus nil) (:tab-index nil) (:read-only nil) (:data-name nil) (:data-comp nil) (:role nil) (:aria-label nil) (:aria-labelledby nil) (:aria-describedby nil) (:aria-hidden nil) (:selected nil) (:target nil) (:on-click nil) (:on-focus nil) (:on-blur nil) (:on-keyup nil) (:on-change nil) (:on-mousedown nil) (:on-mouseup nil) (:innerHTML nil) (:rel nil) (:defer nil) (:on nil) (:alt nil) (:draggable nil) (:content nil) (:charset nil) (:multiple nil) (:accept nil) (:ref nil)
-                            :on-input $ fn (e d!)
+                          props $ DomProps :value text :class-name nil :style nil :inner-text nil :id nil :type nil :href nil :src nil :name nil :title nil :disabled nil :checked nil :spell-check nil :spellcheck nil :autofocus nil :tab-index nil :read-only nil :data-name nil :data-comp nil :role nil :aria-label nil :aria-labelledby nil :aria-describedby nil :aria-hidden nil :selected nil :target nil :on-click nil :on-focus nil :on-blur nil :on-keyup nil :on-change nil :on-mousedown nil :on-mouseup nil :on-paste nil :innerHTML nil :rel nil :defer nil :on nil :alt nil :draggable nil :content nil :charset nil :multiple nil :accept nil :ref nil :on-input
+                            fn (e d!)
                               d! cursor $ &map:assoc state :text $ prompt-event-text e
-                            :on-keydown $ fn (e d!)
-                              let
-                                  event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
-                                  action $ unsafe-coerce
-                                    prompt-key-action event-info $ read-field options :multiline?
-                                    , 'respo-alerts.core/PromptKeyAction
-                                match action
-                                  (:submit) (check-submit! d!)
-                                  (:close)
-                                    do (on-close! d!)
-                                      d! cursor $ {}
-                                  (:ignore) &unit
-                            :placeholder $ either (read-field options :placeholder) nil
+                            , :on-keydown
+                              fn (e d!)
+                                let
+                                    event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
+                                    action $ unsafe-coerce
+                                      prompt-key-action event-info $ read-field options :multiline?
+                                      , 'respo-alerts.core/PromptKeyAction
+                                  match action
+                                    (:submit) (check-submit! d!)
+                                    (:close)
+                                      do (on-close! d!)
+                                        d! cursor $ {}
+                                    (:ignore) &unit
+                              , :placeholder $ prompt-placeholder (read-field options :placeholder)
                         if (read-field options :multiline?)
                           textarea $ struct-with props
                             :class-name $ str-spaced schema/input-box-name css/textarea $ read-field options :input-class
@@ -856,7 +860,7 @@
           :schema $ :: 'EnumDef
         'effect-fade $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-fade (show?) (action el at-place?)
-            case-default action &unit
+            match action
               :before-update $ if show?
                 match
                   browser/element-first-child $ browser/element-host el
@@ -900,20 +904,23 @@
                         , 10
                       , &unit
                 , &unit
+              _ &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Effect)
             :args $ [] 'Bool
             :features $ #{} :js-ffi
         'effect-focus $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-focus (query show?) (action el at-place?)
-            case-default action nil $ :update $ when show? (focus-element! query)
+            match action
+              :update $ when show? $ focus-element! query
+              _ &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Effect)
             :args $ [] 'String 'Bool
             :features $ #{} :js-ffi
         'effect-keydown $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-keydown () (action el at?)
-            case-default action &unit
+            match action
               :mount $ let
                   listener $ fn (event)
                     hint-fn $ {}
@@ -933,20 +940,23 @@
                 browser/remove-event-listener! |keydown listener
                 js-delete el |_listener
                 , &unit
+              _ &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Effect)
             :args $ []
             :features $ #{} :js-ffi
         'effect-select $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-select (query show?) (action el *local)
-            case-default action nil $ :update $ when show? (select-element! query)
+            match action
+              :update $ when show? $ select-element! query
+              _ &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Effect)
             :args $ [] 'String 'Bool
             :features $ #{} :js-ffi
         'effect-slide $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-slide (show?) (action el at-place?)
-            case-default action &unit
+            match action
               :before-update $ if show?
                 match
                   browser/element-first-child $ browser/element-host el
@@ -990,10 +1000,43 @@
                         , 10
                       , &unit
                 , &unit
+              _ &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Effect)
             :args $ [] 'Bool
             :features $ #{} :js-ffi
+        'menu-items $ %{} 'CodeEntry
+          :doc "|Validate the required list container without guessing the heterogeneous item payload or replacing invalid input with an empty list."
+          :code $ quote $ defn menu-items (value)
+            if (list? value)
+              assert-type value $ :: 'List 'Dynamic
+              raise "|Menu items must be List"
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'T
+            :generics $ [] 'T
+            :return $ :: 'List 'Dynamic
+          :tests $ []
+            %{} 'TestEntry (:name |mixed-items-preserved)
+              :code $ quote $ let
+                  items $ [] (:: :item |a |A)
+                    {} (:value :b) (:display |B)
+                assert= items $ menu-items items
+                assert= ([])
+                  menu-items $ []
+              :tags $ #{} :unit
+            %{} 'TestEntry (:name |missing-and-invalid-containers-rejected)
+              :code $ quote $ each
+                [] nil 42 true :item |item $ {}
+                fn (value)
+                  assert= true $ try
+                    do (menu-items value) false
+                    fn (message)
+                      hint-fn $ {}
+                        :args $ [] 'String
+                        :return 'Bool
+                      = message "|Menu items must be List"
+              :tags $ #{} :unit
         'modal-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def modal-actions-plugin (impl-traits PluginNodeCursorState %modal-actions)
           :examples $ []
@@ -1067,6 +1110,37 @@
               is $ match (prompt-key-action composing false)
                 (:ignore) true
                 _ false
+        'prompt-placeholder $ %{} 'CodeEntry
+          :doc "|Validate the optional String placeholder before constructing DOM props."
+          :code $ quote $ defn prompt-placeholder (value)
+            if (nil? value) nil $ if (string? value) (assert-type value 'String) (raise "|Prompt placeholder must be String or nil")
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'T
+            :generics $ [] 'T
+            :return $ :: 'JsNullish 'String
+          :tests $ []
+            %{} 'TestEntry (:name |absent-remains-nil)
+              :code $ quote $ assert= nil (prompt-placeholder nil)
+              :tags $ #{} :unit
+            %{} 'TestEntry (:name |empty-string-preserved)
+              :code $ quote $ assert= | (prompt-placeholder |)
+              :tags $ #{} :unit
+            %{} 'TestEntry (:name |string-preserved)
+              :code $ quote $ assert= |Example (prompt-placeholder |Example)
+              :tags $ #{} :unit
+            %{} 'TestEntry (:name |invalid-values-rejected)
+              :code $ quote $ each
+                [] 42 true :Example ({}) ([])
+                fn (value)
+                  assert= true $ try
+                    do (prompt-placeholder value) false
+                    fn (message)
+                      hint-fn $ {}
+                        :args $ [] 'String
+                        :return 'Bool
+                      , true
+              :tags $ #{} :unit
         'prompt-validation-error $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn prompt-validation-error (value)
             if (string? value) (unsafe-coerce value 'String) |
@@ -1394,7 +1468,7 @@
             respo-alerts.style :as style
             respo-alerts.schema :as schema
             calcit.test :refer $ is
-            respo-alerts.util :refer $ focus-element! select-element! read-field
+            respo-alerts.util :refer $ focus-element! select-element! read-field merge-optional-styles
             js-ffi.browser :as browser
     'respo-alerts.main $ %{} 'FileEntry
       :defs $ {}
@@ -1420,7 +1494,7 @@
             println "|Running mode:" $ if config/dev? |dev |release
             if config/dev? $ load-console-formatter!
             render-app!
-            add-watch *reel :changes $ fn (reel prev) (render-app!)
+            add-watch! *reel :changes $ fn (reel prev) (render-app!)
             listen-devtools! |a dispatch!
             ; js/window.addEventListener |beforeunload $ fn (event) (persist-storage!)
             ; js/setInterval persist-storage! 60000
@@ -1430,7 +1504,7 @@
                 dispatch! :hydrate-storage $ parse-cirru-edn raw
             println "|App started."
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'Dynamic)
+          :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
             :features $ #{} :js-ffi
         'mount-target $ %{} 'CodeEntry (:doc |)
@@ -1463,8 +1537,8 @@
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
             if (nil? build-errors)
-              do (remove-watch *reel :changes) (clear-cache!)
-                add-watch *reel :changes $ fn (reel prev) (render-app!)
+              do (remove-watch! *reel :changes) (clear-cache!)
+                add-watch! *reel :changes $ fn (reel prev) (render-app!)
                 reset! *reel $ reloaded-reel
                 hud! |ok~ |Ok
               hud! |error build-errors
@@ -1567,7 +1641,7 @@
               {} $ :class-name style-trigger-container
               , el $ div $ {}
                 :class-name $ str-spaced style-trigger $ if show? style-trigger-active
-                :style $ &merge (read-field options :trigger-style)
+                :style $ merge-optional-styles (read-field options :trigger-style)
                   if show? $ read-field options :trigger-active-style
           :examples $ [] $ quote
             comp-trigger show?
@@ -1602,7 +1676,7 @@
             respo-ui.css :as css
             respo.util.format :refer $ hsl
             respo.css :refer $ defstyle
-            respo-alerts.util :refer $ read-field
+            respo-alerts.util :refer $ read-field merge-optional-styles
     'respo-alerts.updater $ %{} 'FileEntry
       :defs $ {} $ 'updater
         %{} 'CodeEntry (:doc |)
@@ -1636,6 +1710,62 @@
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'String
             :features $ #{} :js-ffi
+        'merge-optional-styles $ %{} 'CodeEntry
+          :doc "|Validate optional style containers, preserving nil and right-hand overrides. CSS key/value validation remains owned by Respo."
+          :code $ quote $ defn merge-optional-styles (base active)
+            let
+                check-style $ fn (value)
+                  if (nil? value) nil $ if (map? value)
+                    assert-type value $ :: 'Map 'Dynamic 'Dynamic
+                    raise "|Style must be Map or nil"
+                checked-base $ check-style base
+                checked-active $ check-style active
+              if (nil? checked-base) checked-active $ if (nil? checked-active) checked-base $ &merge
+                assert-type checked-base $ :: 'Map 'Dynamic 'Dynamic
+                assert-type checked-active $ :: 'Map 'Dynamic 'Dynamic
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'B 'A
+            :generics $ [] 'B 'A
+            :return $ :: 'JsNullish $ :: 'Map 'Dynamic 'Dynamic
+          :tests $ []
+            %{} 'TestEntry (:name |missing-stays-nil)
+              :code $ quote $ assert= nil (merge-optional-styles nil nil)
+              :tags $ #{} :unit
+            %{} 'TestEntry (:name |one-sided-and-empty-styles)
+              :code $ quote $ let
+                  style $ {} $ :color |red
+                assert= style $ merge-optional-styles nil style
+                assert= style $ merge-optional-styles style nil
+                assert= ({})
+                  merge-optional-styles ({}) nil
+              :tags $ #{} :unit
+            %{} 'TestEntry (:name |active-overrides-base)
+              :code $ quote $ assert=
+                {} (:color |red) (:display |flex)
+                merge-optional-styles
+                  {} (:color |blue) (:display |flex)
+                  {} $ :color |red
+              :tags $ #{} :unit
+            %{} 'TestEntry (:name |invalid-containers-rejected)
+              :code $ quote $ each
+                [] 42 true :style |red $ []
+                fn (value)
+                  assert= true $ try
+                    do (merge-optional-styles value nil) false
+                    fn (message)
+                      hint-fn $ {}
+                        :args $ [] 'String
+                        :return 'Bool
+                      = message "|Style must be Map or nil"
+                  assert= true $ try
+                    do (merge-optional-styles nil value) false
+                    fn (message)
+                      hint-fn $ {}
+                        :args $ [] 'String
+                        :return 'Bool
+                      = message "|Style must be Map or nil"
+              :tags $ #{} :unit
         'read-field $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn read-field (value field)
             if (struct? value)
@@ -1643,7 +1773,8 @@
               if (map? value) (&map:get value field) nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
-            :args $ [] 'Dynamic 'Tag
+            :args $ [] 'T 'Tag
+            :generics $ [] 'T
           :tests $ []
             %{} 'TestEntry (:name |reads-map)
               :code $ quote $ assert= 1
