@@ -57,6 +57,7 @@ for (const multiline of [false, true]) {
     ['absent', '', undefined],
     ['empty', '(:placeholder |)', ''],
     ['provided', '(:placeholder |Example)', 'Example'],
+    ['unicode', '(:placeholder |请输入😀)', '请输入😀'],
   ]) {
     test(`${multiline ? 'textarea' : 'input'} renders with ${name} placeholder`, () => {
       const options = c.parse_cirru_edn(`{} (:multiline? ${multiline}) ${setting}`);
@@ -69,6 +70,19 @@ for (const multiline of [false, true]) {
       if (expected === undefined) assert.doesNotMatch(control, /placeholder=/);
       else assert.ok(control.includes(`placeholder="${expected}"`));
       assert.doesNotMatch(control, /undefined/);
+    });
+  }
+
+  for (const [name, setting] of [
+    ['number', '(:placeholder 42)'], ['boolean', '(:placeholder true)'],
+    ['tag', '(:placeholder :Example)'], ['map', '(:placeholder $ {})'],
+    ['list', '(:placeholder $ [])'],
+  ]) {
+    test(`${multiline ? 'textarea' : 'input'} rejects ${name} placeholder`, () => {
+      const options = c.parse_cirru_edn(`{} (:multiline? ${multiline}) ${setting}`);
+      const unexpectedCallback = () => assert.fail('invalid options must not invoke callbacks');
+      assert.throws(() => comp_prompt_modal(states, options, true,
+        unexpectedCallback, unexpectedCallback), /String/);
     });
   }
 }

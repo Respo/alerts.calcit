@@ -795,22 +795,23 @@
                         <> $ either (read-field options :text) "|Type in text"
                       =< nil 8
                       let
-                          props $ %{} DomProps (:value text) (:class-name nil) (:style nil) (:inner-text nil) (:id nil) (:type nil) (:href nil) (:src nil) (:name nil) (:title nil) (:disabled nil) (:checked nil) (:spell-check nil) (:spellcheck nil) (:autofocus nil) (:tab-index nil) (:read-only nil) (:data-name nil) (:data-comp nil) (:role nil) (:aria-label nil) (:aria-labelledby nil) (:aria-describedby nil) (:aria-hidden nil) (:selected nil) (:target nil) (:on-click nil) (:on-focus nil) (:on-blur nil) (:on-keyup nil) (:on-change nil) (:on-mousedown nil) (:on-mouseup nil) (:innerHTML nil) (:rel nil) (:defer nil) (:on nil) (:alt nil) (:draggable nil) (:content nil) (:charset nil) (:multiple nil) (:accept nil) (:ref nil)
-                            :on-input $ fn (e d!)
+                          props $ DomProps :value text :class-name nil :style nil :inner-text nil :id nil :type nil :href nil :src nil :name nil :title nil :disabled nil :checked nil :spell-check nil :spellcheck nil :autofocus nil :tab-index nil :read-only nil :data-name nil :data-comp nil :role nil :aria-label nil :aria-labelledby nil :aria-describedby nil :aria-hidden nil :selected nil :target nil :on-click nil :on-focus nil :on-blur nil :on-keyup nil :on-change nil :on-mousedown nil :on-mouseup nil :on-paste nil :innerHTML nil :rel nil :defer nil :on nil :alt nil :draggable nil :content nil :charset nil :multiple nil :accept nil :ref nil :on-input
+                            fn (e d!)
                               d! cursor $ &map:assoc state :text $ prompt-event-text e
-                            :on-keydown $ fn (e d!)
-                              let
-                                  event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
-                                  action $ unsafe-coerce
-                                    prompt-key-action event-info $ read-field options :multiline?
-                                    , 'respo-alerts.core/PromptKeyAction
-                                match action
-                                  (:submit) (check-submit! d!)
-                                  (:close)
-                                    do (on-close! d!)
-                                      d! cursor $ {}
-                                  (:ignore) &unit
-                            :placeholder $ either (read-field options :placeholder) nil
+                            , :on-keydown
+                              fn (e d!)
+                                let
+                                    event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
+                                    action $ unsafe-coerce
+                                      prompt-key-action event-info $ read-field options :multiline?
+                                      , 'respo-alerts.core/PromptKeyAction
+                                  match action
+                                    (:submit) (check-submit! d!)
+                                    (:close)
+                                      do (on-close! d!)
+                                        d! cursor $ {}
+                                    (:ignore) &unit
+                              , :placeholder $ prompt-placeholder (read-field options :placeholder)
                         if (read-field options :multiline?)
                           textarea $ struct-with props
                             :class-name $ str-spaced schema/input-box-name css/textarea $ read-field options :input-class
@@ -1067,6 +1068,37 @@
               is $ match (prompt-key-action composing false)
                 (:ignore) true
                 _ false
+        'prompt-placeholder $ %{} 'CodeEntry
+          :doc "|Validate the optional String placeholder before constructing DOM props."
+          :code $ quote $ defn prompt-placeholder (value)
+            if (nil? value) nil $ if (string? value) (assert-type value 'String) (raise "|Prompt placeholder must be String or nil")
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'T
+            :generics $ [] 'T
+            :return $ :: 'JsNullish 'String
+          :tests $ []
+            %{} 'TestEntry (:name |absent-remains-nil)
+              :code $ quote $ assert= nil (prompt-placeholder nil)
+              :tags $ #{} :unit
+            %{} 'TestEntry (:name |empty-string-preserved)
+              :code $ quote $ assert= | (prompt-placeholder |)
+              :tags $ #{} :unit
+            %{} 'TestEntry (:name |string-preserved)
+              :code $ quote $ assert= |Example (prompt-placeholder |Example)
+              :tags $ #{} :unit
+            %{} 'TestEntry (:name |invalid-values-rejected)
+              :code $ quote $ each
+                [] 42 true :Example ({}) ([])
+                fn (value)
+                  assert= true $ try
+                    do (prompt-placeholder value) false
+                    fn (message)
+                      hint-fn $ {}
+                        :args $ [] 'String
+                        :return 'Bool
+                      , true
+              :tags $ #{} :unit
         'prompt-validation-error $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn prompt-validation-error (value)
             if (string? value) (unsafe-coerce value 'String) |

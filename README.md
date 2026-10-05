@@ -290,7 +290,7 @@ let
 
 https://github.com/calcit-lang/respo-calcit-workflow
 
-The demo builds with Calcit 0.27.0 and Node.js 24. Its generated frontend assets
+The demo's upgrade candidate uses Calcit 0.29.0-alpha.6 and Node.js 24. Its generated frontend assets
 are uploaded and publicly verified at `https://cos-sh.tiye.me/Respo/alerts.calcit/`
 for production and `/pr/<number>/<run>/<attempt>/` for pull requests. The existing production rsync of
 `dist/*` to `rsync-user@tiye.me:/web-assets/repo/Respo/alerts.calcit` remains
@@ -304,16 +304,32 @@ formal version tags, which remain mutable and are not immutable supply-chain pin
 Plugin definitions and trait-bearing constructors declare `EnumDef`; hook return
 schemas still describe nominal plugin instances. This corrects the constructor
 metadata rejected by Calcit 0.28 without changing payloads or runtime behavior.
-The demo remains on the published 0.27 toolchain: full 0.28 checking still fails
-on published Respo diagnostics and must not be considered complete.
+完整升级尚未完成，以下限制列出当前剩余门禁。
 
 ### License
 
 MIT
 
-### 0.10.48 发布准备
+### 0.10.48 插件原型修复
 
 此 patch 将 #84 已合并的插件原型 `EnumDef` 声明修复纳入正式模块版本，
 供下游固定 tag 引用；仅更新模块版本，不新增迁移规则、验证脚本或 alpha 依赖。
-发布前仍需维护者合并并创建正式 `0.10.48` tag/release；版本清单更新本身不表示已经发布。
-本模块继续使用原 Calcit 0.27.0 门禁，不能据此宣称共享依赖的完整 0.28 迁移已完成。
+正式 `0.10.48` tag/release 已发布，包含该修复。
+该正式版本使用原 Calcit 0.27.0 工具链；不能据此宣称共享依赖的整体迁移已完成。
+
+### Prompt 的 placeholder 边界
+
+`:placeholder` 允许 String 或缺失值：缺失时不生成该 DOM 属性，空字符串保留为空字符串。
+从开放 options 读取后，通过 `prompt-placeholder` 检查，再进入 `DomProps` 的
+`JsNullish<String>` 字段。Number、Bool、Tag、Map、List 会明确失败，不做隐式字符串转换。
+`input` 与 `textarea` 共用此边界；不改变初始文字、提交、关闭、validator 或样式定制。
+
+升级候选使用已发布 Calcit / procs `0.29.0-alpha.6`、Respo `0.16.114-alpha.7`、
+JS-FFI `0.2.1-alpha.13`。Prompt 通过具名 `DomProps` 构造并显式提供当前字段，
+保持事件回调、初始文字、提交和关闭行为。
+
+### 升级候选的限制
+
+- 完整 demo 严格入口仍有 trigger 样式 merge 与 menu items 的未验证容器警告。
+- 原 `caps --strict --ci` 被 Reel/UI/router 的旧发布依赖 pin 冲突阻塞，门禁未放宽。
+- 候选尚未发布；完整模块、消费者与 PR CI/review 都通过后才可交付。
