@@ -358,7 +358,7 @@ JS 回放使用独立进程隔离 trait registry，临时入口显式设置 nati
 
 ### 升级候选的限制
 
-- 候选尚未发布；PR 最新 HEAD 的 CI/review 和合并后 main 验证完成前，不宣称正式交付。
+- alpha 模块是整体工具链升级的候选，不等同于稳定交付；发布必须先完成 PR 最新 HEAD 的 CI/review 和合并后 main 验证。
 - 现有 hooks 的开放 options/callback 与菜单业务 payload 并未全面类型化；
   不能把容器验证或当前 demo 成功当作任意下游应用的静态类型保证。
 - 模块发布后还需验证真实 tag 消费者；Diary 的整体迁移仍是独立验收，不由此 PR 自动完成。
