@@ -79,6 +79,7 @@ test('canonical attached tests replay on native and generated JavaScript', async
   }
 });
 
+/** Find the first named Element in the local nominal component tree without revisiting objects. */
 function findElement(node, name, seen = new WeakSet()) {
   if (node === null || typeof node !== 'object' || seen.has(node)) return null;
   seen.add(node);
@@ -102,6 +103,7 @@ function findElement(node, name, seen = new WeakSet()) {
   return null;
 }
 
+/** Read a rendered Element's click callback, failing if the expected handler is absent. */
 function clickHandler(element) {
   assert.ok(element, 'click target must be rendered');
   const events = element.values[element.fields.findIndex((field) => field.value === 'event')];
