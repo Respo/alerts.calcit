@@ -91,7 +91,8 @@
               div ({})
                 div ({}) (<> |Trigger)
                 div ({})
-                  comp-trigger (read-field state :visible?)
+                  comp-trigger
+                    = true $ read-field state :visible?
                     button $ {} (:inner-text |Toggle) (:class-name css/button)
                       :on-click $ fn (e d!)
                         d! cursor $ &map:assoc state :visible? $ not (&map:get state :visible?)
@@ -498,6 +499,26 @@
           :code $ quote $ def alert-actions-plugin (impl-traits PluginNodeCursorState %alert-actions)
           :examples $ []
           :schema $ :: 'EnumDef
+        'as-options-map $ %{} 'CodeEntry (:doc "|在选项开放边界校验为 Tag 键 map，nil 视为空。")
+          :code $ quote $ defn as-options-map (value)
+            if (nil? value) ({})
+              if (map? value)
+                foldl value ({})
+                  defn %as-options-entry (acc pair)
+                    hint-fn $ {}
+                      :args $ [] (:: 'Map 'Tag 'Dynamic) (:: 'List 'Dynamic)
+                      :return $ :: 'Map 'Tag 'Dynamic
+                    &let
+                      option-key $ &list:nth pair 0
+                      if (tag? option-key)
+                        &map:assoc acc option-key $ &list:nth pair 1
+                        raise $ str "|respo-alerts expected option keys as tags, got: " option-key
+                raise $ str "|respo-alerts expected options as a map, got: " $ type-of value
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'T
+            :generics $ [] 'T
+            :return $ :: 'Map 'Tag 'Dynamic
         'as-prompt-task $ %{} 'CodeEntry (:doc "|把调用方提供的开放回调适配为接收文本的提示任务。")
           :code $ quote $ defn as-prompt-task (f)
             fn (text)
@@ -519,7 +540,7 @@
             :return $ :: 'Map 'Dynamic 'Dynamic
         'clear-prompt-task! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn clear-prompt-task! (cursor)
-            reset! *prompt-tasks $ assert-type (&map:dissoc @*prompt-tasks cursor) (:: 'Map 'Dynamic 'Dynamic)
+            reset! *prompt-tasks $ &map:dissoc @*prompt-tasks cursor
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -640,7 +661,7 @@
                       if (non-nil? title)
                         div
                           {} $ :class-name $ str-spaced css/center css/font-fancy! style-modal-title
-                          <> title
+                          <> $ read-text-value title
                     cond
                         non-nil? $ read-field options :render
                         (read-field options :render) on-close
@@ -698,7 +719,7 @@
                       if (non-nil? title)
                         div
                           {} $ :class-name $ str-spaced css/center css/font-fancy! style-modal-title
-                          <> title
+                          <> $ read-text-value title
                     cond
                         non-nil? $ read-field options :render
                         (read-field options :render) on-close
@@ -747,7 +768,7 @@
                             :style $ {} (:padding "|4px 8px")
                               :color $ hsl 0 0 70
                           span $ {}
-                          <> title
+                          <> $ read-text-value title
                           span $ {} (:inner-text |Clear) (:class-name style-clear)
                             :on-click $ fn (e d!) (on-select! nil d!)
                     list-> ({})
@@ -933,7 +954,9 @@
         'effect-focus $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-focus (query show?) (action el at-place?)
             match action
-              :update $ when show? $ focus-element! query
+              :update $ if (string? query)
+                if (= true show?) (focus-element! query) &unit
+                raise "|effect-focus expected a query string"
               _ &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Effect)
@@ -1241,9 +1264,16 @@
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'String)
             :args $ [] 'Dynamic 'Tag 'String
+        'read-text-value $ %{} 'CodeEntry (:doc "|把可选的显示值转成文本，nil 为空字符串。")
+          :code $ quote $ defn read-text-value (value)
+            if (string? value) value $ if (nil? value) | $ str value
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'String)
+            :args $ [] 'T
+            :generics $ [] 'T
         'store-prompt-task! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn store-prompt-task! (cursor task)
-            reset! *prompt-tasks $ assert-type (&map:assoc @*prompt-tasks cursor task) (:: 'Map 'Dynamic 'Dynamic)
+            reset! *prompt-tasks $ &map:assoc @*prompt-tasks cursor task
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -1339,6 +1369,7 @@
           :doc "||Alert dialog hook. Shows a simple message box. Returns a plugin object with .show method to display the alert."
           :code $ quote $ defplugin use-alert (states options)
             let
+                options $ as-options-map options
                 cursor $ read-field states :cursor
                 state $ as-state-map $ either (read-field states :data)
                   {} (:show? false)
@@ -1348,7 +1379,7 @@
                     d! cursor $ &map:assoc (as-state-map state) :show? false
                 node $ comp-alert-modal
                   &map:assoc options :text $ read-field state :text
-                  read-field state :show?
+                  = true $ read-field state :show?
                   , on-read $ fn (d!)
                     d! cursor $ &map:assoc (as-state-map state) :show? false
               %:: alert-actions-plugin :plugin node cursor state
@@ -1365,6 +1396,7 @@
           :doc "||Confirm dialog hook. Shows a dialog with confirm/cancel buttons. Returns a plugin object, call .show with a callback function that executes after confirmation."
           :code $ quote $ defplugin use-confirm (states options)
             let
+                options $ as-options-map options
                 cursor $ read-field states :cursor
                 state $ as-state-map $ either (read-field states :data)
                   {} (:show? false) (:text |)
@@ -1372,7 +1404,7 @@
                   if
                     blank? $ read-field state :text
                     , options $ &map:assoc options :text $ read-field state :text
-                  read-field state :show?
+                  = true $ read-field state :show?
                   fn (e d!)
                     d! cursor $ &map:assoc (as-state-map state) :show? false
                     option:fold (take-prompt-task! cursor)
@@ -1483,6 +1515,7 @@
           :doc "||Prompt dialog hook. Shows a dialog with text input. Returns a plugin object, call .show with a callback function to receive user input text."
           :code $ quote $ defplugin use-prompt (states options)
             let
+                options $ as-options-map options
                 cursor $ read-field states :cursor
                 state $ as-state-map $ either (read-field states :data)
                   {} $ :show? false
