@@ -1652,7 +1652,10 @@
             :return $ :: 'reel.typed/State 'Enum $ :: 'Map 'Dynamic 'Dynamic
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
-            render! (mount-target) (comp-container @*reel) dispatch!
+            render!
+              narrow-element $ mount-target
+              comp-container @*reel
+              , dispatch!
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
@@ -1661,6 +1664,7 @@
         :code $ quote $ ns respo-alerts.main
           :require
             respo.core :refer $ render! clear-cache! realize-ssr!
+            respo.ffi.browser :refer $ narrow-element
             respo-alerts.comp.container :refer $ comp-container
             respo-alerts.updater :refer $ updater
             respo-alerts.schema :as schema
