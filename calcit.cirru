@@ -495,6 +495,13 @@
           :code $ quote $ def alert-actions-plugin (impl-traits PluginNodeCursorState %alert-actions)
           :examples $ []
           :schema $ :: 'EnumDef
+        'as-state-map $ %{} 'CodeEntry (:doc "|在组件状态的开放边界确认其为 map。")
+          :code $ quote $ defn as-state-map (value)
+            if (map? value) value $ raise $ str "|respo-alerts expected component state as a map, got: " (type-of value)
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'Dynamic
+            :return $ :: 'Map 'Dynamic 'Dynamic
         'clear-prompt-task! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn clear-prompt-task! (cursor)
             reset! *prompt-tasks $ assert-type (&map:dissoc @*prompt-tasks cursor) (:: 'Map 'Dynamic 'Dynamic)
@@ -762,7 +769,7 @@
             let
                 initial-text $ either (read-field options :initial) |
                 cursor $ read-field states :cursor
-                state $ either (read-field states :data)
+                state $ as-state-map $ either (read-field states :data)
                   {} (:text initial-text) (:failure |)
                 text $ either (read-field state :text) initial-text
                 check-submit! $ fn (d!)
@@ -1285,7 +1292,7 @@
           :code $ quote $ defplugin use-alert (states options)
             let
                 cursor $ read-field states :cursor
-                state $ either (read-field states :data)
+                state $ as-state-map $ either (read-field states :data)
                   {} (:show? false)
                     :text $ read-field options :text
                 on-read $ either (read-field options :on-read)
@@ -1311,7 +1318,7 @@
           :code $ quote $ defplugin use-confirm (states options)
             let
                 cursor $ read-field states :cursor
-                state $ either (read-field states :data)
+                state $ as-state-map $ either (read-field states :data)
                   {} (:show? false) (:text |)
                 node $ comp-confirm-modal
                   if
@@ -1356,7 +1363,7 @@
           :code $ quote $ defn use-drawer (states options)
             let
                 cursor $ read-field states :cursor
-                state $ either (read-field states :data)
+                state $ as-state-map $ either (read-field states :data)
                   {} $ :show? false
                 node $ comp-drawer options (read-field state :show?)
                   fn (d!)
@@ -1379,7 +1386,7 @@
           :code $ quote $ defn use-modal (states options)
             let
                 cursor $ read-field states :cursor
-                state $ either (read-field states :data)
+                state $ as-state-map $ either (read-field states :data)
                   {} $ :show? false
                 node $ comp-modal options (read-field state :show?)
                   fn (d!)
@@ -1401,7 +1408,7 @@
           :code $ quote $ defn use-modal-menu (states options)
             let
                 cursor $ read-field states :cursor
-                state $ either (read-field states :data)
+                state $ as-state-map $ either (read-field states :data)
                   {} $ :show? false
                 node $ comp-modal-menu options (read-field state :show?)
                   fn (d!)
@@ -1426,7 +1433,7 @@
           :code $ quote $ defplugin use-prompt (states options)
             let
                 cursor $ read-field states :cursor
-                state $ either (read-field states :data)
+                state $ as-state-map $ either (read-field states :data)
                   {} $ :show? false
                 node $ comp-prompt-modal (>> states :modal) options (read-field state :show?)
                   fn (text d!)
