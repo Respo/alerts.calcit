@@ -618,10 +618,11 @@
                         {}
                           :class-name $ str-spaced css/button schema/confirm-button-name $ read-field options :confirm-class
                           :on-click $ fn (e d!)
-                            on-confirm!
-                              decode-map-as e $ :: 'Map 'Tag 'Dynamic
-                              , d!
-                            on-close! d!
+                            let
+                                event $ decode-map-as e $ :: 'Map 'Tag 'Dynamic
+                              if (contains? event :type)
+                                do (on-confirm! event d!) (on-close! d!)
+                                raise "|Confirm event requires :type"
                         <> $ read-text options :button-text |Confirm
                   comp-esc-listener show? on-close!
           :examples $ [] $ quote

@@ -123,6 +123,10 @@ test('confirm delivers the checked event map and dispatch before closing', () =>
   click(event, dispatch);
   assert.deepEqual(calls, [['confirm', event, dispatch], ['close', dispatch]]);
   calls.length = 0;
+  for (const missingType of [c.parse_cirru_edn('{}'), c.parse_cirru_edn('{} (:value |confirmed)')]) {
+    assert.throws(() => click(missingType, dispatch), /Confirm event requires :type/);
+    assert.deepEqual(calls, [], 'missing type must not invoke application callbacks');
+  }
   for (const invalid of [null, 42, {}, c.parse_cirru_edn('{} (|type :click)')]) {
     assert.throws(() => click(invalid, dispatch));
     assert.deepEqual(calls, [], 'invalid events must not invoke application callbacks');

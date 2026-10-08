@@ -1,3 +1,9 @@
+## 追加：确认事件缺失字段的评论修复
+
+确认按钮先执行原有 Map<Tag, Dynamic> decoder，再检查 `:type` 是否存在。空 Calcit Map 和只有 `:value` 的 Map 在 confirm / close 前明确拒绝。合法事件原值、dispatch 身份以及先 confirm 后 close 的顺序保持。
+
+测试将真正的缺少 `:type` 的 Calcit Map 与 JS `{}` 容器分开，前者断言 `Confirm event requires :type`，全部非法输入均验证没有业务回调。16 项原生测试、24 项 Node 测试（含 native / JS attached replay）、95 项公开定义通过；quality baseline 计数保持不变，Snapshot 格式及 diff 检查通过。版本仍为 0.10.49-alpha.3。
+
 # 2026-10-09：样式及确认事件的受检边界
 
 - 样式合并用 `decode-map-as` 检查开放 Map，保留 nil、空 Map、右侧覆盖和原有非法容器错误。移除匿名 helper，保留真实 nil 分支的值。
