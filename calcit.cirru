@@ -617,7 +617,12 @@
                       button
                         {}
                           :class-name $ str-spaced css/button schema/confirm-button-name $ read-field options :confirm-class
-                          :on-click $ fn (e d!) (on-confirm! e d!) (on-close! d!)
+                          :on-click $ fn (e d!)
+                            let
+                                event $ decode-map-as e $ :: 'Map 'Tag 'Dynamic
+                              if (contains? event :type)
+                                do (on-confirm! event d!) (on-close! d!)
+                                raise "|Confirm event requires :type"
                         <> $ read-text options :button-text |Confirm
                   comp-esc-listener show? on-close!
           :examples $ [] $ quote
@@ -625,11 +630,12 @@
               {} $ :text "|Are you sure?"
               , show? on-confirm! on-close!
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] (:: 'Map 'Tag 'Dynamic) 'Bool
+            :args $ [] (:: 'Map 'Tag 'OptionsValue) 'Bool
               :: 'Fn $ {} (:return 'Unit)
-                :args $ [] 'respo.schema/RespoEvent 'Dynamic
+                :args $ [] (:: 'Map 'Tag 'Dynamic) 'Dynamic
               :: 'Fn $ {} (:return 'Unit)
                 :args $ [] 'Dynamic
+            :generics $ [] 'OptionsValue
         'comp-drawer $ %{} 'CodeEntry
           :doc "||Drawer component. Renders a sliding panel from the side with custom content via :render function in options."
           :code $ quote $ defcomp comp-drawer (options show? on-close)
@@ -1402,8 +1408,8 @@
                   {} (:show? false) (:text |)
                 node $ comp-confirm-modal
                   if
-                    blank? $ read-field state :text
-                    , options $ &map:assoc options :text $ read-field state :text
+                    blank? $ read-text state :text |
+                    , options $ &map:assoc options :text $ read-text state :text |
                   = true $ read-field state :show?
                   fn (e d!)
                     d! cursor $ &map:assoc (as-state-map state) :show? false
@@ -1417,8 +1423,10 @@
                               :return 'Unit
                           :return 'Unit
                         task |
+                    , &unit
                   fn (d!) (clear-prompt-task! cursor)
                     d! cursor $ &map:assoc (as-state-map state) :show? false
+                    , &unit
               %:: confirm-actions-plugin :plugin node cursor state
           :examples $ []
             quote $ let
@@ -1812,15 +1820,15 @@
           :doc "|Validate optional style containers, preserving nil and right-hand overrides. CSS key/value validation remains owned by Respo."
           :code $ quote $ defn merge-optional-styles (base active)
             let
-                check-style $ fn (value)
-                  if (nil? value) nil $ if (map? value)
-                    assert-type value $ :: 'Map 'Dynamic 'Dynamic
-                    raise "|Style must be Map or nil"
-                checked-base $ check-style base
-                checked-active $ check-style active
+                checked-base $ if (nil? base) base $ if (map? base)
+                  decode-map-as base $ :: 'Map 'Dynamic 'Dynamic
+                  raise "|Style must be Map or nil"
+                checked-active $ if (nil? active) active $ if (map? active)
+                  decode-map-as active $ :: 'Map 'Dynamic 'Dynamic
+                  raise "|Style must be Map or nil"
               if (nil? checked-base) checked-active $ if (nil? checked-active) checked-base $ &merge
-                assert-type checked-base $ :: 'Map 'Dynamic 'Dynamic
-                assert-type checked-active $ :: 'Map 'Dynamic 'Dynamic
+                decode-map-as checked-base $ :: 'Map 'Dynamic 'Dynamic
+                decode-map-as checked-active $ :: 'Map 'Dynamic 'Dynamic
           :examples $ []
           :schema $ :: 'Fn $ {}
             :args $ [] 'B 'A

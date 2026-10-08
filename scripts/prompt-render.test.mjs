@@ -5,7 +5,7 @@ import { copyFile, mkdir, mkdtemp, readFile, rm, symlink } from 'node:fs/promise
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import * as c from '../js-out/calcit.core.mjs';
-import { comp_prompt_modal, comp_modal_menu } from '../js-out/respo-alerts.core.mjs';
+import { comp_prompt_modal, comp_modal_menu, comp_confirm_modal } from '../js-out/respo-alerts.core.mjs';
 import { comp_trigger } from '../js-out/respo-alerts.trigger.mjs';
 import { make_string } from '../js-out/respo.render.html.mjs';
 
@@ -111,6 +111,27 @@ function clickHandler(element) {
   assert.ok(index >= 0, 'target must have a click handler');
   return events.chunk[index + 1];
 }
+
+test('confirm delivers the checked event map and dispatch before closing', () => {
+  const calls = [];
+  const dispatch = () => {};
+  const event = c.parse_cirru_edn('{} (:type :click) (:value |confirmed)');
+  const component = comp_confirm_modal(c.parse_cirru_edn('{}'), true,
+    (received, receivedDispatch) => calls.push(['confirm', received, receivedDispatch]),
+    (receivedDispatch) => calls.push(['close', receivedDispatch]));
+  const click = clickHandler(findElement(component, 'button'));
+  click(event, dispatch);
+  assert.deepEqual(calls, [['confirm', event, dispatch], ['close', dispatch]]);
+  calls.length = 0;
+  for (const missingType of [c.parse_cirru_edn('{}'), c.parse_cirru_edn('{} (:value |confirmed)')]) {
+    assert.throws(() => click(missingType, dispatch), /Confirm event requires :type/);
+    assert.deepEqual(calls, [], 'missing type must not invoke application callbacks');
+  }
+  for (const invalid of [null, 42, {}, c.parse_cirru_edn('{} (|type :click)')]) {
+    assert.throws(() => click(invalid, dispatch));
+    assert.deepEqual(calls, [], 'invalid events must not invoke application callbacks');
+  }
+});
 
 test('trigger supports absent styles and active overrides without changing child rendering', () => {
   const child = comp_prompt_modal(states, c.parse_cirru_edn('{}'), false, () => {}, () => {});
