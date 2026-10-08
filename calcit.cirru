@@ -847,7 +847,7 @@
                                 let
                                     event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
                                     action $ unsafe-coerce
-                                      prompt-key-action event-info $ = true $ read-field options :multiline?
+                                      prompt-key-action event-info $ if (read-field options :multiline?) true false
                                       , 'respo-alerts.core/PromptKeyAction
                                   match action
                                     (:submit) (check-submit! d!)
