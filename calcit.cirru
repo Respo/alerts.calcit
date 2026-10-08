@@ -91,7 +91,8 @@
               div ({})
                 div ({}) (<> |Trigger)
                 div ({})
-                  comp-trigger (read-field state :visible?)
+                  comp-trigger
+                    = true $ read-field state :visible?
                     button $ {} (:inner-text |Toggle) (:class-name css/button)
                       :on-click $ fn (e d!)
                         d! cursor $ &map:assoc state :visible? $ not (&map:get state :visible?)
@@ -243,22 +244,22 @@
               match self $
                 :plugin node cursor state
                 if (non-nil? text)
-                  d! cursor $ -> state (&map:assoc :show? true) (&map:assoc :text text)
-                  d! cursor $ &map:assoc state :show? true
+                  d! cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text text)
+                  d! cursor $ &map:assoc (as-state-map state) :show? true
             .close $ fn (self d!)
               hint-fn $ {}
                 :args $ [] 'Dynamic 'Fn
                 :return 'Dynamic
               match self $
                 :plugin node cursor state
-                d! cursor $ &map:assoc state :show? false
+                d! cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
               hint-fn $ {}
                 :args $ [] 'Dynamic
                 :return 'Bool
               match self $
                 :plugin node cursor state
-                read-field state :show?
+                = true $ read-field state :show?
           :examples $ []
           :schema $ :: 'Impl
         '%confirm-actions $ %{} 'CodeEntry (:doc |)
@@ -277,8 +278,8 @@
               match self $
                 :plugin node cursor state
                 do
-                  store-prompt-task! cursor $ fn (ignored) (next-task)
-                  d! cursor $ -> state (&map:assoc :show? true) (&map:assoc :text |)
+                  store-prompt-task! cursor $ as-prompt-task $ fn (ignored) (next-task)
+                  d! cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text |)
             .show-with-text $ fn (self d! text next-task)
               hint-fn $ {}
                 :args $ [] 'Dynamic 'Fn 'String 'Fn
@@ -286,8 +287,8 @@
               match self $
                 :plugin node cursor state
                 do
-                  store-prompt-task! cursor $ fn (ignored) (next-task)
-                  d! cursor $ -> state (&map:assoc :show? true) (&map:assoc :text text)
+                  store-prompt-task! cursor $ as-prompt-task $ fn (ignored) (next-task)
+                  d! cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text text)
             .close $ fn (self d!)
               hint-fn $ {}
                 :args $ [] 'Dynamic 'Fn
@@ -295,14 +296,14 @@
               match self $
                 :plugin node cursor state
                 do (clear-prompt-task! cursor)
-                  d! cursor $ &map:assoc state :show? false
+                  d! cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
               hint-fn $ {}
                 :args $ [] 'Dynamic
                 :return 'Bool
               match self $
                 :plugin node cursor state
-                read-field state :show?
+                = true $ read-field state :show?
           :examples $ []
           :schema $ :: 'Impl
         '%drawer-actions $ %{} 'CodeEntry (:doc |)
@@ -320,21 +321,21 @@
                 :return 'Dynamic
               match self $
                 :plugin node cursor state
-                d! cursor $ &map:assoc state :show? true
+                d! cursor $ &map:assoc (as-state-map state) :show? true
             .close $ fn (self d!)
               hint-fn $ {}
                 :args $ [] 'Dynamic 'Fn
                 :return 'Dynamic
               match self $
                 :plugin node cursor state
-                d! cursor $ &map:assoc state :show? false
+                d! cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
               hint-fn $ {}
                 :args $ [] 'Dynamic
                 :return 'Bool
               match self $
                 :plugin node cursor state
-                read-field state :show?
+                = true $ read-field state :show?
           :examples $ []
           :schema $ :: 'Impl
         '%modal-actions $ %{} 'CodeEntry (:doc |)
@@ -352,21 +353,21 @@
                 :return 'Dynamic
               match self $
                 :plugin node cursor state
-                d! cursor $ &map:assoc state :show? true
+                d! cursor $ &map:assoc (as-state-map state) :show? true
             .close $ fn (self d!)
               hint-fn $ {}
                 :args $ [] 'Dynamic 'Fn
                 :return 'Dynamic
               match self $
                 :plugin node cursor state
-                d! cursor $ &map:assoc state :show? false
+                d! cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
               hint-fn $ {}
                 :args $ [] 'Dynamic
                 :return 'Bool
               match self $
                 :plugin node cursor state
-                read-field state :show?
+                = true $ read-field state :show?
           :examples $ []
           :schema $ :: 'Impl
         '%modal-menu-actions $ %{} 'CodeEntry (:doc |)
@@ -384,21 +385,21 @@
                 :return 'Dynamic
               match self $
                 :plugin node cursor state
-                d! cursor $ &map:assoc state :show? true
+                d! cursor $ &map:assoc (as-state-map state) :show? true
             .close $ fn (self d!)
               hint-fn $ {}
                 :args $ [] 'Dynamic 'Fn
                 :return 'Dynamic
               match self $
                 :plugin node cursor state
-                d! cursor $ &map:assoc state :show? false
+                d! cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
               hint-fn $ {}
                 :args $ [] 'Dynamic
                 :return 'Bool
               match self $
                 :plugin node cursor state
-                read-field state :show?
+                = true $ read-field state :show?
           :examples $ []
           :schema $ :: 'Impl
         '%prompt-actions $ %{} 'CodeEntry (:doc |)
@@ -416,8 +417,9 @@
                 :return 'Dynamic
               match self $
                 :plugin node cursor state
-                do (store-prompt-task! cursor next-task)
-                  d! cursor $ &map:assoc state :show? true
+                do
+                  store-prompt-task! cursor $ as-prompt-task next-task
+                  d! cursor $ &map:assoc (as-state-map state) :show? true
             .close $ fn (self d!)
               hint-fn $ {}
                 :args $ [] 'Dynamic 'Fn
@@ -425,14 +427,14 @@
               match self $
                 :plugin node cursor state
                 do (clear-prompt-task! cursor)
-                  d! cursor $ &map:assoc state :show? false
+                  d! cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
               hint-fn $ {}
                 :args $ [] 'Dynamic
                 :return 'Bool
               match self $
                 :plugin node cursor state
-                read-field state :show?
+                = true $ read-field state :show?
           :examples $ []
           :schema $ :: 'Impl
           :tests $ [] $ %{} 'TestEntry (:name |stores-callback-across-render)
@@ -450,7 +452,9 @@
         '*prompt-tasks $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defatom *prompt-tasks ({})
           :examples $ []
-          :schema $ :: 'Ref $ :: 'Map 'Dynamic 'Dynamic
+          :schema $ :: 'Ref $ :: 'Map 'Dynamic
+            :: 'Fn $ {} (:return 'Unit)
+              :args $ [] 'String
         'AlertActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait AlertActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
@@ -495,9 +499,48 @@
           :code $ quote $ def alert-actions-plugin (impl-traits PluginNodeCursorState %alert-actions)
           :examples $ []
           :schema $ :: 'EnumDef
+        'as-options-map $ %{} 'CodeEntry (:doc "|在选项开放边界校验为 Tag 键 map，nil 视为空。")
+          :code $ quote $ defn as-options-map (value)
+            if (nil? value) ({})
+              if (map? value)
+                foldl value ({})
+                  defn %as-options-entry (acc pair)
+                    hint-fn $ {}
+                      :args $ [] (:: 'Map 'Tag 'Dynamic) (:: 'List 'Dynamic)
+                      :return $ :: 'Map 'Tag 'Dynamic
+                    &let
+                      option-key $ &list:nth pair 0
+                      if (tag? option-key)
+                        &map:assoc acc option-key $ &list:nth pair 1
+                        raise $ str "|respo-alerts expected option keys as tags, got: " option-key
+                raise $ str "|respo-alerts expected options as a map, got: " $ type-of value
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'T
+            :generics $ [] 'T
+            :return $ :: 'Map 'Tag 'Dynamic
+        'as-prompt-task $ %{} 'CodeEntry (:doc "|把调用方提供的开放回调适配为接收文本的提示任务。")
+          :code $ quote $ defn as-prompt-task (f)
+            fn (text)
+              hint-fn $ {} (:return 'Unit)
+                :args $ [] 'String
+              f text
+              , &unit
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'Fn
+            :return $ :: 'Fn $ {} (:return 'Unit)
+              :args $ [] 'String
+        'as-state-map $ %{} 'CodeEntry (:doc "|在组件状态的开放边界确认其为 map。")
+          :code $ quote $ defn as-state-map (value)
+            if (map? value) value $ raise $ str "|respo-alerts expected component state as a map, got: " (type-of value)
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'Dynamic
+            :return $ :: 'Map 'Dynamic 'Dynamic
         'clear-prompt-task! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn clear-prompt-task! (cursor)
-            reset! *prompt-tasks $ assert-type (&map:dissoc @*prompt-tasks cursor) (:: 'Map 'Dynamic 'Dynamic)
+            reset! *prompt-tasks $ &map:dissoc @*prompt-tasks cursor
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -513,7 +556,7 @@
                 if show? $ div
                   {}
                     :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop $ read-field options :backdrop-class
-                    :style $ read-field options :backdrop-style
+                    :style $ read-style options :backdrop-style
                     :on-click $ fn (e d!)
                       let
                           event $ .-event e
@@ -525,10 +568,10 @@
                   div
                     {}
                       :class-name $ str-spaced style-modal-card css/global css/column $ read-field options :card-class
-                      :style $ read-field options :card-style
+                      :style $ read-style options :card-style
                       :on-click $ fn (e d!) &unit
                     div ({})
-                      <> $ either (read-field options :text) |Alert!
+                      <> $ read-text options :text |Alert!
                     =< nil 8
                     div
                       {} $ :class-name css/row-parted
@@ -536,9 +579,9 @@
                       button
                         {}
                           :class-name $ str-spaced css/button schema/confirm-button-name $ read-field options :confirm-class
-                          :style $ read-field options :confirm-style
+                          :style $ read-style options :confirm-style
                           :on-click $ fn (e d!) (on-close! d!) (on-read! e d!)
-                        <> $ either (read-field options :confirm-text) |Read
+                        <> $ read-text options :confirm-text |Read
                   comp-esc-listener show? on-close!
           :examples $ [] $ quote
             comp-alert-modal
@@ -558,15 +601,15 @@
                 if show? $ div
                   {}
                     :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop $ read-field options :backdrop-class
-                    :style $ read-field options :backdrop-style
+                    :style $ read-style options :backdrop-style
                     :on-click $ fn (e d!) (on-close! d!)
                   div
                     {}
                       :class-name $ str-spaced css/global css/column style-modal-card $ read-field options :card-class
-                      :style $ read-field options :card-style
+                      :style $ read-style options :card-style
                       :on-click $ fn (e d!) &unit
                     div ({})
-                      <> $ either (read-field options :text) |Confirm?
+                      <> $ read-text options :text |Confirm?
                     =< nil 8
                     div
                       {} $ :class-name css/row-parted
@@ -575,7 +618,7 @@
                         {}
                           :class-name $ str-spaced css/button schema/confirm-button-name $ read-field options :confirm-class
                           :on-click $ fn (e d!) (on-confirm! e d!) (on-close! d!)
-                        <> $ either (read-field options :button-text) |Confirm
+                        <> $ read-text options :button-text |Confirm
                   comp-esc-listener show? on-close!
           :examples $ [] $ quote
             comp-confirm-modal
@@ -594,11 +637,11 @@
               div
                 {} $ :style $ &merge
                   {} $ :position :absolute
-                  read-field options :container-style
+                  read-style options :container-style
                 if show? $ div
                   {}
                     :class-name $ str-spaced css/fullscreen style-drawer-backdrop $ read-field options :backdrop-class
-                    :style $ read-field options :backdrop-style
+                    :style $ read-style options :backdrop-style
                     :on-click $ fn (e d!)
                       let
                           event $ .-event e
@@ -611,14 +654,14 @@
                       :class-name $ str-spaced css/global css/column style-drawer-card $ read-field options :card-class
                       :style $ &merge
                         {} $ :padding 0
-                        read-field options :style
+                        read-style options :style
                       :on-click $ fn (e d!) &unit
                     let
                         title $ read-field options :title
                       if (non-nil? title)
                         div
                           {} $ :class-name $ str-spaced css/center css/font-fancy! style-modal-title
-                          <> title
+                          <> $ read-text-value title
                     cond
                         non-nil? $ read-field options :render
                         (read-field options :render) on-close
@@ -643,9 +686,7 @@
                 :on-keydown $ fn (e d!) (on-close! d!)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
-            :args $ [] 'Bool $ :: 'Fn
-              {} (:return 'Unit)
-                :args $ [] 'Dynamic
+            :args $ [] 'Bool 'Dynamic
         'comp-modal $ %{} 'CodeEntry
           :doc "||Modal component. Renders a modal dialog with custom content via :render function in options."
           :code $ quote $ defcomp comp-modal (options show? on-close)
@@ -653,11 +694,11 @@
               div
                 {} $ :style $ &merge
                   {} $ :position :absolute
-                  read-field options :container-style
+                  read-style options :container-style
                 if show? $ div
                   {}
                     :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop $ read-field options :backdrop-class
-                    :style $ read-field options :backdrop-style
+                    :style $ read-style options :backdrop-style
                     :on-click $ fn (e d!)
                       let
                           event $ .-event e
@@ -670,15 +711,15 @@
                       :class-name $ str-spaced css/global css/column style-modal-card $ read-field options :card-class
                       :style $ &merge
                         {} $ :padding 0
-                        read-field options :style
-                        read-field options :card-style
+                        read-style options :style
+                        read-style options :card-style
                       :on-click $ fn (e d!) &unit
                     let
                         title $ read-field options :title
                       if (non-nil? title)
                         div
                           {} $ :class-name $ str-spaced css/center css/font-fancy! style-modal-title
-                          <> title
+                          <> $ read-text-value title
                     cond
                         non-nil? $ read-field options :render
                         (read-field options :render) on-close
@@ -703,7 +744,7 @@
                 if show? $ div
                   {}
                     :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop $ read-field options :backdrop-class
-                    :style $ read-field options :backdrop-style
+                    :style $ read-style options :backdrop-style
                     :on-click $ fn (e d!)
                       let
                           event $ .-event e
@@ -716,7 +757,7 @@
                       :class-name $ str-spaced css/global css/column style-modal-card $ read-field options :card-class
                       :style $ merge-optional-styles
                         {} $ :padding 0
-                        read-field options :style
+                        read-style options :style
                       :on-click $ fn (e d!) &unit
                     let
                         title $ read-field options :title
@@ -727,7 +768,7 @@
                             :style $ {} (:padding "|4px 8px")
                               :color $ hsl 0 0 70
                           span $ {}
-                          <> title
+                          <> $ read-text-value title
                           span $ {} (:inner-text |Clear) (:class-name style-clear)
                             :on-click $ fn (e d!) (on-select! nil d!)
                     list-> ({})
@@ -760,9 +801,9 @@
           :doc "||Prompt modal component. Shows a dialog with text input field and validation. Used internally by use-prompt hook."
           :code $ quote $ defcomp comp-prompt-modal (states options show? on-finish! on-close!)
             let
-                initial-text $ either (read-field options :initial) |
+                initial-text $ read-text options :initial |
                 cursor $ read-field states :cursor
-                state $ either (read-field states :data)
+                state $ as-state-map $ either (read-field states :data)
                   {} (:text initial-text) (:failure |)
                 text $ either (read-field state :text) initial-text
                 check-submit! $ fn (d!)
@@ -773,7 +814,7 @@
                         , |
                     if
                       not $ blank? result
-                      d! cursor $ &map:assoc state :failure result
+                      d! cursor $ &map:assoc (as-state-map state) :failure result
                       do (on-finish! text d!) (on-close! d!)
                         d! cursor $ {}
               []
@@ -786,27 +827,27 @@
                       :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop $ read-field options :backdrop-class
                       :style $ &merge
                         {} $ :line-height |32px
-                        read-field options :backdrop-style
+                        read-style options :backdrop-style
                       :on-click $ fn (e d!) (on-close! d!)
                         d! cursor $ {}
                     div
                       {}
                         :class-name $ str-spaced css/global css/column style-modal-card $ read-field options :card-class
-                        :style $ read-field options :card-style
+                        :style $ read-style options :card-style
                         :on-click $ fn (e d!) &unit
                       div ({})
-                        <> $ either (read-field options :text) "|Type in text"
+                        <> $ read-text options :text "|Type in text"
                       =< nil 8
                       let
                           props $ DomProps :value text :class-name nil :style nil :inner-text nil :id nil :type nil :href nil :src nil :name nil :title nil :disabled nil :checked nil :spell-check nil :spellcheck nil :autofocus nil :tab-index nil :read-only nil :data-name nil :data-comp nil :role nil :aria-label nil :aria-labelledby nil :aria-describedby nil :aria-hidden nil :selected nil :target nil :on-click nil :on-focus nil :on-blur nil :on-keyup nil :on-change nil :on-mousedown nil :on-mouseup nil :on-paste nil :innerHTML nil :rel nil :defer nil :on nil :alt nil :draggable nil :content nil :charset nil :multiple nil :accept nil :ref nil :on-input
                             fn (e d!)
-                              d! cursor $ &map:assoc state :text $ prompt-event-text e
+                              d! cursor $ &map:assoc (as-state-map state) :text $ prompt-event-text e
                             , :on-keydown
                               fn (e d!)
                                 let
                                     event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
                                     action $ unsafe-coerce
-                                      prompt-key-action event-info $ read-field options :multiline?
+                                      prompt-key-action event-info $ = true $ read-field options :multiline?
                                       , 'respo-alerts.core/PromptKeyAction
                                   match action
                                     (:submit) (check-submit! d!)
@@ -814,23 +855,24 @@
                                       do (on-close! d!)
                                         d! cursor $ {}
                                     (:ignore) &unit
+                                  , &unit
                               , :placeholder $ prompt-placeholder (read-field options :placeholder)
                         if (read-field options :multiline?)
                           textarea $ struct-with props
                             :class-name $ str-spaced schema/input-box-name css/textarea $ read-field options :input-class
                             :style $ &merge
                               {} (:width |100%) (:min-height 120) (:max-height |50vh)
-                              read-field options :input-style
+                              read-style options :input-style
                           input $ struct-with props
                             :class-name $ str-spaced schema/input-box-name css/input $ read-field options :input-class
                             :style $ &merge
                               {} $ :width |100%
-                              read-field options :input-style
+                              read-style options :input-style
                       =< nil 16
                       div
                         {} $ :class-name css/row-parted
                         let
-                            failure $ either (read-field state :failure) |
+                            failure $ read-text state :failure |
                           if
                             not $ blank? failure
                             span $ {}
@@ -841,7 +883,7 @@
                           {}
                             :class-name $ str-spaced css/button $ read-field options :confirm-class
                             :on-click $ fn (e d!) (check-submit! d!)
-                          <> $ either (read-field options :button-text) |Finish
+                          <> $ read-text options :button-text |Finish
                     comp-esc-listener show? on-close!
           :examples $ [] $ quote
             comp-prompt-modal states
@@ -912,7 +954,9 @@
         'effect-focus $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-focus (query show?) (action el at-place?)
             match action
-              :update $ when show? $ focus-element! query
+              :update $ if (string? query)
+                if (= true show?) (focus-element! query) &unit
+                raise "|effect-focus expected a query string"
               _ &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Effect)
@@ -930,7 +974,9 @@
                       =
                         browser/keyboard-event-key $ browser/keyboard-event-host event
                         , |Escape
-                      browser/element-dispatch-event! (browser/element-host el) (browser/mouse-event-from-event event)
+                      &let
+                        _dispatched $ browser/element-dispatch-event! (browser/element-host el) (browser/mouse-event-from-event event)
+                        , &unit
                       , &unit
                 browser/add-event-listener! |keydown listener
                 aset el |_listener listener
@@ -948,7 +994,9 @@
         'effect-select $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-select (query show?) (action el *local)
             match action
-              :update $ when show? $ select-element! query
+              :update $ if (string? query)
+                if (= true show?) (select-element! query) &unit
+                raise "|effect-select expected a query string"
               _ &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Effect)
@@ -1186,9 +1234,46 @@
               :code $ quote $ let
                   event $ read-prompt-event $ {} (:key-code 27) (:keycode 13)
                 is $ = 27 $ :keycode event
+        'read-style $ %{} 'CodeEntry (:doc "|读取样式选项并校验为 map，nil 视为空 map。")
+          :code $ quote $ defn read-style (options k)
+            &let
+              v $ read-field options k
+              if (nil? v) ({})
+                if (map? v)
+                  foldl v ({})
+                    defn %read-style-entry (acc pair)
+                      hint-fn $ {}
+                        :args $ [] (:: 'Map 'Tag 'Dynamic) (:: 'List 'Dynamic)
+                        :return $ :: 'Map 'Tag 'Dynamic
+                      &let
+                        style-key $ &list:nth pair 0
+                        if (tag? style-key)
+                          &map:assoc acc style-key $ &list:nth pair 1
+                          raise $ str "|respo-alerts expected style keys as tags, got: " style-key
+                  raise $ str "|respo-alerts expected a style map at " k "|, got: " $ type-of v
+          :examples $ []
+          :schema $ :: 'Fn $ {}
+            :args $ [] 'Dynamic 'Tag
+            :return $ :: 'Map 'Tag 'Dynamic
+        'read-text $ %{} 'CodeEntry (:doc "|读取文本选项并校验为字符串，nil 时使用默认文本。")
+          :code $ quote $ defn read-text (options k default-text)
+            &let
+              v $ read-field options k
+              if (nil? v) default-text $ if (string? v) v $ raise
+                str "|respo-alerts expected text at " k "|, got: " $ type-of v
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'String)
+            :args $ [] 'Dynamic 'Tag 'String
+        'read-text-value $ %{} 'CodeEntry (:doc "|把可选的显示值转成文本，nil 为空字符串。")
+          :code $ quote $ defn read-text-value (value)
+            if (string? value) value $ if (nil? value) | $ str value
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'String)
+            :args $ [] 'T
+            :generics $ [] 'T
         'store-prompt-task! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn store-prompt-task! (cursor task)
-            reset! *prompt-tasks $ assert-type (&map:assoc @*prompt-tasks cursor task) (:: 'Map 'Dynamic 'Dynamic)
+            reset! *prompt-tasks $ &map:assoc @*prompt-tasks cursor task
             , &unit
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
@@ -1284,18 +1369,19 @@
           :doc "||Alert dialog hook. Shows a simple message box. Returns a plugin object with .show method to display the alert."
           :code $ quote $ defplugin use-alert (states options)
             let
+                options $ as-options-map options
                 cursor $ read-field states :cursor
-                state $ either (read-field states :data)
+                state $ as-state-map $ either (read-field states :data)
                   {} (:show? false)
                     :text $ read-field options :text
                 on-read $ either (read-field options :on-read)
                   fn (e d!)
-                    d! cursor $ &map:assoc state :show? false
+                    d! cursor $ &map:assoc (as-state-map state) :show? false
                 node $ comp-alert-modal
                   &map:assoc options :text $ read-field state :text
-                  read-field state :show?
+                  = true $ read-field state :show?
                   , on-read $ fn (d!)
-                    d! cursor $ &map:assoc state :show? false
+                    d! cursor $ &map:assoc (as-state-map state) :show? false
               %:: alert-actions-plugin :plugin node cursor state
           :examples $ [] $ quote
             let
@@ -1310,16 +1396,17 @@
           :doc "||Confirm dialog hook. Shows a dialog with confirm/cancel buttons. Returns a plugin object, call .show with a callback function that executes after confirmation."
           :code $ quote $ defplugin use-confirm (states options)
             let
+                options $ as-options-map options
                 cursor $ read-field states :cursor
-                state $ either (read-field states :data)
+                state $ as-state-map $ either (read-field states :data)
                   {} (:show? false) (:text |)
                 node $ comp-confirm-modal
                   if
                     blank? $ read-field state :text
                     , options $ &map:assoc options :text $ read-field state :text
-                  read-field state :show?
+                  = true $ read-field state :show?
                   fn (e d!)
-                    d! cursor $ &map:assoc state :show? false
+                    d! cursor $ &map:assoc (as-state-map state) :show? false
                     option:fold (take-prompt-task! cursor)
                       fn () &unit
                       fn (task)
@@ -1331,7 +1418,7 @@
                           :return 'Unit
                         task |
                   fn (d!) (clear-prompt-task! cursor)
-                    d! cursor $ &map:assoc state :show? false
+                    d! cursor $ &map:assoc (as-state-map state) :show? false
               %:: confirm-actions-plugin :plugin node cursor state
           :examples $ []
             quote $ let
@@ -1356,11 +1443,12 @@
           :code $ quote $ defn use-drawer (states options)
             let
                 cursor $ read-field states :cursor
-                state $ either (read-field states :data)
+                state $ as-state-map $ either (read-field states :data)
                   {} $ :show? false
-                node $ comp-drawer options (read-field state :show?)
+                node $ comp-drawer options
+                  = true $ read-field state :show?
                   fn (d!)
-                    d! cursor $ &map:assoc state :show? false
+                    d! cursor $ &map:assoc (as-state-map state) :show? false
               %:: drawer-actions-plugin :plugin node cursor state
           :examples $ [] $ quote
             let
@@ -1379,11 +1467,12 @@
           :code $ quote $ defn use-modal (states options)
             let
                 cursor $ read-field states :cursor
-                state $ either (read-field states :data)
+                state $ as-state-map $ either (read-field states :data)
                   {} $ :show? false
-                node $ comp-modal options (read-field state :show?)
+                node $ comp-modal options
+                  = true $ read-field state :show?
                   fn (d!)
-                    d! cursor $ &map:assoc state :show? false
+                    d! cursor $ &map:assoc (as-state-map state) :show? false
               %:: modal-actions-plugin :plugin node cursor state
           :examples $ [] $ quote
             let
@@ -1401,14 +1490,15 @@
           :code $ quote $ defn use-modal-menu (states options)
             let
                 cursor $ read-field states :cursor
-                state $ either (read-field states :data)
+                state $ as-state-map $ either (read-field states :data)
                   {} $ :show? false
-                node $ comp-modal-menu options (read-field state :show?)
+                node $ comp-modal-menu options
+                  = true $ read-field state :show?
                   fn (d!)
-                    d! cursor $ &map:assoc state :show? false
+                    d! cursor $ &map:assoc (as-state-map state) :show? false
                   fn (result d!)
                     (read-field options :on-result) result d!
-                    d! cursor $ &map:assoc state :show? false
+                    d! cursor $ &map:assoc (as-state-map state) :show? false
               %:: modal-menu-actions-plugin :plugin node cursor state
           :examples $ [] $ quote
             let
@@ -1425,12 +1515,16 @@
           :doc "||Prompt dialog hook. Shows a dialog with text input. Returns a plugin object, call .show with a callback function to receive user input text."
           :code $ quote $ defplugin use-prompt (states options)
             let
+                options $ as-options-map options
                 cursor $ read-field states :cursor
-                state $ either (read-field states :data)
+                state $ as-state-map $ either (read-field states :data)
                   {} $ :show? false
-                node $ comp-prompt-modal (>> states :modal) options (read-field state :show?)
+                node $ comp-prompt-modal (>> states :modal) options
+                  = true $ read-field state :show?
                   fn (text d!)
-                    d! cursor $ &map:assoc state :show? false
+                    hint-fn $ {} (:return 'Dynamic)
+                      :args $ [] 'String 'Dynamic
+                    d! cursor $ &map:assoc (as-state-map state) :show? false
                     option:fold (take-prompt-task! cursor)
                       fn () &unit
                       fn (task)
@@ -1442,7 +1536,7 @@
                           :return 'Unit
                         task text
                   fn (d!) (clear-prompt-task! cursor)
-                    d! cursor $ &map:assoc state :show? false
+                    d! cursor $ &map:assoc (as-state-map state) :show? false
               %:: prompt-actions-plugin :plugin node cursor state
           :examples $ [] $ quote
             let
@@ -1558,7 +1652,10 @@
             :return $ :: 'reel.typed/State 'Enum $ :: 'Map 'Dynamic 'Dynamic
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
-            render! (mount-target) (comp-container @*reel) dispatch!
+            render!
+              narrow-element $ mount-target
+              comp-container @*reel
+              , dispatch!
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
@@ -1567,6 +1664,7 @@
         :code $ quote $ ns respo-alerts.main
           :require
             respo.core :refer $ render! clear-cache! realize-ssr!
+            respo.ffi.browser :refer $ narrow-element
             respo-alerts.comp.container :refer $ comp-container
             respo-alerts.updater :refer $ updater
             respo-alerts.schema :as schema
