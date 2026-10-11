@@ -13,7 +13,7 @@
         'comp-container $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-container (reel)
             let
-                store $ read-field reel :store
+                store $ :store reel
                 states $ read-field store :states
                 state $ either (read-field states :data)
                   {} (:selected |) (:show-modal? false) (:show-modal-menu? false)
@@ -27,11 +27,11 @@
                     img $ {} (:class-name style-logo)
                       :src |https://cos-sh.tiye.me/cos-up/bb4c2755050318e864b56f59145d726e-SubstractRespo.png
                 =< nil 40
-                comp-hooks-usages $ >> states :hooks
+                comp-hooks-usages $ decode-map-as (>> states :hooks) (:: 'Map 'Tag 'Dynamic)
                 =< nil 40
-                comp-controlled-modals $ >> states :controlled
+                comp-controlled-modals $ decode-map-as (>> states :controlled) (:: 'Map 'Tag 'Dynamic)
                 =< nil 40
-                comp-demo-trigger $ >> states :trigger
+                comp-demo-trigger $ decode-map-as (>> states :trigger) (:: 'Map 'Tag 'Dynamic)
                 when dev? $ comp-inspect |states states $ {} (:bottom 0)
                 when dev? $ comp-typed-reel (>> states :reel) reel $ {}
           :examples $ []
