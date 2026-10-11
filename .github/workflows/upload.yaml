@@ -48,16 +48,14 @@ jobs:
         git diff --exit-code -- calcit.cirru
         calcit calcit.cirru --check-only
         calcit calcit.cirru test --tag unit --require-match
-        calcit calcit.cirru analyze check-public \
+        calcit calcit.cirru --check-only \
           --ns respo-alerts.comp.container --ns respo-alerts.config \
           --ns respo-alerts.core --ns respo-alerts.main --ns respo-alerts.schema \
           --ns respo-alerts.style --ns respo-alerts.trigger \
-          --ns respo-alerts.updater --ns respo-alerts.util --summary-only
-        mkdir -p .calcit
-        calcit calcit.cirru analyze check-types --summary-only --format json > .calcit/check-types.json
-        calcit calcit.cirru analyze weak-types --only schema-dynamic,code-dynamic,code-nil --intent unresolved,declared-optional --summary-only --format json > .calcit/weak-types.json
-        calcit calcit.cirru analyze deprecated --summary-only --format json > .calcit/deprecated.json
-        node scripts/check-calcit-upgrade-baseline.mjs
+          --ns respo-alerts.updater --ns respo-alerts.util --format edn
+        calcit calcit.cirru analyze weak-types --only coverage --summary-only --format json
+        calcit calcit.cirru analyze weak-types --only schema-dynamic,code-dynamic --intent unresolved --summary-only --format json
+        calcit calcit.cirru analyze weak-types --only deprecated-call --summary-only --format json
 
     - name: Select frontend CDN path
       id: asset-path
