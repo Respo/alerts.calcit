@@ -323,7 +323,7 @@ MIT
 `input` 与 `textarea` 共用此边界；不改变初始文字、提交、关闭、validator 或样式定制。
 
 当前源码固定正式 Calcit/procs `0.29.0`、Respo `0.16.114`、
-JS-FFI `0.2.1`、Reel `0.6.33`、UI `0.7.32`，
+JS-FFI `0.2.1`、Reel `0.6.34`、UI `0.7.33`，
 传递 Router 为 `0.8.28`。Prompt 通过具名 `DomProps` 构造并显式提供当前字段，
 保持事件回调、初始文字、提交和关闭行为；Escape 事件使用 JS-FFI 的类型化浏览器适配器。
 
