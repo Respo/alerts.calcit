@@ -53,9 +53,7 @@ jobs:
           --ns respo-alerts.core --ns respo-alerts.main --ns respo-alerts.schema \
           --ns respo-alerts.style --ns respo-alerts.trigger \
           --ns respo-alerts.updater --ns respo-alerts.util --format edn
-        calcit calcit.cirru analyze weak-types --only coverage --summary-only --format json
-        calcit calcit.cirru analyze weak-types --only schema-dynamic,code-dynamic --intent unresolved --summary-only --format json
-        calcit calcit.cirru analyze weak-types --only deprecated-call --summary-only --format json
+        calcit calcit.cirru analyze weak-types --only deprecated-call --summary-only --format json | jq -e '.data.summary.calls == 0'
 
     - name: Select frontend CDN path
       id: asset-path
