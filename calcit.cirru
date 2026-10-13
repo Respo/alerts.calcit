@@ -450,7 +450,7 @@
                 clear-prompt-task! cursor
             :tags $ #{} :regression :unit
         '*prompt-tasks $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *prompt-tasks ({})
+          :code $ quote $ defref *prompt-tasks ({})
           :examples $ []
           :schema $ :: 'Ref $ :: 'Map 'Dynamic
             :: 'Fn $ {} (:return 'Unit)
@@ -1575,7 +1575,7 @@
     'respo-alerts.main $ %{} 'FileEntry
       :defs $ {}
         '*reel $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *reel (typed/new-reel schema/store)
+          :code $ quote $ defref *reel (typed/new-reel schema/store)
           :examples $ []
           :schema $ :: 'Ref $ :: 'reel.typed/State 'Enum (:: 'Map 'Dynamic 'Dynamic)
         'dispatch! $ %{} 'CodeEntry (:doc |)

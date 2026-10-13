@@ -292,7 +292,7 @@ let
 
 https://github.com/calcit-lang/respo-calcit-workflow
 
-当前源码配对正式 Calcit/procs `0.29.0` 和 Node.js 24。生成的前端产物上传后，
+当前源码配对正式 Calcit/procs `0.29.1` 和 Node.js 24。生成的前端产物上传后，
 由 COS action 的内置功能验证公开可访问性；生产路径是
 `https://cos-sh.tiye.me/Respo/alerts.calcit/`，PR 使用独立的
 `/pr/<number>/<run>/<attempt>/` 路径。
@@ -322,9 +322,9 @@ MIT
 `JsNullish<String>` 字段。Number、Bool、Tag、Map、List 会明确失败，不做隐式字符串转换。
 `input` 与 `textarea` 共用此边界；不改变初始文字、提交、关闭、validator 或样式定制。
 
-当前源码固定正式 Calcit/procs `0.29.0`、Respo `0.16.114`、
-JS-FFI `0.2.1`、Reel `0.6.34`、UI `0.7.33`，
-传递 Router 为 `0.8.28`。Prompt 通过具名 `DomProps` 构造并显式提供当前字段，
+当前源码固定正式 Calcit/procs `0.29.1`、Respo `0.16.116`、
+JS-FFI `0.2.1`、Reel `0.6.35`、UI `0.7.35`，
+传递 Router 为 `0.8.30`。Prompt 通过具名 `DomProps` 构造并显式提供当前字段，
 保持事件回调、初始文字、提交和关闭行为；Escape 事件使用 JS-FFI 的类型化浏览器适配器。
 
 ### 样式和菜单输入边界
@@ -354,7 +354,9 @@ yarn vite build
 以 native 和生成 JS 回放同一份断言；不会维护一套不同的 JS 单元断言。
 JS 回放使用独立进程隔离 trait registry，临时入口显式设置 native mode，不重写正常 `js-out`。
 原有初始文字重开、提交、Reel 渲染断言保留，新增 placeholder、菜单选择和 trigger 样式回归。
-CI 用当前严格检查覆盖全部公开命名空间，并报告弱类型和废弃调用。
+CI 用当前严格检查覆盖全部公开命名空间，并阻断废弃调用；弱类型报告按需运行，
+不保留重复数字预算。0.10.51 候选对齐正式依赖图，供 Lilac Parser 等消费者严格安装。
+Prompt 回调和 demo Reel 的命名空间状态使用首选 `defref` 写法，保留初始化与热重载语义。
 旧迁移预算在正式图与源码验收通过后退役，不再保留重复预算脚本。
 具名 Reel 的 store 使用直接字段访问；demo 的三个 state 分支由
 `decode-map-as` 检查为原有 `Map<Tag, Dynamic>` 合同，不用新增 cast 或放宽参数类型。
