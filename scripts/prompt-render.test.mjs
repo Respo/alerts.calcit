@@ -198,7 +198,10 @@ test('prompt reopens with its current initial value after submitting', () => {
   const event = button.values[button.fields.findIndex((field) => field.value === 'event')];
   const clickIndex = event.chunk.findIndex((key) => key?.value === 'click');
   assert.ok(clickIndex >= 0, 'submit button must have a click handler');
-  event.chunk[clickIndex + 1]({}, (_cursor, state) => updates.push(state));
+  event.chunk[clickIndex + 1]({}, (op) => {
+    assert.equal(op.tag.value, 'states', 'component state goes out as a :states op');
+    updates.push(op.extra[1]);
+  });
 
   assert.deepEqual(submitted, ['saved-text']);
   assert.equal(updates.at(-1)?.chunk?.length, 0, 'closing must discard stale input state');
