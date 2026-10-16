@@ -292,7 +292,7 @@ let
 
 https://github.com/calcit-lang/respo-calcit-workflow
 
-当前源码配对正式 Calcit/procs `0.29.3` 和 Node.js 24。生成的前端产物上传后，
+当前源码配对正式 Calcit/procs `0.30.0` 和 Node.js 24。生成的前端产物上传后，
 由 COS action 的内置功能验证公开可访问性；生产路径是
 `https://cos-sh.tiye.me/Respo/alerts.calcit/`，PR 使用独立的
 `/pr/<number>/<run>/<attempt>/` 路径。
@@ -322,8 +322,8 @@ MIT
 `JsNullish<String>` 字段。Number、Bool、Tag、Map、List 会明确失败，不做隐式字符串转换。
 `input` 与 `textarea` 共用此边界；不改变初始文字、提交、关闭、validator 或样式定制。
 
-当前源码固定正式 Calcit/procs `0.29.3`、Respo `0.16.120`、
-JS-FFI `0.2.3`、Reel `0.6.36`、UI `0.7.39`，
+当前源码固定正式 Calcit/procs `0.30.0`、Respo `0.16.120`、
+JS-FFI `0.2.3`、Reel `0.6.37`、UI `0.7.39`，
 传递 Router 为 `0.8.34`。Prompt 通过具名 `DomProps` 构造并显式提供当前字段，
 保持事件回调、初始文字、提交和关闭行为；Escape 事件使用 JS-FFI 的类型化浏览器适配器。
 
@@ -355,7 +355,7 @@ yarn vite build
 JS 回放使用独立进程隔离 trait registry，临时入口显式设置 native mode，不重写正常 `js-out`。
 原有初始文字重开、提交、Reel 渲染断言保留，新增 placeholder、菜单选择和 trigger 样式回归。
 CI 用当前严格检查覆盖全部公开命名空间，并阻断废弃调用；弱类型报告按需运行，
-不保留重复数字预算。0.10.52 候选对齐正式依赖图，供消费者严格安装；
+不保留重复数字预算。0.10.53 候选对齐正式依赖图，供消费者严格安装；
 保留 prompt/menu/plugin 的既有行为，不宣称开放业务 payload 已全面静态化。
 本仓库 npm 新包安装隔离期按既有授权统一为一小时，不设置逐版本豁免。
 Prompt 回调和 demo Reel 的命名空间状态使用首选 `defref` 写法，保留初始化与热重载语义。
@@ -364,6 +364,23 @@ Prompt 回调和 demo Reel 的命名空间状态使用首选 `defref` 写法，�
 `decode-map-as` 检查为原有 `Map<Tag, Dynamic>` 合同，不用新增 cast 或放宽参数类型。
 
 ### 升级候选的限制
+
+本候选把公共 `read-field` 的 Map/Struct 读取迁移到 `get` + Option 解包，
+缺失键仍返回 nil，false、0、空字符串和原值身份不变。菜单 Map 项、prompt
+事件及 trigger demo 复用这个既有 helper；项目代码不再调用旧 `&map:get`。
+不改原 Tag/cursor-list 派发协议，不修改 schema、trait 或原测试断言。
+demo 在 validator、可见状态、cursor、hydrate 和开放操作的实际入口检查其合同；
+错误容器明确拒绝，不伪造默认状态或把断言当成解码。
+
+正式 0.30.0 下原 22 项附带测试和原 24 项 Node 渲染测试（其中包含原附带断言的
+native/生成 JS 回放）通过。根依赖已更新为新正式发布的 Reel 0.6.37，
+CI 直接执行完整 strict；不能把普通检查或隔离候选证据替代干净 CI 验收。
+仍须完成本模块的最新 HEAD review、精确 main CI 和正式 tag 消费验证后才发版。
+隔离 Docs Workflow 使用本候选、Respo #269 和 Reel #72，配对已发布的
+0.30.1-alpha.4 CLI/runtime 后完整 strict 通过；业务项目正式 pin 未改为 alpha。
+真实隔离 localhost 页面完成 Unicode prompt 提交、关闭和重新打开、菜单 B 选择，
+未见 console error；原 mode 配置 warning 保留。此页面运行的是正式 0.30.0/Reel 0.6.36 图，
+不冒称 alpha.4 浏览器或任意业务应用部署验收。临时页面和 Vite 已关闭。
 
 - 当前源码与依赖图使用正式版本；仍须完成 PR 最新 HEAD 的 CI/review 和合并后 main 验证后才发布模块。
 - 现有 hooks 的开放 options/callback 与菜单业务 payload 并未全面类型化；
