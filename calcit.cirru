@@ -86,7 +86,7 @@
           :code $ quote $ defcomp comp-demo-trigger (states)
             let
                 cursor $ read-field states :cursor
-                state $ either (read-field states :data)
+                state $ as-state-map $ either (read-field states :data)
                   {} $ :visible? false
               div ({})
                 div ({}) (<> |Trigger)
@@ -95,7 +95,7 @@
                     = true $ read-field state :visible?
                     button $ {} (:inner-text |Toggle) (:class-name css/button)
                       :on-click $ fn (e d!)
-                        d! cursor $ &map:assoc state :visible? $ not (&map:get state :visible?)
+                        d! cursor $ &map:assoc state :visible? $ not (read-field state :visible?)
                     , nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
@@ -112,7 +112,9 @@
                 confirm-prompt-plugin $ use-prompt (>> states :confirm-prompt)
                   {} (:text "|Input confirm text") (:placeholder "|Confirm text")
                     :validator $ fn (text)
-                      if (blank? text) "|Please enter text" |
+                      if (string? text)
+                        if (blank? text) "|Please enter text" |
+                        raise "|prompt validator expected String"
                 prompt-plugin $ use-prompt (>> states :prompt)
                   {} $ :title |demo
                 prompt-multilines-plugin $ use-prompt (>> states :multilines-prompt)
@@ -133,7 +135,10 @@
               div ({})
                 div ({}) (<> |Hooks)
                 div ({})
-                  comp-trigger (.show? alert-plugin)
+                  comp-trigger
+                    let
+                        show? $ .show? alert-plugin
+                      if (bool? show?) show? $ raise "|alert visibility must be Bool"
                     button $ {} (:inner-text "|show alert") (:class-name css/button)
                       :on-click $ fn (e d!) (.show alert-plugin d! nil)
                     , nil
@@ -161,7 +166,10 @@
                       .show prompt-multilines-plugin d! $ fn (text)
                         println "|read from prompt" $ to-lispy-string text
                   =< 8 nil
-                  comp-trigger (.show? prompt-validation-plugin)
+                  comp-trigger
+                    let
+                        show? $ .show? prompt-validation-plugin
+                      if (bool? show?) show? $ raise "|prompt visibility must be Bool"
                     button $ {} (:inner-text "|show validated prompt") (:class-name css/button)
                       :on-click $ fn (e d!)
                         .show prompt-validation-plugin d! $ fn (text)
@@ -206,7 +214,7 @@
             respo.comp.space :refer $ =<
             reel.comp.reel :refer $ comp-typed-reel
             respo-alerts.config :refer $ dev?
-            respo-alerts.core :refer $ comp-modal comp-modal-menu use-alert use-confirm use-prompt use-modal use-modal-menu use-drawer
+            respo-alerts.core :refer $ comp-modal comp-modal-menu use-alert use-confirm use-prompt use-modal use-modal-menu use-drawer as-state-map
             respo.comp.inspect :refer $ comp-inspect
             respo-alerts.style :as style
             |@calcit/std :refer $ rand-int
@@ -786,7 +794,7 @@
                                   enum? info
                                   , info
                                 (map? info)
-                                  :: :item (&map:get info :value) (&map:get info :display)
+                                  :: :item (read-field info :value) (read-field info :display)
                                 true $ raise "|Unknown menu item"
                             match item $
                               :item v l
@@ -1215,14 +1223,14 @@
         'read-prompt-event $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn read-prompt-event (event)
             let
-                raw-text $ or (&map:get event :value) |
+                raw-text $ or (read-field event :value) |
                 text $ if (string? raw-text) (unsafe-coerce raw-text 'String) |
-                raw-key $ or (&map:get event :key-code)
-                  or (&map:get event :keycode) 0
+                raw-key $ or (read-field event :key-code)
+                  or (read-field event :keycode) 0
                 keycode $ if (number? raw-key) (unsafe-coerce raw-key 'Number) 0
-                raw-meta $ &map:get event :meta?
+                raw-meta $ read-field event :meta?
                 meta? $ if (bool? raw-meta) (unsafe-coerce raw-meta 'Bool) false
-                raw-ctrl $ &map:get event :ctrl?
+                raw-ctrl $ read-field event :ctrl?
                 ctrl? $ if (bool? raw-ctrl) (unsafe-coerce raw-ctrl 'Bool) false
               PromptEvent :text text :keycode keycode :meta? meta? :ctrl? ctrl?
           :examples $ []
@@ -1620,7 +1628,7 @@
           :code $ quote $ defn next-reel (op)
             typed/record-op updater
               assert-type @*reel $ :: 'reel.typed/State 'Enum $ :: 'Map 'Dynamic 'Dynamic
-              assert-type op 'Enum
+              if (enum? op) op $ raise "|alert operation must be an Enum"
               generate-id!
               shared/now-ms
           :examples $ []
@@ -1663,7 +1671,8 @@
             render!
               narrow-element $ mount-target
               comp-container @*reel
-              , dispatch!
+              fn (op)
+                if (enum? op) (dispatch! op) (raise "|alert renderer operation must be an Enum")
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ []
@@ -1787,10 +1796,12 @@
       :defs $ {} $ 'updater
         %{} 'CodeEntry (:doc |)
           :code $ quote $ defn updater (store op op-id op-time)
-            match op
-              (:states cursor s) (update-states store cursor s)
+            as-state-map $ match op
+              (:states cursor s)
+                if (list? cursor) (update-states store cursor s) (raise "|state operation expected a cursor List")
               (:content c) (&map:assoc store :content c)
-              (:hydrate-storage d) d
+              (:hydrate-storage d)
+                if (map? d) d $ raise "|hydrated store must be a Map"
               _ $ do
                 shared/console-warn! $ str "|Unknown op:" op
                 , store
@@ -1805,6 +1816,7 @@
             respo.cursor :refer $ update-states
             respo-alerts.config :refer $ dev?
             js-ffi.shared :as shared
+            respo-alerts.core :refer $ as-state-map
     'respo-alerts.util $ %{} 'FileEntry
       :defs $ {}
         'focus-element! $ %{} 'CodeEntry (:doc |)
@@ -1875,8 +1887,12 @@
         'read-field $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn read-field (value field)
             if (struct? value)
-              &map:get (&struct:to-map value) field
-              if (map? value) (&map:get value field) nil
+              .unwrap-or
+                get (&struct:to-map value) field
+                , nil
+              if (map? value)
+                .unwrap-or (get value field) nil
+                , nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Dynamic)
             :args $ [] 'T 'Tag
