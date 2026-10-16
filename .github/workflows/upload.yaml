@@ -48,6 +48,7 @@ jobs:
         calcit calcit.cirru edit format
         git diff --exit-code -- calcit.cirru
         calcit calcit.cirru --check-only
+        calcit calcit.cirru fix --workflow strict --verify --format edn
         calcit calcit.cirru test --tag unit --require-match
         calcit calcit.cirru --check-only \
           --ns respo-alerts.comp.container --ns respo-alerts.config \

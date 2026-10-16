@@ -323,7 +323,7 @@ MIT
 `input` 与 `textarea` 共用此边界；不改变初始文字、提交、关闭、validator 或样式定制。
 
 当前源码固定正式 Calcit/procs `0.30.0`、Respo `0.16.120`、
-JS-FFI `0.2.3`、Reel `0.6.36`、UI `0.7.39`，
+JS-FFI `0.2.3`、Reel `0.6.37`、UI `0.7.39`，
 传递 Router 为 `0.8.34`。Prompt 通过具名 `DomProps` 构造并显式提供当前字段，
 保持事件回调、初始文字、提交和关闭行为；Escape 事件使用 JS-FFI 的类型化浏览器适配器。
 
@@ -373,13 +373,13 @@ demo 在 validator、可见状态、cursor、hydrate 和开放操作的实际入
 错误容器明确拒绝，不伪造默认状态或把断言当成解码。
 
 正式 0.30.0 下原 22 项附带测试和原 24 项 Node 渲染测试（其中包含原附带断言的
-native/生成 JS 回放）通过。实际根依赖仍为 Reel 0.6.36，完整 strict 被其
-`comp-records` 阻断；不能把普通检查或隔离候选证据宣称为正式根依赖验收。
-等待 Reel 0.6.37 正式发布后更新 pin 并重跑干净 CI，才发布本模块。
+native/生成 JS 回放）通过。根依赖已更新为新正式发布的 Reel 0.6.37，
+CI 直接执行完整 strict；不能把普通检查或隔离候选证据替代干净 CI 验收。
+仍须完成本模块的最新 HEAD review、精确 main CI 和正式 tag 消费验证后才发版。
 隔离 Docs Workflow 使用本候选、Respo #269 和 Reel #72，配对已发布的
 0.30.1-alpha.4 CLI/runtime 后完整 strict 通过；业务项目正式 pin 未改为 alpha。
 真实隔离 localhost 页面完成 Unicode prompt 提交、关闭和重新打开、菜单 B 选择，
-未见 console error；原 mode 配置 warning 保留。此页面运行的是正式 0.30.0 图，
+未见 console error；原 mode 配置 warning 保留。此页面运行的是正式 0.30.0/Reel 0.6.36 图，
 不冒称 alpha.4 浏览器或任意业务应用部署验收。临时页面和 Vite 已关闭。
 
 - 当前源码与依赖图使用正式版本；仍须完成 PR 最新 HEAD 的 CI/review 和合并后 main 验证后才发布模块。
