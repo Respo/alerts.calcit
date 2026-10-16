@@ -6,7 +6,7 @@
     {} (:description |) (:init-fn 'respo-alerts.main/main!) (:mode :js) (:reload-fn 'respo-alerts.main/reload!) (:target :browser)
       :feature-policy $ {}
       :modules $ [] |respo.calcit/ |respo-ui.calcit/ |reel.calcit/ |js-ffi/
-      :type-slots $ {}
+      :type-slots $ {} $ :dispatch-op |respo-alerts.schema/Op
   :files $ {}
     'respo-alerts.comp.container $ %{} 'FileEntry
       :defs $ {}
@@ -95,7 +95,8 @@
                     = true $ read-field state :visible?
                     button $ {} (:inner-text |Toggle) (:class-name css/button)
                       :on-click $ fn (e d!)
-                        d! cursor $ &map:assoc state :visible? $ not (read-field state :visible?)
+                        d! $ :: :states cursor $ &map:assoc state :visible?
+                          not $ read-field state :visible?
                     , nil
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
@@ -252,15 +253,15 @@
               match self $
                 :plugin node cursor state
                 if (non-nil? text)
-                  d! cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text text)
-                  d! cursor $ &map:assoc (as-state-map state) :show? true
+                  d! $ :: :states cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text text)
+                  d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
             .close $ fn (self d!)
               hint-fn $ {}
                 :args $ [] 'Dynamic 'Fn
                 :return 'Dynamic
               match self $
                 :plugin node cursor state
-                d! cursor $ &map:assoc (as-state-map state) :show? false
+                d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
               hint-fn $ {}
                 :args $ [] 'Dynamic
@@ -287,7 +288,7 @@
                 :plugin node cursor state
                 do
                   store-prompt-task! cursor $ as-prompt-task $ fn (ignored) (next-task)
-                  d! cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text |)
+                  d! $ :: :states cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text |)
             .show-with-text $ fn (self d! text next-task)
               hint-fn $ {}
                 :args $ [] 'Dynamic 'Fn 'String 'Fn
@@ -296,7 +297,7 @@
                 :plugin node cursor state
                 do
                   store-prompt-task! cursor $ as-prompt-task $ fn (ignored) (next-task)
-                  d! cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text text)
+                  d! $ :: :states cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text text)
             .close $ fn (self d!)
               hint-fn $ {}
                 :args $ [] 'Dynamic 'Fn
@@ -304,7 +305,7 @@
               match self $
                 :plugin node cursor state
                 do (clear-prompt-task! cursor)
-                  d! cursor $ &map:assoc (as-state-map state) :show? false
+                  d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
               hint-fn $ {}
                 :args $ [] 'Dynamic
@@ -329,14 +330,14 @@
                 :return 'Dynamic
               match self $
                 :plugin node cursor state
-                d! cursor $ &map:assoc (as-state-map state) :show? true
+                d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
             .close $ fn (self d!)
               hint-fn $ {}
                 :args $ [] 'Dynamic 'Fn
                 :return 'Dynamic
               match self $
                 :plugin node cursor state
-                d! cursor $ &map:assoc (as-state-map state) :show? false
+                d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
               hint-fn $ {}
                 :args $ [] 'Dynamic
@@ -361,14 +362,14 @@
                 :return 'Dynamic
               match self $
                 :plugin node cursor state
-                d! cursor $ &map:assoc (as-state-map state) :show? true
+                d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
             .close $ fn (self d!)
               hint-fn $ {}
                 :args $ [] 'Dynamic 'Fn
                 :return 'Dynamic
               match self $
                 :plugin node cursor state
-                d! cursor $ &map:assoc (as-state-map state) :show? false
+                d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
               hint-fn $ {}
                 :args $ [] 'Dynamic
@@ -393,14 +394,14 @@
                 :return 'Dynamic
               match self $
                 :plugin node cursor state
-                d! cursor $ &map:assoc (as-state-map state) :show? true
+                d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
             .close $ fn (self d!)
               hint-fn $ {}
                 :args $ [] 'Dynamic 'Fn
                 :return 'Dynamic
               match self $
                 :plugin node cursor state
-                d! cursor $ &map:assoc (as-state-map state) :show? false
+                d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
               hint-fn $ {}
                 :args $ [] 'Dynamic
@@ -427,7 +428,7 @@
                 :plugin node cursor state
                 do
                   store-prompt-task! cursor $ as-prompt-task next-task
-                  d! cursor $ &map:assoc (as-state-map state) :show? true
+                  d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
             .close $ fn (self d!)
               hint-fn $ {}
                 :args $ [] 'Dynamic 'Fn
@@ -435,7 +436,7 @@
               match self $
                 :plugin node cursor state
                 do (clear-prompt-task! cursor)
-                  d! cursor $ &map:assoc (as-state-map state) :show? false
+                  d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
               hint-fn $ {}
                 :args $ [] 'Dynamic
@@ -452,7 +453,7 @@
                   respo.schema/Component :name :test :effects ([]) :listeners ([]) :tree $ Option :none
                   , cursor $ {}
                 next-task $ fn (text) &unit
-                d! $ fn (cursor state) &unit
+                d! $ fn (op) &unit
               do (.show plugin d! next-task)
                 is $ option:some? $ get @*prompt-tasks cursor
                 clear-prompt-task! cursor
@@ -828,9 +829,9 @@
                         , |
                     if
                       not $ blank? result
-                      d! cursor $ &map:assoc (as-state-map state) :failure result
+                      d! $ :: :states cursor $ &map:assoc (as-state-map state) :failure result
                       do (on-finish! text d!) (on-close! d!)
-                        d! cursor $ {}
+                        d! $ :: :states cursor $ {}
               []
                 effect-select (str |. schema/input-box-name) show?
                 effect-fade show?
@@ -843,7 +844,7 @@
                         {} $ :line-height |32px
                         read-style options :backdrop-style
                       :on-click $ fn (e d!) (on-close! d!)
-                        d! cursor $ {}
+                        d! $ :: :states cursor $ {}
                     div
                       {}
                         :class-name $ str-spaced css/global css/column style-modal-card $ read-field options :card-class
@@ -855,7 +856,7 @@
                       let
                           props $ DomProps :value text :class-name nil :style nil :inner-text nil :id nil :type nil :href nil :src nil :name nil :title nil :disabled nil :checked nil :spell-check nil :spellcheck nil :autofocus nil :tab-index nil :read-only nil :data-name nil :data-comp nil :role nil :aria-label nil :aria-labelledby nil :aria-describedby nil :aria-hidden nil :selected nil :target nil :on-click nil :on-focus nil :on-blur nil :on-keyup nil :on-change nil :on-mousedown nil :on-mouseup nil :on-paste nil :innerHTML nil :rel nil :defer nil :on nil :alt nil :draggable nil :content nil :charset nil :multiple nil :accept nil :ref nil :on-input
                             fn (e d!)
-                              d! cursor $ &map:assoc (as-state-map state) :text $ prompt-event-text e
+                              d! $ :: :states cursor $ &map:assoc (as-state-map state) :text (prompt-event-text e)
                             , :on-keydown
                               fn (e d!)
                                 let
@@ -867,7 +868,7 @@
                                     (:submit) (check-submit! d!)
                                     (:close)
                                       do (on-close! d!)
-                                        d! cursor $ {}
+                                        d! $ :: :states cursor $ {}
                                     (:ignore) &unit
                                   , &unit
                               , :placeholder $ prompt-placeholder (read-field options :placeholder)
@@ -1390,12 +1391,12 @@
                     :text $ read-field options :text
                 on-read $ either (read-field options :on-read)
                   fn (e d!)
-                    d! cursor $ &map:assoc (as-state-map state) :show? false
+                    d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
                 node $ comp-alert-modal
                   &map:assoc options :text $ read-field state :text
                   = true $ read-field state :show?
                   , on-read $ fn (d!)
-                    d! cursor $ &map:assoc (as-state-map state) :show? false
+                    d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
               %:: alert-actions-plugin :plugin node cursor state
           :examples $ [] $ quote
             let
@@ -1420,7 +1421,7 @@
                     , options $ &map:assoc options :text $ read-text state :text |
                   = true $ read-field state :show?
                   fn (e d!)
-                    d! cursor $ &map:assoc (as-state-map state) :show? false
+                    d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
                     option:fold (take-prompt-task! cursor)
                       fn () &unit
                       fn (task)
@@ -1433,7 +1434,7 @@
                         task |
                     , &unit
                   fn (d!) (clear-prompt-task! cursor)
-                    d! cursor $ &map:assoc (as-state-map state) :show? false
+                    d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
                     , &unit
               %:: confirm-actions-plugin :plugin node cursor state
           :examples $ []
@@ -1464,7 +1465,7 @@
                 node $ comp-drawer options
                   = true $ read-field state :show?
                   fn (d!)
-                    d! cursor $ &map:assoc (as-state-map state) :show? false
+                    d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
               %:: drawer-actions-plugin :plugin node cursor state
           :examples $ [] $ quote
             let
@@ -1488,7 +1489,7 @@
                 node $ comp-modal options
                   = true $ read-field state :show?
                   fn (d!)
-                    d! cursor $ &map:assoc (as-state-map state) :show? false
+                    d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
               %:: modal-actions-plugin :plugin node cursor state
           :examples $ [] $ quote
             let
@@ -1511,10 +1512,10 @@
                 node $ comp-modal-menu options
                   = true $ read-field state :show?
                   fn (d!)
-                    d! cursor $ &map:assoc (as-state-map state) :show? false
+                    d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
                   fn (result d!)
                     (read-field options :on-result) result d!
-                    d! cursor $ &map:assoc (as-state-map state) :show? false
+                    d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
               %:: modal-menu-actions-plugin :plugin node cursor state
           :examples $ [] $ quote
             let
@@ -1540,7 +1541,7 @@
                   fn (text d!)
                     hint-fn $ {} (:return 'Dynamic)
                       :args $ [] 'String 'Dynamic
-                    d! cursor $ &map:assoc (as-state-map state) :show? false
+                    d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
                     option:fold (take-prompt-task! cursor)
                       fn () &unit
                       fn (task)
@@ -1552,7 +1553,7 @@
                           :return 'Unit
                         task text
                   fn (d!) (clear-prompt-task! cursor)
-                    d! cursor $ &map:assoc (as-state-map state) :show? false
+                    d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
               %:: prompt-actions-plugin :plugin node cursor state
           :examples $ [] $ quote
             let
@@ -1694,6 +1695,14 @@
             js-ffi.shared :as shared
     'respo-alerts.schema $ %{} 'FileEntry
       :defs $ {}
+        'Op $ %{} 'CodeEntry
+          :doc "|Ops the demo app dispatches. Bound to Respo's :dispatch-op slot, so d! in handlers is checked against it; :states carries component state written by alerts' plugins."
+          :code $ quote $ defenum Op
+            :states (:: 'List 'Dynamic) 'Dynamic
+            :content 'Dynamic
+            :hydrate-storage 'Dynamic
+          :examples $ []
+          :schema $ :: 'EnumDef
         'confirm-button-name $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def confirm-button-name |respo-confirm-button
           :examples $ []
