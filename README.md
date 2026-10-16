@@ -4,6 +4,25 @@
 
 Demo http://repo.respo-mvc.org/alerts.calcit/ .
 
+### 0.10.54 候选：正式依赖图对齐
+
+使用者影响：CLI/runtime 继续固定正式 0.30.0，依赖升级到已发布的 Reel 0.6.38、
+UI 0.7.40（传递 Router 0.8.35）；Respo 0.16.120、JS-FFI 0.2.3 不变。
+消费者其他模块也需协调同一精确版本，不能只改根依赖或放宽 Caps strict。
+本 patch 不修改 Snapshot、hook/插件 API、Tag/cursor 派发协议、样式、业务回调或原测试；
+不合入另一个 typed-dispatch PR，不新增兼容层、验证脚本或预算豁免。
+
+固定旧 0.10.53 图与新候选图分别通过完整 strict/preflight、原 22 项附带测试和
+原 24 项 Node 渲染回归（包含原断言的 native/生成 JS 回放）。候选 all-defs 280/280、
+九个公开 namespace 95/95、生产构建通过。仍有开放业务 payload/FFI 边界，不宣称全部类型闭合。
+本地只读模块链接不代替 PR CI 的 fresh Caps 严格安装和工具链验收；正式发版前以其结果为准。
+COS 仅使用 Action 内置 verify，原 demo 与服务器路径保持不变。
+
+0.30.1-alpha.4 只读探测：正式 Respo 0.16.120 图 public 64/95，42 条含级联诊断；
+仅临时加载 Respo #269 的精确合并源码后 public 95/95、原 22 项测试通过，
+随后恢复正式链接。跟踪上游 #270，不将未发布 main 当作正式依赖，
+也不冒称完整 alpha strict/配对 JS 或消费者应用验收。
+
 ### Hooks usages
 
 ```cirru.no-run
@@ -292,7 +311,7 @@ let
 
 https://github.com/calcit-lang/respo-calcit-workflow
 
-当前源码配对正式 Calcit/procs `0.29.3` 和 Node.js 24。生成的前端产物上传后，
+当前源码配对正式 Calcit/procs `0.30.0` 和 Node.js 24。生成的前端产物上传后，
 由 COS action 的内置功能验证公开可访问性；生产路径是
 `https://cos-sh.tiye.me/Respo/alerts.calcit/`，PR 使用独立的
 `/pr/<number>/<run>/<attempt>/` 路径。
@@ -322,9 +341,9 @@ MIT
 `JsNullish<String>` 字段。Number、Bool、Tag、Map、List 会明确失败，不做隐式字符串转换。
 `input` 与 `textarea` 共用此边界；不改变初始文字、提交、关闭、validator 或样式定制。
 
-当前源码固定正式 Calcit/procs `0.29.3`、Respo `0.16.120`、
-JS-FFI `0.2.3`、Reel `0.6.36`、UI `0.7.39`，
-传递 Router 为 `0.8.34`。Prompt 通过具名 `DomProps` 构造并显式提供当前字段，
+当前源码固定正式 Calcit/procs `0.30.0`、Respo `0.16.120`、
+JS-FFI `0.2.3`、Reel `0.6.38`、UI `0.7.40`，
+传递 Router 为 `0.8.35`。Prompt 通过具名 `DomProps` 构造并显式提供当前字段，
 保持事件回调、初始文字、提交和关闭行为；Escape 事件使用 JS-FFI 的类型化浏览器适配器。
 
 ### 样式和菜单输入边界
@@ -355,7 +374,7 @@ yarn vite build
 JS 回放使用独立进程隔离 trait registry，临时入口显式设置 native mode，不重写正常 `js-out`。
 原有初始文字重开、提交、Reel 渲染断言保留，新增 placeholder、菜单选择和 trigger 样式回归。
 CI 用当前严格检查覆盖全部公开命名空间，并阻断废弃调用；弱类型报告按需运行，
-不保留重复数字预算。0.10.52 候选对齐正式依赖图，供消费者严格安装；
+不保留重复数字预算。此前 0.10.53 已正式发布；0.10.54 候选进一步对齐正式依赖图，供消费者严格安装；
 保留 prompt/menu/plugin 的既有行为，不宣称开放业务 payload 已全面静态化。
 本仓库 npm 新包安装隔离期按既有授权统一为一小时，不设置逐版本豁免。
 Prompt 回调和 demo Reel 的命名空间状态使用首选 `defref` 写法，保留初始化与热重载语义。
@@ -363,9 +382,26 @@ Prompt 回调和 demo Reel 的命名空间状态使用首选 `defref` 写法，�
 具名 Reel 的 store 使用直接字段访问；demo 的三个 state 分支由
 `decode-map-as` 检查为原有 `Map<Tag, Dynamic>` 合同，不用新增 cast 或放宽参数类型。
 
-### 升级候选的限制
+### 上一轮 0.10.53 升级的历史证据与限制
 
-- 当前源码与依赖图使用正式版本；仍须完成 PR 最新 HEAD 的 CI/review 和合并后 main 验证后才发布模块。
+本候选把公共 `read-field` 的 Map/Struct 读取迁移到 `get` + Option 解包，
+缺失键仍返回 nil，false、0、空字符串和原值身份不变。菜单 Map 项、prompt
+事件及 trigger demo 复用这个既有 helper；项目代码不再调用旧 `&map:get`。
+不改原 Tag/cursor-list 派发协议，不修改 schema、trait 或原测试断言。
+demo 在 validator、可见状态、cursor、hydrate 和开放操作的实际入口检查其合同；
+错误容器明确拒绝，不伪造默认状态或把断言当成解码。
+
+正式 0.30.0 下原 22 项附带测试和原 24 项 Node 渲染测试（其中包含原附带断言的
+native/生成 JS 回放）通过。根依赖已更新为新正式发布的 Reel 0.6.37，
+CI 直接执行完整 strict；不能把普通检查或隔离候选证据替代干净 CI 验收。
+0.10.53 的 review、精确 main CI 与正式发布已完成；不能以这些历史结果代替 0.10.54 的验收。
+隔离 Docs Workflow 使用本候选、Respo #269 和 Reel #72，配对已发布的
+0.30.1-alpha.4 CLI/runtime 后完整 strict 通过；业务项目正式 pin 未改为 alpha。
+真实隔离 localhost 页面完成 Unicode prompt 提交、关闭和重新打开、菜单 B 选择，
+未见 console error；原 mode 配置 warning 保留。此页面运行的是正式 0.30.0/Reel 0.6.36 图，
+不冒称 alpha.4 浏览器或任意业务应用部署验收。临时页面和 Vite 已关闭。
+
+- 当前候选依赖图使用正式版本；仍须完成本轮 PR 最新 HEAD 的 CI/review 和合并后 main 验证后才发布 0.10.54。
 - 现有 hooks 的开放 options/callback 与菜单业务 payload 并未全面类型化；
   不能把容器验证或当前 demo 成功当作任意下游应用的静态类型保证。
 - 模块发布后还需验证真实 tag 消费者；Diary 的整体迁移仍是独立验收，不由此 PR 自动完成。
