@@ -311,7 +311,9 @@ let
 
 https://github.com/calcit-lang/respo-calcit-workflow
 
-当前源码配对正式 Calcit/procs `0.30.0` 和 Node.js 24。生成的前端产物上传后，
+当前源码配对已发布的 Calcit/procs `0.30.1-alpha.4` 和 Node.js 24，
+不是稳定 Calcit 0.30.1。稳定 0.30.0 项目继续使用模块 0.10.54，不混装工具链。
+生成的前端产物上传后，
 由 COS action 的内置功能验证公开可访问性；生产路径是
 `https://cos-sh.tiye.me/Respo/alerts.calcit/`，PR 使用独立的
 `/pr/<number>/<run>/<attempt>/` 路径。
@@ -341,9 +343,9 @@ MIT
 `JsNullish<String>` 字段。Number、Bool、Tag、Map、List 会明确失败，不做隐式字符串转换。
 `input` 与 `textarea` 共用此边界；不改变初始文字、提交、关闭、validator 或样式定制。
 
-当前源码固定正式 Calcit/procs `0.30.0`、Respo `0.16.120`、
-JS-FFI `0.2.3`、Reel `0.6.38`、UI `0.7.40`，
-传递 Router 为 `0.8.35`。Prompt 通过具名 `DomProps` 构造并显式提供当前字段，
+当前源码固定已发布的 Calcit/procs `0.30.1-alpha.4`、Respo `0.16.122`、
+JS-FFI `0.2.3`、Reel `0.6.39`、UI `0.7.41`，
+传递 Router 为 `0.8.36`。Prompt 通过具名 `DomProps` 构造并显式提供当前字段，
 保持事件回调、初始文字、提交和关闭行为；Escape 事件使用 JS-FFI 的类型化浏览器适配器。
 
 ### 样式和菜单输入边界
@@ -374,13 +376,21 @@ yarn vite build
 JS 回放使用独立进程隔离 trait registry，临时入口显式设置 native mode，不重写正常 `js-out`。
 原有初始文字重开、提交、Reel 渲染断言保留，新增 placeholder、菜单选择和 trigger 样式回归。
 CI 用当前严格检查覆盖全部公开命名空间，并阻断废弃调用；弱类型报告按需运行，
-不保留重复数字预算。此前 0.10.53 已正式发布；0.10.54 候选进一步对齐正式依赖图，供消费者严格安装；
+不保留重复数字预算。此前 0.10.54 已正式发布；0.10.55 候选对齐上述 alpha 工具链和正式模块图，供消费者严格安装；
 保留 prompt/menu/plugin 的既有行为，不宣称开放业务 payload 已全面静态化。
 本仓库 npm 新包安装隔离期按既有授权统一为一小时，不设置逐版本豁免。
 Prompt 回调和 demo Reel 的命名空间状态使用首选 `defref` 写法，保留初始化与热重载语义。
 旧迁移预算在正式图与源码验收通过后退役，不再保留重复预算脚本。
 具名 Reel 的 store 使用直接字段访问；demo 的三个 state 分支由
 `decode-map-as` 检查为原有 `Map<Tag, Dynamic>` 合同，不用新增 cast 或放宽参数类型。
+
+### 状态派发与升级边界
+
+0.10.55 还包含此前已合入 main、未随 0.10.54 发布的状态派发调整：
+组件直接发送 `:: :states cursor state` 操作，应用 Op 需要保留 `:states`
+变体及原 cursor/state payload。当前正式 Respo 仍支持旧派发入口；本次不删除它们，
+也不要求应用采用尚未发布的 slot/泛型路线。Prompt 提交、关闭、重开和菜单回调
+继续由原测试验证；本次配对不改这些程序或断言。
 
 ### 上一轮 0.10.53 升级的历史证据与限制
 
@@ -401,7 +411,7 @@ CI 直接执行完整 strict；不能把普通检查或隔离候选证据替代�
 未见 console error；原 mode 配置 warning 保留。此页面运行的是正式 0.30.0/Reel 0.6.36 图，
 不冒称 alpha.4 浏览器或任意业务应用部署验收。临时页面和 Vite 已关闭。
 
-- 当前候选依赖图使用正式版本；仍须完成本轮 PR 最新 HEAD 的 CI/review 和合并后 main 验证后才发布 0.10.54。
+- 当前候选使用已发布 alpha 工具链与正式模块 tag；仍须完成本轮 PR 最新 HEAD 的 CI/review 和合并后 main 验证后才发布 0.10.55。
 - 现有 hooks 的开放 options/callback 与菜单业务 payload 并未全面类型化；
   不能把容器验证或当前 demo 成功当作任意下游应用的静态类型保证。
 - 模块发布后还需验证真实 tag 消费者；Diary 的整体迁移仍是独立验收，不由此 PR 自动完成。
