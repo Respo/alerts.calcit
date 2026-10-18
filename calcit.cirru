@@ -149,13 +149,26 @@
                   =< 8 nil
                   button $ {} (:inner-text "|show confirm") (:class-name css/button)
                     :on-click $ fn (e d!)
+                      hint-fn $ {}
+                        :args $ [] (:: 'Map 'Tag 'Dynamic)
+                          :: 'Fn $ {}
+                            :args $ [] 'Enum
+                            :return 'Unit
+                        :return 'Unit
                       .show confirm-plugin d! $ fn () $ println "|after confirmed"
                   =< 8 nil
                   button $ {} (:inner-text "|show confirm with text") (:class-name css/button)
                     :on-click $ fn (e d!)
+                      hint-fn $ {}
+                        :args $ [] (:: 'Map 'Tag 'Dynamic)
+                          :: 'Fn $ {}
+                            :args $ [] 'Enum
+                            :return 'Unit
+                        :return 'Unit
                       .show confirm-prompt-plugin d! $ fn (text)
                         .show-with-text confirm-plugin d! (str "|Confirmed: " text)
                           fn () $ println |after-confirmed
+                      , &unit
                   =< 8 nil
                   button $ {} (:inner-text "|show prompt") (:class-name css/button)
                     :on-click $ fn (e d!)
@@ -275,15 +288,21 @@
           :code $ quote $ defimpl %confirm-actions ConfirmActions
             .render $ fn (self)
               hint-fn $ {}
-                :args $ [] 'Dynamic
-                :return 'Dynamic
+                :args $ [] 'respo-alerts.core/PluginNodeCursorState
+                :return 'respo.schema/Component
               match self $
                 :plugin node cursor state
                 , node
             .show $ fn (self d! next-task)
               hint-fn $ {}
-                :args $ [] 'Dynamic 'Fn 'Fn
-                :return 'Dynamic
+                :args $ [] 'respo-alerts.core/PluginNodeCursorState
+                  :: 'Fn $ {}
+                    :args $ [] 'Enum
+                    :return 'Unit
+                  :: 'Fn $ {}
+                    :args $ []
+                    :return 'Unit
+                :return 'Unit
               match self $
                 :plugin node cursor state
                 do
@@ -291,8 +310,15 @@
                   d! $ :: :states cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text |)
             .show-with-text $ fn (self d! text next-task)
               hint-fn $ {}
-                :args $ [] 'Dynamic 'Fn 'String 'Fn
-                :return 'Dynamic
+                :args $ [] 'respo-alerts.core/PluginNodeCursorState
+                  :: 'Fn $ {}
+                    :args $ [] 'Enum
+                    :return 'Unit
+                  , 'String $ :: 'Fn
+                    {}
+                      :args $ []
+                      :return 'Unit
+                :return 'Unit
               match self $
                 :plugin node cursor state
                 do
@@ -300,21 +326,54 @@
                   d! $ :: :states cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text text)
             .close $ fn (self d!)
               hint-fn $ {}
-                :args $ [] 'Dynamic 'Fn
-                :return 'Dynamic
+                :args $ [] 'respo-alerts.core/PluginNodeCursorState $ :: 'Fn
+                  {}
+                    :args $ [] 'Enum
+                    :return 'Unit
+                :return 'Unit
               match self $
                 :plugin node cursor state
                 do (clear-prompt-task! cursor)
                   d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
               hint-fn $ {}
-                :args $ [] 'Dynamic
+                :args $ [] 'respo-alerts.core/PluginNodeCursorState
                 :return 'Bool
               match self $
                 :plugin node cursor state
                 = true $ read-field state :show?
           :examples $ []
           :schema $ :: 'Impl
+          :tests $ [] $ %{} 'TestEntry (:name |single-dispatch-zero-argument-task-and-close)
+            :code $ quote $ let
+                cursor $ [] :confirm-contract
+                node $ respo.schema/Component :name :test :effects ([]) :listeners ([]) :tree $ Option :none
+                plugin $ confirm-actions-plugin :plugin node cursor $ {}
+              .show plugin
+                fn (op)
+                  assert=
+                    :: :states cursor $ {} (:show? true) (:text |)
+                    , op
+                  , &unit
+                fn () &unit
+              match (take-prompt-task! cursor)
+                (:some task) (task |)
+                (:none) (raise |Missing-confirm-task)
+              assert= (Option :none) (take-prompt-task! cursor)
+              .show-with-text plugin
+                fn (op)
+                  assert=
+                    :: :states cursor $ {} (:show? true) (:text |override)
+                    , op
+                  , &unit
+                , |override $ fn () &unit
+              .close plugin $ fn (op)
+                assert=
+                  :: :states cursor $ {} $ :show? false
+                  , op
+                , &unit
+              assert= (Option :none) (take-prompt-task! cursor)
+            :tags $ #{} :regression :unit
         '%drawer-actions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defimpl %drawer-actions DrawerActions
             .render $ fn (self)
@@ -468,8 +527,40 @@
           :code $ quote $ deftrait AlertActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
           :examples $ []
           :schema $ :: 'Trait
-        'ConfirmActions $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait ConfirmActions (.render :fn) (.show :fn) (.show-with-text :fn) (.close :fn) (.show? :fn)
+        'ConfirmActions $ %{} 'CodeEntry
+          :doc "|Confirm plugin: .show(plugin, dispatch!, next-task) and .show-with-text(plugin, dispatch!, text, next-task). dispatch! receives one Enum operation, including (:: :states cursor data), and returns Unit; next-task receives no arguments and returns Unit. Do not pass the retired (cursor,data) state callback. .close clears the pending task before dispatching closed state."
+          :code $ quote $ deftrait ConfirmActions
+            .render $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PluginNodeCursorState
+              :return 'respo.schema/Component
+            .show $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PluginNodeCursorState
+                :: 'Fn $ {}
+                  :args $ [] 'Enum
+                  :return 'Unit
+                :: 'Fn $ {}
+                  :args $ []
+                  :return 'Unit
+              :return 'Unit
+            .show-with-text $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PluginNodeCursorState
+                :: 'Fn $ {}
+                  :args $ [] 'Enum
+                  :return 'Unit
+                , 'String $ :: 'Fn
+                  {}
+                    :args $ []
+                    :return 'Unit
+              :return 'Unit
+            .close $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PluginNodeCursorState $ :: 'Fn
+                {}
+                  :args $ [] 'Enum
+                  :return 'Unit
+              :return 'Unit
+            .show? $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PluginNodeCursorState
+              :return 'Bool
           :examples $ []
           :schema $ :: 'Trait
         'DrawerActions $ %{} 'CodeEntry (:doc |)
@@ -1408,7 +1499,7 @@
           :schema $ :: 'Fn $ {} (:return 'respo-alerts.core/alert-actions-plugin)
             :args $ [] (:: 'Map 'Dynamic 'Dynamic) (:: 'Map 'Dynamic 'Dynamic)
         'use-confirm $ %{} 'CodeEntry
-          :doc "||Confirm dialog hook. Shows a dialog with confirm/cancel buttons. Returns a plugin object, call .show with a callback function that executes after confirmation."
+          :doc "|Build a Confirm plugin from Respo states and options. Call (.show plugin dispatch! (fn () ...)) with the ordinary single-Enum dispatcher; the success task is zero-argument. Rendering does not invoke the success task. Closing clears it. The old two-argument cursor/data dispatcher is not supported."
           :code $ quote $ defplugin use-confirm (states options)
             let
                 options $ as-options-map options

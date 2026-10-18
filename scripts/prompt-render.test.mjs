@@ -60,7 +60,7 @@ test('canonical attached tests replay on native and generated JavaScript', async
         [':features', ['#{}', ...features]]]])]);
     const args = ['edit', 'transaction', '--code', JSON.stringify(operations)];
     const preview = JSON.parse(invoke(snapshot, ...args, '--dry-run', '--format', 'json'));
-    invoke(snapshot, ...args, '--expect-revision', preview.original_revision, '--format', 'edn');
+    invoke(snapshot, ...args, '--expect-revision', preview.scoped_revision, '--format', 'edn');
     const roots = ['--init-fn', entry, '--reload-fn', entry];
     invoke(snapshot, ...roots);
     const output = join(directory, 'js');
@@ -70,6 +70,20 @@ test('canonical attached tests replay on native and generated JavaScript', async
       `const tests = await import(${JSON.stringify(pathToFileURL(join(output, 'respo-alerts.core.mjs')).href)}); tests.replay_attached_$x_();`],
       { timeout: 60000, stdio: 'inherit' });
     console.log(`Alerts: ${selected.tests.length} canonical tests replayed on native/generated JS`);
+
+    // The old cursor/data callback must fail before a user clicks Confirm (#102).
+    const legacyTarget = 'respo-alerts.core/legacy-confirm-dispatch';
+    const legacyOperations = [['edit', 'def', legacyTarget, '--input-format', 'cirru', '--code',
+      'quote $ defn legacy-confirm-dispatch ()\n  let\n      plugin $ use-confirm ({} (:cursor $ [])) ({})\n    .show plugin (fn (cursor data) &unit) (fn () &unit)']];
+    const legacyArgs = ['edit', 'transaction', '--code', JSON.stringify(legacyOperations)];
+    const legacyPreview = JSON.parse(invoke(snapshot, ...legacyArgs, '--dry-run', '--format', 'json'));
+    invoke(snapshot, ...legacyArgs, '--expect-revision', legacyPreview.scoped_revision, '--format', 'edn');
+    assert.throws(() => invoke(snapshot, '--check-only', '--init-fn', legacyTarget, '--reload-fn', legacyTarget),
+      (error) => {
+        assert.equal(error.status, 1);
+        assert.match(`${error.stdout}${error.stderr}`, /W_METHOD_ARG_TYPE_MISMATCH/);
+        return true;
+      });
   } finally {
     try {
       assert.deepEqual(await readFile(canonical), before, 'replay must preserve canonical Snapshot bytes');

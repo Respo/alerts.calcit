@@ -4,7 +4,21 @@
 
 Demo http://repo.respo-mvc.org/alerts.calcit/ .
 
-### 0.10.54 候选：正式依赖图对齐
+### Confirm 回调合同收紧（0.10.56 候选）
+
+使用者影响：Confirm 的 `dispatch!` 必须接收**一个 Enum 操作**并返回 Unit，
+确认后的 `next-task` 必须是**零参数**并返回 Unit。旧 `(cursor data)` 回调现在会在检查阶段报错，
+请直接传入现有 Respo dispatcher；不再等用户点击删除时才抛出参数数量错误。
+`.show`、`.show-with-text` 和 `.close` 保留原状态操作、cursor、文本与任务清理行为；
+`.render` 明确返回 Component，`.show?` 返回 Bool。不引入兼容包装、强转或编译器规则。
+
+CLI/runtime 仍固定已发布的 **0.30.1-alpha.4（预发布）**；依赖保持正式 Reel 0.6.39、
+UI 0.7.41、Respo 0.16.122 和 JS-FFI 0.2.3，不把模块正式 patch 当作语言稳定版。
+新增一个定义内 Confirm 正向回归，复用现有原生/生成 JS 回放；在同一临时 fixture 中检查旧回调被拒绝，
+不增加独立脚本或放宽预算。完整验收、CI 和消费者结果以对应 PR 为准。
+关联 [#102](https://github.com/Respo/alerts.calcit/issues/102)。
+
+### 历史：0.10.54 正式依赖图对齐
 
 使用者影响：CLI/runtime 继续固定正式 0.30.0，依赖升级到已发布的 Reel 0.6.38、
 UI 0.7.40（传递 Router 0.8.35）；Respo 0.16.120、JS-FFI 0.2.3 不变。
