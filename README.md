@@ -336,8 +336,8 @@ let
 
 https://github.com/calcit-lang/respo-calcit-workflow
 
-当前源码配对已发布的 Calcit/procs `0.30.1-alpha.4` 和 Node.js 24，
-不是稳定 Calcit 0.30.1。稳定 0.30.0 项目继续使用模块 0.10.54，不混装工具链。
+当前源码配对已发布的正式 Calcit/procs `0.30.1` 和 Node.js 24。
+候选模块为 `0.10.57`，发布前不要以 main/hash 代替正式 tag；旧工具链消费者需同步升级整张依赖图，不混装工具链。
 生成的前端产物上传后，
 由 COS action 的内置功能验证公开可访问性；生产路径是
 `https://cos-sh.tiye.me/Respo/alerts.calcit/`，PR 使用独立的
@@ -368,7 +368,7 @@ MIT
 `JsNullish<String>` 字段。Number、Bool、Tag、Map、List 会明确失败，不做隐式字符串转换。
 `input` 与 `textarea` 共用此边界；不改变初始文字、提交、关闭、validator 或样式定制。
 
-当前源码固定已发布的 Calcit/procs `0.30.1-alpha.4`、Respo `0.16.122`、
+历史 `0.10.55` / `0.10.56` 图固定 Calcit/procs `0.30.1-alpha.4`、Respo `0.16.122`、
 JS-FFI `0.2.3`、Reel `0.6.39`、UI `0.7.41`，
 传递 Router 为 `0.8.36`。Prompt 通过具名 `DomProps` 构造并显式提供当前字段，
 保持事件回调、初始文字、提交和关闭行为；Escape 事件使用 JS-FFI 的类型化浏览器适配器。
@@ -389,7 +389,7 @@ JS-FFI `0.2.3`、Reel `0.6.39`、UI `0.7.41`，
 caps --strict --ci
 yarn install --immutable
 caps verify --toolchain
-calcit --check-only
+calcit --check-only --all-defs
 calcit test --tag unit --require-match
 calcit js
 node --test scripts/prompt-render.test.mjs scripts/typed-reel-render.test.mjs
@@ -401,7 +401,7 @@ yarn vite build
 JS 回放使用独立进程隔离 trait registry，临时入口显式设置 native mode，不重写正常 `js-out`。
 原有初始文字重开、提交、Reel 渲染断言保留，新增 placeholder、菜单选择和 trigger 样式回归。
 CI 用当前严格检查覆盖全部公开命名空间，并阻断废弃调用；弱类型报告按需运行，
-不保留重复数字预算。此前 0.10.54 已正式发布；0.10.55 候选对齐上述 alpha 工具链和正式模块图，供消费者严格安装；
+不保留重复数字预算。历史 0.10.54 使用稳定 0.30.0，0.10.55 / 0.10.56 使用上述 alpha 图；当前 0.10.57 候选使用本文开头的正式 0.30.1 图。
 保留 prompt/menu/plugin 的既有行为，不宣称开放业务 payload 已全面静态化。
 本仓库 npm 新包安装隔离期按既有授权统一为一小时，不设置逐版本豁免。
 Prompt 回调和 demo Reel 的命名空间状态使用首选 `defref` 写法，保留初始化与热重载语义。
