@@ -4,7 +4,18 @@
 
 Demo http://repo.respo-mvc.org/alerts.calcit/ .
 
-### Confirm 回调合同收紧（0.10.56 候选）
+### 0.10.57 候选：正式 Calcit 0.30.1 配对
+
+使用者影响：CLI/runtime 切到已配对发布的正式 **0.30.1**，模块依赖固定正式
+Reel0.6.41、UI0.8.0、Respo0.16.124、JS-FFI0.2.5。消费者应协调整张依赖图、
+重新生成 JS 并刷新，不混用旧 alpha 缓存；候选正式 tag 发布前不要用 main/hash 替代。
+本次不改0.10.56的Snapshot、Confirm回调合同、状态cursor、组件样式或存档行为。
+
+CI 以 all-defs 覆盖全部10个本地namespace，替代重复的9项手写清单；保留完整strict、
+原附带测试的native/生成JS回放、Node渲染与typed Reel回归、弃用检查及COS action内置校验。
+不新增验证脚本、预算或兼容包装；公开回调/宿主边界不宣称清零，真实消费者仍需单独验收。
+
+### 历史：Confirm 回调合同收紧（0.10.56）
 
 使用者影响：Confirm 的 `dispatch!` 必须接收**一个 Enum 操作**并返回 Unit，
 确认后的 `next-task` 必须是**零参数**并返回 Unit。旧 `(cursor data)` 回调现在会在检查阶段报错，

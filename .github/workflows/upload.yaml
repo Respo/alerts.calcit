@@ -42,19 +42,15 @@ jobs:
 
     - name: Validate Calcit snapshot and types
       run: |
+        set -euo pipefail
         caps --strict --ci
         yarn install --immutable
         caps verify --toolchain
         calcit calcit.cirru edit format
         git diff --exit-code -- calcit.cirru
-        calcit calcit.cirru --check-only
+        calcit calcit.cirru --check-only --all-defs
         calcit calcit.cirru fix --workflow strict --verify --format edn
         calcit calcit.cirru test --tag unit --require-match
-        calcit calcit.cirru --check-only \
-          --ns respo-alerts.comp.container --ns respo-alerts.config \
-          --ns respo-alerts.core --ns respo-alerts.main --ns respo-alerts.schema \
-          --ns respo-alerts.style --ns respo-alerts.trigger \
-          --ns respo-alerts.updater --ns respo-alerts.util --format edn
         calcit calcit.cirru analyze weak-types --only deprecated-call --summary-only --format json | jq -e '.data.summary.calls == 0'
 
     - name: Select frontend CDN path
