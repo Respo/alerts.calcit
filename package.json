@@ -5,8 +5,8 @@
     "vite": "^8.0.11"
   },
   "dependencies": {
-    "@calcit/procs": "0.30.1"
+    "@calcit/procs": "0.31.0-alpha.1"
   },
   "packageManager": "yarn@4.18.0",
-  "version": "0.10.57"
+  "version": "0.11.0-alpha.1"
 }

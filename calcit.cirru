@@ -702,7 +702,7 @@
                   {}
                     :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop $ read-field options :backdrop-class
                     :style $ read-style options :backdrop-style
-                    :on-click $ fn (e d!) (on-close! d!)
+                    :on-click $ dispatch-fn (e d!) (on-close! d!)
                   div
                     {}
                       :class-name $ str-spaced css/global css/column style-modal-card $ read-field options :card-class
@@ -717,7 +717,7 @@
                       button
                         {}
                           :class-name $ str-spaced css/button schema/confirm-button-name $ read-field options :confirm-class
-                          :on-click $ fn (e d!)
+                          :on-click $ dispatch-fn (e d!)
                             let
                                 event $ decode-map-as e $ :: 'Map 'Tag 'Dynamic
                               if (contains? event :type)
@@ -732,9 +732,13 @@
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
             :args $ [] (:: 'Map 'Tag 'OptionsValue) 'Bool
               :: 'Fn $ {} (:return 'Unit)
-                :args $ [] (:: 'Map 'Tag 'Dynamic) 'Dynamic
+                :args $ [] (:: 'Map 'Tag 'Dynamic)
+                  :: 'Fn $ {} (:return 'Unit)
+                    :args $ [] '*dispatch-op
               :: 'Fn $ {} (:return 'Unit)
-                :args $ [] 'Dynamic
+                :args $ [] $ :: 'Fn
+                  {} (:return 'Unit)
+                    :args $ [] '*dispatch-op
             :generics $ [] 'OptionsValue
         'comp-drawer $ %{} 'CodeEntry
           :doc "||Drawer component. Renders a sliding panel from the side with custom content via :render function in options."
@@ -789,7 +793,9 @@
             [] (effect-keydown)
               div $ {}
                 :style $ {} $ :position :absolute
-                :on-keydown $ fn (e d!) (on-close! d!)
+                :on-keydown $ fn (e d!)
+                  if (fn? on-close!) (on-close! d!)
+                    raise "|comp-esc-listener expects on-close! to be a function"
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
             :args $ [] 'Bool 'Dynamic
@@ -1511,7 +1517,7 @@
                     blank? $ read-text state :text |
                     , options $ &map:assoc options :text $ read-text state :text |
                   = true $ read-field state :show?
-                  fn (e d!)
+                  dispatch-fn (e d!)
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
                     option:fold (take-prompt-task! cursor)
                       fn () &unit
@@ -1524,7 +1530,7 @@
                           :return 'Unit
                         task |
                     , &unit
-                  fn (d!) (clear-prompt-task! cursor)
+                  dispatch-fn (d!) (clear-prompt-task! cursor)
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
                     , &unit
               %:: confirm-actions-plugin :plugin node cursor state
@@ -1602,10 +1608,12 @@
                   {} $ :show? false
                 node $ comp-modal-menu options
                   = true $ read-field state :show?
-                  fn (d!)
+                  dispatch-fn (d!)
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
-                  fn (result d!)
-                    (read-field options :on-result) result d!
+                  dispatch-fn (result d!)
+                    let
+                        on-result $ read-field options :on-result
+                      if (fn? on-result) (on-result result d!) (raise "|modal menu expects :on-result to be a function")
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
               %:: modal-menu-actions-plugin :plugin node cursor state
           :examples $ [] $ quote
@@ -1630,8 +1638,10 @@
                 node $ comp-prompt-modal (>> states :modal) options
                   = true $ read-field state :show?
                   fn (text d!)
-                    hint-fn $ {} (:return 'Dynamic)
-                      :args $ [] 'String 'Dynamic
+                    hint-fn $ {} (:return 'Unit)
+                      :args $ [] 'String $ :: 'Fn
+                        {} (:return 'Unit)
+                          :args $ [] *dispatch-op
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
                     option:fold (take-prompt-task! cursor)
                       fn () &unit
@@ -1643,7 +1653,7 @@
                               :return 'Unit
                           :return 'Unit
                         task text
-                  fn (d!) (clear-prompt-task! cursor)
+                  dispatch-fn (d!) (clear-prompt-task! cursor)
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
               %:: prompt-actions-plugin :plugin node cursor state
           :examples $ [] $ quote
@@ -1663,7 +1673,7 @@
             respo.schema :refer $ DomProps
             respo-ui.core :as ui
             respo-ui.css :as css
-            respo.core :refer $ defcomp defplugin list-> <> >> div button textarea span input a defeffect
+            respo.core :refer $ defcomp defplugin list-> <> >> div button textarea span input a defeffect dispatch-fn
             respo.css :refer $ defstyle
             respo.comp.space :refer $ =<
             respo-alerts.config :refer $ dev?
@@ -1718,11 +1728,14 @@
             :features $ #{} :js-ffi
         'next-reel $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn next-reel (op)
-            typed/record-op updater
-              assert-type @*reel $ :: 'reel.typed/State 'Enum $ :: 'Map 'Dynamic 'Dynamic
-              if (enum? op) op $ raise "|alert operation must be an Enum"
-              generate-id!
-              shared/now-ms
+            let
+                reel $ assert-type @*reel $ :: 'reel.typed/State 'Enum (:: 'Map 'Dynamic 'Dynamic)
+              if (enum? op)
+                match (typed/decode-control op)
+                  (:some control) (typed/apply-control updater reel control)
+                  (:none)
+                    typed/record-op updater reel op (generate-id!) (shared/now-ms)
+                raise "|alert operation must be an Enum"
           :examples $ []
           :schema $ :: 'Fn $ {}
             :args $ [] 'Dynamic
@@ -1792,6 +1805,13 @@
             :states (:: 'List 'Dynamic) 'Dynamic
             :content 'Dynamic
             :hydrate-storage 'Dynamic
+            :reel/toggle
+            :reel/recall 'Number
+            :reel/run
+            :reel/step
+            :reel/merge
+            :reel/reset
+            :reel/remove 'Number
           :examples $ []
           :schema $ :: 'EnumDef
         'confirm-button-name $ %{} 'CodeEntry (:doc |)

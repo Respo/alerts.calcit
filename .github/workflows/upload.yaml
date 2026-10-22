@@ -82,7 +82,7 @@ jobs:
       uses: actions/checkout@v7.0.1
       with:
         repository: worktools/qrcode-shelf
-        ref: 31bcc8b88d66fc24789650732ed4cb8ff7c234f6
+        ref: dd7d02d0cffca31f964d730642de53bf70c68016
         path: .calcit/consumer
         persist-credentials: false
 
@@ -104,16 +104,16 @@ jobs:
         # Explicit local candidate graph, NOT a Caps-resolved release install.
         # The consumer Snapshot remains unchanged.
         cat > "$consumer/deps.cirru" <<'EOF'
-        {} (:calcit-version |0.30.1) (:version |0.1.0)
-          :dependencies $ {} (|Respo/reel.calcit |0.6.41)
-            |Respo/respo-ui.calcit |0.8.0
-            |Respo/respo.calcit |0.16.124
+        {} (:calcit-version |0.31.0-alpha.1) (:version |0.1.0)
+          :dependencies $ {} (|Respo/reel.calcit |0.7.0-alpha.1)
+            |Respo/respo-ui.calcit |0.9.0-alpha.1
+            |Respo/respo.calcit |0.17.0-alpha.2
             |Respo/respo-feather.calcit |0.4.30
-            |Respo/alerts.calcit |0.10.57
+            |Respo/alerts.calcit |0.11.0-alpha.1
             |calcit-lang/js-ffi |0.2.5
         EOF
         cd "$consumer"
-        yarn add --exact @calcit/procs@0.30.1
+        yarn add --exact @calcit/procs@0.31.0-alpha.1
         calcit calcit.cirru edit format
         git diff --exit-code -- calcit.cirru
         calcit calcit.cirru --check-only --all-defs
