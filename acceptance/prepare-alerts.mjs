@@ -63,7 +63,7 @@ for(const [trait,impl,self] of [
 // Prompt104: the submitted argument is String, but its result is deliberately
 // ignored. Preserve arbitrary R rather than rejecting valid value-returning tasks.
 const dispatch=['::',"'Fn",['{}',[':args',['[]',"'Enum"]],[':return',"'Unit"]]];
-const task=['::',"'Fn",['{}',[':args',['[]',"'String"]],[':return',"'R"]]];
+const task=['::',"'Fn",['{}',[':return',"'R"],[':args',['[]',"'String"]]]];
 const promptSelf="'respo-alerts.core/PromptPluginNodeCursorState";
 for(const [name,args] of [['.show',[promptSelf,dispatch,task]],['.close',[promptSelf,dispatch]]]){
   const fields=['{}',[':args',['[]',...args]],[':return',"'Unit"]];
@@ -76,7 +76,7 @@ for(const [name,args] of [['.show',[promptSelf,dispatch,task]],['.close',[prompt
 const adapter=get('respo-alerts.core/as-prompt-task');
 assert.equal(adapter.schema.find(p=>Array.isArray(p)&&p[0]===':args')[1][1],"'Fn");
 adapter.schema.find(p=>Array.isArray(p)&&p[0]===':args')[1][1]=task;
-adapter.schema.push([':generics',['[]',"'R"]]);
+adapter.schema.splice(adapter.schema.findIndex(p=>Array.isArray(p)&&p[0]===':return'),0,[':generics',['[]',"'R"]]);
 const mount=get('respo-alerts.main/mount-target');
 assert.deepEqual(mount.code,['defn','mount-target',[],['.unwrap',['browser/query-selector','|.app']]]);
 mount.code[3][1][0]='respo-browser/query-selector';
