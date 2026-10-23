@@ -22,8 +22,10 @@ cursor、task 缓存或存档。Prompt `.show` / `.close` 的 dispatcher 明确�
 错误 Number/arity 回调会更早被类型门禁拒绝；取消仍不调用成功任务。其他 hook 的开放
 callable 与菜单 item/Clear 合同不在本次被强行收窄，也不声称业务 payload 已全面证明。
 原先行为正确但签名被擦除的 Prompt 回调，在完整 strict 中也需补明 String 参数和
-实际返回类型；只补合同，不必改执行逻辑。原 Shelf 集成已因此暴露待迁移的 comp-note
-回调，本维护候选尚未完成该消费者验收，不把 Alerts 自身通过当作完整交付。
+实际返回类型；只补合同，不必改执行逻辑。Shelf 两处 Prompt 回调已在独立维护补丁
+补明 String → Unit；正式 0.30.1 联合准备 CI 通过完整 strict、构建和原六项业务测试。
+最终 CI 直接检出该已提交源码并要求 Snapshot 不变，不在消费者内临时改写。
+这仍不是已发布依赖安装或 Shelf 页面交互验收，不把联合候选通过当作完整应用交付。
 Demo 四个 Prompt 提交回调补明实际 String/Unit 合同，三个原未标注的点击入口明确
 原 Respo 事件 Map 与单 Enum dispatcher；只补生产者注释，不改变回调执行体或分支。
 
