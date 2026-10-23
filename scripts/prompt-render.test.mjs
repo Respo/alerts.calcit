@@ -86,7 +86,7 @@ test('canonical attached tests replay on native and generated JavaScript', async
       });
     invoke(snapshot, 'edit', 'rm-def', legacyTarget);
 
-    // #104: Prompt submits String. Preserve a task's ignored return value,
+    // #104: Prompt submits String, but its ignored return may be Number.
     // while rejecting Number input and the old two-argument dispatcher.
     const promptProbe = (name, badNumber = false, badDispatch = false) =>
       ['defn', name, [], ['let',
@@ -95,9 +95,9 @@ test('canonical attached tests replay on native and generated JavaScript', async
           ['fn', badDispatch ? ['cursor', 'data'] : ['op'],
             ['hint-fn', ['{}', [':args', ['[]', ...(badDispatch ? ["'Dynamic", "'Dynamic"] : ["'Enum"])]], [':return', "'Unit"]]], '&unit'],
           ['fn', ['value'], ['hint-fn', ['{}', [':args', ['[]', badNumber ? "'Number" : "'String"]],
-            [':return', badNumber ? "'Unit" : "'String"]]], badNumber ? '&unit' : 'value']], '&unit']];
+            [':return', badNumber ? "'Unit" : "'Number"]]], badNumber ? '&unit' : '42']], '&unit']];
     for (const [name, badNumber, badDispatch] of [
-      ['prompt-string-return-contract', false, false],
+      ['prompt-number-return-contract', false, false],
       ['prompt-number-contract', true, false],
       ['prompt-legacy-dispatch-contract', false, true],
     ]) {
