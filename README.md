@@ -4,7 +4,36 @@
 
 Demo http://repo.respo-mvc.org/alerts.calcit/ .
 
-### 0.10.57 候选：正式 Calcit 0.30.1 配对
+### 0.10.58 维护版：对使用者的影响
+
+配对正式 Calcit CLI / `@calcit/procs` **0.30.1**，同步 Reel **0.6.42**、UI **0.8.1**、
+Respo **0.16.126**、JS-FFI **0.2.6**（传递 Router **0.8.38**）。消费者需协调完整图，
+保留 Caps strict，不用 main/hash/alpha。本维护线从正式 0.10.57 出发，不回退 main
+的 0.31 alpha；发布状态以正式 tag 和精确提交 CI 为准。
+
+迁移8处旧 Option调用、1处测试 atom、1处测试 Struct 构造和2处 Map fold。
+Map先经原 map? 分支检查，再以公开 .to-list/.foldl 遍历原 pair；原 Tag-key 校验、
+nil/default/覆盖行为和报错保留。不增加兼容包装、检查脚本、测试组或预算豁免。
+
+Alert/Drawer/Modal/Menu/Prompt 的 `.render`、`.show?` 按已有具名插件 producer
+补明 Component/Bool 合同及真实 self 类型；不修改执行体、样式、Confirm 回调、
+cursor、task 缓存或存档。Prompt `.show` / `.close` 的 dispatcher 明确为接收单个 Enum
+并返回 Unit；成功任务明确接收 String，返回值仍被忽略，允许任意 R，不强改为 Unit。
+错误 Number/arity 回调会更早被类型门禁拒绝；取消仍不调用成功任务。其他 hook 的开放
+callable 与菜单 item/Clear 合同不在本次被强行收窄，也不声称业务 payload 已全面证明。
+原先行为正确但签名被擦除的 Prompt 回调，在完整 strict 中也需补明 String 参数和
+实际返回类型；只补合同，不必改执行逻辑。原 Shelf 集成已因此暴露待迁移的 comp-note
+回调，本维护候选尚未完成该消费者验收，不把 Alerts 自身通过当作完整交付。
+Demo 四个 Prompt 提交回调补明实际 String/Unit 合同，三个原未标注的点击入口明确
+原 Respo 事件 Map 与单 Enum dispatcher；只补生产者注释，不改变回调执行体或分支。
+
+Demo mount 直接使用 Respo 的 query-selector / DomElement 合同，移除调用方重复
+narrow，跨库信任适配仍由 Respo 原入口负责，不宣称完整 DOM 字段已验证。
+原 `hud!` 成功/错误展示保留，不替换为 raise。维护分支和以它为目标的 PR 只测试，
+不上传 COS 或 rsync；main 原前端生产路径和部署行为保持。Shelf 仍是明确的本地候选
+集成（含未发布 Feather），不能当作已发布 Caps 图或业务应用迁移通过。
+
+### 历史：0.10.57 正式 Calcit 0.30.1 配对
 
 使用者影响：CLI/runtime 切到已配对发布的正式 **0.30.1**，模块依赖固定正式
 Reel0.6.41、UI0.8.0、Respo0.16.124、JS-FFI0.2.5。消费者应协调整张依赖图、
@@ -337,7 +366,7 @@ let
 https://github.com/calcit-lang/respo-calcit-workflow
 
 当前源码配对已发布的正式 Calcit/procs `0.30.1` 和 Node.js 24。
-候选模块为 `0.10.57`，发布前不要以 main/hash 代替正式 tag；旧工具链消费者需同步升级整张依赖图，不混装工具链。
+当前维护模块声明 `0.10.58`，发布状态以正式 tag 为准，不以 main/hash 代替；旧工具链消费者需同步升级整张依赖图，不混装工具链。
 生成的前端产物上传后，
 由 COS action 的内置功能验证公开可访问性；生产路径是
 `https://cos-sh.tiye.me/Respo/alerts.calcit/`，PR 使用独立的
@@ -401,7 +430,7 @@ yarn vite build
 JS 回放使用独立进程隔离 trait registry，临时入口显式设置 native mode，不重写正常 `js-out`。
 原有初始文字重开、提交、Reel 渲染断言保留，新增 placeholder、菜单选择和 trigger 样式回归。
 CI 用当前严格检查覆盖全部公开命名空间，并阻断废弃调用；弱类型报告按需运行，
-不保留重复数字预算。历史 0.10.54 使用稳定 0.30.0，0.10.55 / 0.10.56 使用上述 alpha 图；当前 0.10.57 候选使用本文开头的正式 0.30.1 图。
+不保留重复数字预算。历史 0.10.54 使用稳定 0.30.0，0.10.55 / 0.10.56 使用上述 alpha 图；当前 0.10.58 维护线使用本文开头的正式 0.30.1 图。
 保留 prompt/menu/plugin 的既有行为，不宣称开放业务 payload 已全面静态化。
 本仓库 npm 新包安装隔离期按既有授权统一为一小时，不设置逐版本豁免。
 Prompt 回调和 demo Reel 的命名空间状态使用首选 `defref` 写法，保留初始化与热重载语义。
