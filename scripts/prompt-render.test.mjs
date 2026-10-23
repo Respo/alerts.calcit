@@ -84,6 +84,7 @@ test('canonical attached tests replay on native and generated JavaScript', async
         assert.match(`${error.stdout}${error.stderr}`, /W_METHOD_ARG_TYPE_MISMATCH/);
         return true;
       });
+    invoke(snapshot, 'edit', 'rm-def', legacyTarget);
 
     // #104: Prompt submits String. Preserve a task's ignored return value,
     // while rejecting Number input and the old two-argument dispatcher.
@@ -113,6 +114,7 @@ test('canonical attached tests replay on native and generated JavaScript', async
         assert.match(`${error.stdout}${error.stderr}`, /W_METHOD_ARG_TYPE_MISMATCH|E_CALL_ARGUMENT_MISMATCH|E_ERASED_GENERIC_RELATION/);
         return true;
       });
+      invoke(snapshot, 'edit', 'rm-def', target);
     }
   } finally {
     try {
