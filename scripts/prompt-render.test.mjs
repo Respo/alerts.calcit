@@ -84,6 +84,38 @@ test('canonical attached tests replay on native and generated JavaScript', async
         assert.match(`${error.stdout}${error.stderr}`, /W_METHOD_ARG_TYPE_MISMATCH/);
         return true;
       });
+    invoke(snapshot, 'edit', 'rm-def', legacyTarget);
+
+    // #104: Prompt submits String, but its ignored return may be Number.
+    // while rejecting Number input and the old two-argument dispatcher.
+    const promptProbe = (name, badNumber = false, badDispatch = false) =>
+      ['defn', name, [], ['let',
+        [['plugin', ['use-prompt', ['{}', [':cursor', ['[]']]], ['{}']]]],
+        ['.show', 'plugin',
+          ['fn', badDispatch ? ['cursor', 'data'] : ['op'],
+            ['hint-fn', ['{}', [':args', ['[]', ...(badDispatch ? ["'Dynamic", "'Dynamic"] : ["'Enum"])]], [':return', "'Unit"]]], '&unit'],
+          ['fn', ['value'], ['hint-fn', ['{}', [':args', ['[]', badNumber ? "'Number" : "'String"]],
+            [':return', badNumber ? "'Unit" : "'Number"]]], badNumber ? '&unit' : '42']], '&unit']];
+    for (const [name, badNumber, badDispatch] of [
+      ['prompt-number-return-contract', false, false],
+      ['prompt-number-contract', true, false],
+      ['prompt-legacy-dispatch-contract', false, true],
+    ]) {
+      const target = `respo-alerts.core/${name}`;
+      const operation = [['edit', 'def', target, '--input-format', 'json-ast', '--code',
+        JSON.stringify(promptProbe(name, badNumber, badDispatch))]];
+      const transaction = ['edit', 'transaction', '--code', JSON.stringify(operation), '--format', 'json'];
+      const preview = JSON.parse(invoke(snapshot, ...transaction, '--dry-run'));
+      invoke(snapshot, ...transaction, '--expect-revision', preview.scoped_revision);
+      const check = () => invoke(snapshot, '--check-only', '--init-fn', target, '--reload-fn', target);
+      if (!badNumber && !badDispatch) check();
+      else assert.throws(check, error => {
+        assert.equal(error.status, 1);
+        assert.match(`${error.stdout}${error.stderr}`, /W_METHOD_ARG_TYPE_MISMATCH|E_CALL_ARGUMENT_MISMATCH|E_ERASED_GENERIC_RELATION/);
+        return true;
+      });
+      invoke(snapshot, 'edit', 'rm-def', target);
+    }
   } finally {
     try {
       assert.deepEqual(await readFile(canonical), before, 'replay must preserve canonical Snapshot bytes');

@@ -166,18 +166,39 @@
                             :return 'Unit
                         :return 'Unit
                       .show confirm-prompt-plugin d! $ fn (text)
+                        hint-fn $ {}
+                          :args $ [] 'String
+                          :return 'Unit
                         .show-with-text confirm-plugin d! (str "|Confirmed: " text)
                           fn () $ println |after-confirmed
                       , &unit
                   =< 8 nil
                   button $ {} (:inner-text "|show prompt") (:class-name css/button)
                     :on-click $ fn (e d!)
+                      hint-fn $ {}
+                        :args $ [] (:: 'Map 'Tag 'Dynamic)
+                          :: 'Fn $ {}
+                            :args $ [] 'Enum
+                            :return 'Unit
+                        :return 'Unit
                       .show prompt-plugin d! $ fn (text)
+                        hint-fn $ {}
+                          :args $ [] 'String
+                          :return 'Unit
                         println "|read from prompt" $ to-lispy-string text
                   =< 8 nil
                   button $ {} (:inner-text "|show multilines prompt") (:class-name css/button)
                     :on-click $ fn (e d!)
+                      hint-fn $ {}
+                        :args $ [] (:: 'Map 'Tag 'Dynamic)
+                          :: 'Fn $ {}
+                            :args $ [] 'Enum
+                            :return 'Unit
+                        :return 'Unit
                       .show prompt-multilines-plugin d! $ fn (text)
+                        hint-fn $ {}
+                          :args $ [] 'String
+                          :return 'Unit
                         println "|read from prompt" $ to-lispy-string text
                   =< 8 nil
                   comp-trigger
@@ -186,7 +207,16 @@
                       if (bool? show?) show? $ raise "|prompt visibility must be Bool"
                     button $ {} (:inner-text "|show validated prompt") (:class-name css/button)
                       :on-click $ fn (e d!)
+                        hint-fn $ {}
+                          :args $ [] (:: 'Map 'Tag 'Dynamic)
+                            :: 'Fn $ {}
+                              :args $ [] 'Enum
+                              :return 'Unit
+                          :return 'Unit
                         .show prompt-validation-plugin d! $ fn (text)
+                          hint-fn $ {}
+                            :args $ [] 'String
+                            :return 'Unit
                           println "|read from prompt" $ to-lispy-string text
                     , nil
                 .render alert-plugin
@@ -238,7 +268,7 @@
       :defs $ {}
         'dev? $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def dev?
-            = |dev $ option:unwrap-or (get-env |mode) |release
+            = |dev $ .unwrap-or (get-env |mode) |release
           :examples $ []
           :schema $ :: 'Bool
         'site $ %{} 'CodeEntry (:doc |)
@@ -254,8 +284,8 @@
           :code $ quote $ defimpl %alert-actions AlertActions
             .render $ fn (self)
               hint-fn $ {}
-                :args $ [] 'Dynamic
-                :return 'Dynamic
+                :args $ [] 'respo-alerts.core/PluginNodeCursorState
+                :return 'respo.schema/Component
               match self $
                 :plugin node cursor state
                 , node
@@ -277,7 +307,7 @@
                 d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
               hint-fn $ {}
-                :args $ [] 'Dynamic
+                :args $ [] 'respo-alerts.core/PluginNodeCursorState
                 :return 'Bool
               match self $
                 :plugin node cursor state
@@ -378,8 +408,8 @@
           :code $ quote $ defimpl %drawer-actions DrawerActions
             .render $ fn (self)
               hint-fn $ {}
-                :args $ [] 'Dynamic
-                :return 'Dynamic
+                :args $ [] 'respo-alerts.core/PluginNodeCursorState
+                :return 'respo.schema/Component
               match self $
                 :plugin node cursor state
                 , node
@@ -399,7 +429,7 @@
                 d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
               hint-fn $ {}
-                :args $ [] 'Dynamic
+                :args $ [] 'respo-alerts.core/PluginNodeCursorState
                 :return 'Bool
               match self $
                 :plugin node cursor state
@@ -410,8 +440,8 @@
           :code $ quote $ defimpl %modal-actions ModalActions
             .render $ fn (self)
               hint-fn $ {}
-                :args $ [] 'Dynamic
-                :return 'Dynamic
+                :args $ [] 'respo-alerts.core/PluginNodeCursorState
+                :return 'respo.schema/Component
               match self $
                 :plugin node cursor state
                 , node
@@ -431,7 +461,7 @@
                 d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
               hint-fn $ {}
-                :args $ [] 'Dynamic
+                :args $ [] 'respo-alerts.core/PluginNodeCursorState
                 :return 'Bool
               match self $
                 :plugin node cursor state
@@ -442,8 +472,8 @@
           :code $ quote $ defimpl %modal-menu-actions ModalMenuActions
             .render $ fn (self)
               hint-fn $ {}
-                :args $ [] 'Dynamic
-                :return 'Dynamic
+                :args $ [] 'respo-alerts.core/PluginNodeCursorState
+                :return 'respo.schema/Component
               match self $
                 :plugin node cursor state
                 , node
@@ -463,7 +493,7 @@
                 d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
               hint-fn $ {}
-                :args $ [] 'Dynamic
+                :args $ [] 'respo-alerts.core/PluginNodeCursorState
                 :return 'Bool
               match self $
                 :plugin node cursor state
@@ -474,15 +504,21 @@
           :code $ quote $ defimpl %prompt-actions PromptActions
             .render $ fn (self)
               hint-fn $ {}
-                :args $ [] 'Dynamic
-                :return 'Dynamic
+                :args $ [] 'respo-alerts.core/PromptPluginNodeCursorState
+                :return 'respo.schema/Component
               match self $
                 :plugin node cursor state
                 , node
             .show $ fn (self d! next-task)
               hint-fn $ {}
-                :args $ [] 'Dynamic 'Fn 'Fn
-                :return 'Dynamic
+                :args $ [] 'respo-alerts.core/PromptPluginNodeCursorState
+                  :: 'Fn $ {}
+                    :args $ [] 'Enum
+                    :return 'Unit
+                  :: 'Fn $ {} (:return 'R)
+                    :args $ [] 'String
+                :return 'Unit
+                :generics $ [] 'R
               match self $
                 :plugin node cursor state
                 do
@@ -490,15 +526,18 @@
                   d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
             .close $ fn (self d!)
               hint-fn $ {}
-                :args $ [] 'Dynamic 'Fn
-                :return 'Dynamic
+                :args $ [] 'respo-alerts.core/PromptPluginNodeCursorState $ :: 'Fn
+                  {}
+                    :args $ [] 'Enum
+                    :return 'Unit
+                :return 'Unit
               match self $
                 :plugin node cursor state
                 do (clear-prompt-task! cursor)
                   d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
               hint-fn $ {}
-                :args $ [] 'Dynamic
+                :args $ [] 'respo-alerts.core/PromptPluginNodeCursorState
                 :return 'Bool
               match self $
                 :plugin node cursor state
@@ -514,7 +553,7 @@
                 next-task $ fn (text) &unit
                 d! $ fn (op) &unit
               do (.show plugin d! next-task)
-                is $ option:some? $ get @*prompt-tasks cursor
+                is $ .some? $ get @*prompt-tasks cursor
                 clear-prompt-task! cursor
             :tags $ #{} :regression :unit
         '*prompt-tasks $ %{} 'CodeEntry (:doc |)
@@ -524,7 +563,15 @@
             :: 'Fn $ {} (:return 'Unit)
               :args $ [] 'String
         'AlertActions $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait AlertActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
+          :code $ quote $ deftrait AlertActions
+            .render $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PluginNodeCursorState
+              :return 'respo.schema/Component
+            .show :fn
+            .close :fn
+            .show? $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PluginNodeCursorState
+              :return 'Bool
           :examples $ []
           :schema $ :: 'Trait
         'ConfirmActions $ %{} 'CodeEntry
@@ -564,15 +611,39 @@
           :examples $ []
           :schema $ :: 'Trait
         'DrawerActions $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait DrawerActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
+          :code $ quote $ deftrait DrawerActions
+            .render $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PluginNodeCursorState
+              :return 'respo.schema/Component
+            .show :fn
+            .close :fn
+            .show? $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PluginNodeCursorState
+              :return 'Bool
           :examples $ []
           :schema $ :: 'Trait
         'ModalActions $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait ModalActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
+          :code $ quote $ deftrait ModalActions
+            .render $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PluginNodeCursorState
+              :return 'respo.schema/Component
+            .show :fn
+            .close :fn
+            .show? $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PluginNodeCursorState
+              :return 'Bool
           :examples $ []
           :schema $ :: 'Trait
         'ModalMenuActions $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait ModalMenuActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
+          :code $ quote $ deftrait ModalMenuActions
+            .render $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PluginNodeCursorState
+              :return 'respo.schema/Component
+            .show :fn
+            .close :fn
+            .show? $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PluginNodeCursorState
+              :return 'Bool
           :examples $ []
           :schema $ :: 'Trait
         'PluginNodeCursorState $ %{} 'CodeEntry (:doc |)
@@ -580,7 +651,28 @@
           :examples $ []
           :schema $ :: 'EnumDef
         'PromptActions $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ deftrait PromptActions (.render :fn) (.show :fn) (.close :fn) (.show? :fn)
+          :code $ quote $ deftrait PromptActions
+            .render $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PromptPluginNodeCursorState
+              :return 'respo.schema/Component
+            .show $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PromptPluginNodeCursorState
+                :: 'Fn $ {}
+                  :args $ [] 'Enum
+                  :return 'Unit
+                :: 'Fn $ {} (:return 'R)
+                  :args $ [] 'String
+              :return 'Unit
+              :generics $ [] 'R
+            .close $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PromptPluginNodeCursorState $ :: 'Fn
+                {}
+                  :args $ [] 'Enum
+                  :return 'Unit
+              :return 'Unit
+            .show? $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PromptPluginNodeCursorState
+              :return 'Bool
           :examples $ []
           :schema $ :: 'Trait
         'PromptEvent $ %{} 'CodeEntry (:doc |)
@@ -603,7 +695,7 @@
           :code $ quote $ defn as-options-map (value)
             if (nil? value) ({})
               if (map? value)
-                foldl value ({})
+                .foldl (.to-list value) ({})
                   defn %as-options-entry (acc pair)
                     hint-fn $ {}
                       :args $ [] (:: 'Map 'Tag 'Dynamic) (:: 'List 'Dynamic)
@@ -628,7 +720,10 @@
               , &unit
           :examples $ []
           :schema $ :: 'Fn $ {}
-            :args $ [] 'Fn
+            :args $ [] $ :: 'Fn
+              {} (:return 'R)
+                :args $ [] 'String
+            :generics $ [] 'R
             :return $ :: 'Fn $ {} (:return 'Unit)
               :args $ [] 'String
         'as-state-map $ %{} 'CodeEntry (:doc "|在组件状态的开放边界确认其为 map。")
@@ -1241,7 +1336,7 @@
             :args $ [] 'respo-alerts.core/PromptEvent 'Bool
           :tests $ [] $ %{} 'TestEntry (:name |keyboard-matrix)
             :code $ quote $ let
-                enter $ %{} PromptEvent (:text |) (:keycode 13) (:meta? false) (:ctrl? false)
+                enter $ PromptEvent :text | :keycode 13 :meta? false :ctrl? false
                 escape $ assoc enter :keycode 27
                 composing $ assoc enter :keycode 229
               is $ match (prompt-key-action enter false)
@@ -1346,7 +1441,7 @@
               v $ read-field options k
               if (nil? v) ({})
                 if (map? v)
-                  foldl v ({})
+                  .foldl (.to-list v) ({})
                     defn %read-style-entry (acc pair)
                       hint-fn $ {}
                         :args $ [] (:: 'Map 'Tag 'Dynamic) (:: 'List 'Dynamic)
@@ -1450,7 +1545,7 @@
           :tests $ [] $ %{} 'TestEntry (:name |persists-across-renders)
             :code $ quote $ let
                 cursor $ [] :prompt-test
-                *called $ atom |
+                *called $ ref |
                 callback $ fn (text)
                   hint-fn $ {}
                     :args $ [] 'String
@@ -1458,7 +1553,7 @@
                   reset! *called text
                   , &unit
               store-prompt-task! cursor callback
-              option:fold (take-prompt-task! cursor)
+              .fold (take-prompt-task! cursor)
                 fn () &unit
                 fn (task)
                   hint-fn $ {}
@@ -1469,7 +1564,7 @@
                     :return 'Unit
                   task |hello
               is $ = |hello @*called
-              is $ option:none? $ take-prompt-task! cursor
+              is $ .none? $ take-prompt-task! cursor
             :tags $ #{} :regression :unit
         'use-alert $ %{} 'CodeEntry
           :doc "||Alert dialog hook. Shows a simple message box. Returns a plugin object with .show method to display the alert."
@@ -1513,7 +1608,7 @@
                   = true $ read-field state :show?
                   fn (e d!)
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
-                    option:fold (take-prompt-task! cursor)
+                    .fold (take-prompt-task! cursor)
                       fn () &unit
                       fn (task)
                         hint-fn $ {}
@@ -1633,7 +1728,7 @@
                     hint-fn $ {} (:return 'Dynamic)
                       :args $ [] 'String 'Dynamic
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
-                    option:fold (take-prompt-task! cursor)
+                    .fold (take-prompt-task! cursor)
                       fn () &unit
                       fn (task)
                         hint-fn $ {}
@@ -1711,9 +1806,9 @@
             :features $ #{} :js-ffi
         'mount-target $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn mount-target ()
-            option:unwrap $ browser/query-selector |.app
+            .unwrap $ respo-browser/query-selector |.app
           :examples $ []
-          :schema $ :: 'Fn $ {} (:return 'js-ffi.browser/DomElementHost)
+          :schema $ :: 'Fn $ {} (:return 'respo.dom/DomElement)
             :args $ []
             :features $ #{} :js-ffi
         'next-reel $ %{} 'CodeEntry (:doc |)
@@ -1731,7 +1826,7 @@
         'persist-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-storage! (& _args)
             browser/storage-set!
-              option:unwrap $ get config/site :storage-key
+              .unwrap $ get config/site :storage-key
               format-cirru-edn $ :store @*reel
           :examples $ []
           :schema $ :: 'Fn $ {} (:rest 'Dynamic) (:return 'Unit)
@@ -1760,9 +1855,7 @@
             :return $ :: 'reel.typed/State 'Enum $ :: 'Map 'Dynamic 'Dynamic
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
-            render!
-              narrow-element $ mount-target
-              comp-container @*reel
+            render! (mount-target) (comp-container @*reel)
               fn (op)
                 if (enum? op) (dispatch! op) (raise "|alert renderer operation must be an Enum")
           :examples $ []
@@ -1773,7 +1866,7 @@
         :code $ quote $ ns respo-alerts.main
           :require
             respo.core :refer $ render! clear-cache! realize-ssr!
-            respo.ffi.browser :refer $ narrow-element
+            respo.ffi.browser :as respo-browser
             respo-alerts.comp.container :refer $ comp-container
             respo-alerts.updater :refer $ updater
             respo-alerts.schema :as schema
