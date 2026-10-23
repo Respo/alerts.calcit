@@ -119,8 +119,9 @@ jobs:
         EOF
         cd "$consumer"
         yarn add --exact @calcit/procs@0.30.1
+        node "$GITHUB_WORKSPACE/acceptance/prepare-shelf.mjs" "$GITHUB_WORKSPACE/acceptance"
         calcit calcit.cirru edit format
-        git diff --exit-code -- calcit.cirru
+        test "$(git hash-object calcit.cirru)" = "$(cat "$GITHUB_WORKSPACE/acceptance/shelf-snapshot-blob.txt")"
         calcit calcit.cirru --check-only --all-defs
         calcit calcit.cirru fix --workflow strict --verify --format json | jq -e 'if .data.workflow.status == "passed" and .diagnostics == [] then true else ., false end'
         VITE_BASE_URL=./ yarn build
@@ -214,6 +215,8 @@ jobs:
           acceptance/
           js-out/
           dist/
+          .calcit/consumer/calcit.cirru
+          .calcit/consumer/js-out/
           .calcit/consumer/dist/
         include-hidden-files: true
         if-no-files-found: error
