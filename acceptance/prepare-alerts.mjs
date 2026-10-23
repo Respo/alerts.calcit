@@ -60,6 +60,23 @@ for(const [trait,impl,self] of [
     changedContracts.push(trait+'/'+name);
   }
 }
+// Prompt104: the submitted argument is String, but its result is deliberately
+// ignored. Preserve arbitrary R rather than rejecting valid value-returning tasks.
+const dispatch=['::',"'Fn",['{}',[':args',['[]',"'Enum"]],[':return',"'Unit"]]];
+const task=['::',"'Fn",['{}',[':args',['[]',"'String"]],[':return',"'R"]]];
+const promptSelf="'respo-alerts.core/PromptPluginNodeCursorState";
+for(const [name,args] of [['.show',[promptSelf,dispatch,task]],['.close',[promptSelf,dispatch]]]){
+  const fields=['{}',[':args',['[]',...args]],[':return',"'Unit"]];
+  if(name==='.show')fields.push([':generics',['[]',"'R"]]);
+  const declaration=get('respo-alerts.core/PromptActions').code.find(p=>Array.isArray(p)&&p[0]===name);
+  assert.equal(declaration[1],':fn');declaration[1]=['::',"'Fn",fields];
+  const fn=get('respo-alerts.core/%prompt-actions').code.find(p=>Array.isArray(p)&&p[0]===name)[1];
+  assert.equal(fn[2][0],'hint-fn');fn[2]=['hint-fn',fields];changedContracts.push('PromptActions/'+name);
+}
+const adapter=get('respo-alerts.core/as-prompt-task');
+assert.equal(adapter.schema.find(p=>Array.isArray(p)&&p[0]===':args')[1][1],"'Fn");
+adapter.schema.find(p=>Array.isArray(p)&&p[0]===':args')[1][1]=task;
+adapter.schema.push([':generics',['[]',"'R"]]);
 const mount=get('respo-alerts.main/mount-target');
 assert.deepEqual(mount.code,['defn','mount-target',[],['.unwrap',['browser/query-selector','|.app']]]);
 mount.code[3][1][0]='respo-browser/query-selector';
@@ -87,5 +104,5 @@ writeFileSync('acceptance/applied.json',run(...args,'--expect-revision',preview.
 assert.deepEqual(inventory(),expected,'All98views retain originalcallbacks/Confirm/styles/cursor/FFI/docs/tests/examples except reviewed forms and actual rendering contracts');
 assert.deepEqual(q('ns','respo-alerts.main'),nsAfter);assert.deepEqual(q('config'),config);
 writeFileSync('acceptance/after.json',JSON.stringify(expected,null,2));
-writeFileSync('acceptance/preserved.json',JSON.stringify({definitions:98,namespaces:10,tests:23,examples:14,...counts,changedContracts,mountElementTypeFromRespoProvider:true,hudAndCallbacksUnchanged:true},null,2));
+writeFileSync('acceptance/preserved.json',JSON.stringify({definitions:98,namespaces:10,tests:23,examples:14,...counts,changedContracts,promptTaskArgumentString:true,ignoredPromptReturnGenericR:true,promptCallbackRuntimeUnchanged:true,mountElementTypeFromRespoProvider:true,hudAndCallbacksUnchanged:true},null,2));
 writeFileSync('acceptance/snapshot-blob.txt',execFileSync('git',['hash-object','calcit.cirru'],{encoding:'utf8'}));
