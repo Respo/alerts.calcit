@@ -77,6 +77,25 @@ const adapter=get('respo-alerts.core/as-prompt-task');
 assert.equal(adapter.schema.find(p=>Array.isArray(p)&&p[0]===':args')[1][1],"'Fn");
 adapter.schema.find(p=>Array.isArray(p)&&p[0]===':args')[1][1]=task;
 adapter.schema.splice(adapter.schema.findIndex(p=>Array.isArray(p)&&p[0]===':return'),0,[':generics',['[]',"'R"]]);
+const demo=get('respo-alerts.comp.container/comp-hooks-usages');
+const promptReceivers=new Set(['confirm-prompt-plugin','prompt-plugin','prompt-multilines-plugin','prompt-validation-plugin']);
+let taskHints=0,eventHints=0;
+function tightenDemo(n){
+  if(!Array.isArray(n))return;
+  if(n[0]===':on-click'&&Array.isArray(n[1])&&n[1][0]==='fn'){
+    const event=n[1],call=event.slice(2).find(x=>Array.isArray(x)&&x[0]==='.show'&&promptReceivers.has(x[1]));
+    if(call){
+      assert.deepEqual(event[1],['e','d!']);
+      if(event[2][0]!=='hint-fn'){
+        event.splice(2,0,['hint-fn',['{}',[':args',['[]',['::',"'Map","'Tag","'Dynamic"],dispatch]],[':return',"'Unit"]]]);eventHints++;
+      }
+      const callback=call[3];assert.deepEqual(callback.slice(0,2),['fn',['text']]);assert.notEqual(callback[2][0],'hint-fn');
+      callback.splice(2,0,['hint-fn',['{}',[':args',['[]',"'String"]],[':return',"'Unit"]]]);taskHints++;
+    }
+  }
+  n.forEach(tightenDemo);
+}
+tightenDemo(demo.code);assert.equal(taskHints,4);assert.equal(eventHints,3);
 const mount=get('respo-alerts.main/mount-target');
 assert.deepEqual(mount.code,['defn','mount-target',[],['.unwrap',['browser/query-selector','|.app']]]);
 mount.code[3][1][0]='respo-browser/query-selector';
@@ -104,5 +123,5 @@ writeFileSync('acceptance/applied.json',run(...args,'--expect-revision',preview.
 assert.deepEqual(inventory(),expected,'All98views retain originalcallbacks/Confirm/styles/cursor/FFI/docs/tests/examples except reviewed forms and actual rendering contracts');
 assert.deepEqual(q('ns','respo-alerts.main'),nsAfter);assert.deepEqual(q('config'),config);
 writeFileSync('acceptance/after.json',JSON.stringify(expected,null,2));
-writeFileSync('acceptance/preserved.json',JSON.stringify({definitions:98,namespaces:10,tests:23,examples:14,...counts,changedContracts,promptTaskArgumentString:true,ignoredPromptReturnGenericR:true,promptCallbackRuntimeUnchanged:true,mountElementTypeFromRespoProvider:true,hudAndCallbacksUnchanged:true},null,2));
+writeFileSync('acceptance/preserved.json',JSON.stringify({definitions:98,namespaces:10,tests:23,examples:14,...counts,changedContracts,promptTaskArgumentString:true,ignoredPromptReturnGenericR:true,promptCallbackRuntimeUnchanged:true,taskHints,eventHints,mountElementTypeFromRespoProvider:true,hudAndCallbacksUnchanged:true},null,2));
 writeFileSync('acceptance/snapshot-blob.txt',execFileSync('git',['hash-object','calcit.cirru'],{encoding:'utf8'}));

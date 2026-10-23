@@ -21,6 +21,8 @@ cursor、task 缓存或存档。Prompt `.show` / `.close` 的 dispatcher 明确�
 并返回 Unit；成功任务明确接收 String，返回值仍被忽略，允许任意 R，不强改为 Unit。
 错误 Number/arity 回调会更早被类型门禁拒绝；取消仍不调用成功任务。其他 hook 的开放
 callable 与菜单 item/Clear 合同不在本次被强行收窄，也不声称业务 payload 已全面证明。
+Demo 四个 Prompt 提交回调补明实际 String/Unit 合同，三个原未标注的点击入口明确
+原 Respo 事件 Map 与单 Enum dispatcher；只补生产者注释，不改变回调执行体或分支。
 
 Demo mount 直接使用 Respo 的 query-selector / DomElement 合同，移除调用方重复
 narrow，跨库信任适配仍由 Respo 原入口负责，不宣称完整 DOM 字段已验证。
