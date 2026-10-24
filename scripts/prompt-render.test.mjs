@@ -129,6 +129,8 @@ test('canonical attached tests replay on native and generated JavaScript', async
           ['.close', 'plugin', ['fn', ['op'], ['hint-fn', ['{}', [':args', ['[]', "'Enum"]], [':return', "'Number"]]], '42']]];
       const transaction = ['edit', 'transaction', '--code', JSON.stringify([
         ['edit', 'def', target, '--input-format', 'json-ast', '--code', JSON.stringify(body)],
+        ['config', 'set', 'init-fn', target],
+        ['config', 'set', 'reload-fn', target],
       ]), '--format', 'json'];
       const preview = JSON.parse(invoke(snapshot, ...transaction, '--dry-run'));
       invoke(snapshot, ...transaction, '--expect-revision', preview.scoped_revision);
