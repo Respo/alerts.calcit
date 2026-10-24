@@ -69,7 +69,13 @@
                 div
                   {} $ :style $ {} (:padding "|8px 0px")
                   button $ {} (:inner-text "|show modal") (:class-name css/button)
-                    :on-click $ fn (e d!) (.show demo-modal d!)
+                    :on-click $ fn (e d!)
+                      hint-fn $ {}
+                        :args $ [] (:: 'Map 'Tag 'Dynamic)
+                          :: 'Fn $ {} (:rest 'Dynamic) (:return 'Unit)
+                            :args $ [] 'Dynamic
+                        :return 'Unit
+                      .show demo-modal d!
                   =< 8 nil
                   button $ {} (:inner-text "|show modal menu") (:class-name css/button)
                     :on-click $ fn (e d!) (.show demo-modal-menu d!)
@@ -445,20 +451,8 @@
               match self $
                 :plugin node cursor state
                 , node
-            .show $ fn (self d!)
-              hint-fn $ {}
-                :args $ [] 'Dynamic 'Fn
-                :return 'Dynamic
-              match self $
-                :plugin node cursor state
-                d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
-            .close $ fn (self d!)
-              hint-fn $ {}
-                :args $ [] 'Dynamic 'Fn
-                :return 'Dynamic
-              match self $
-                :plugin node cursor state
-                d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
+            .show show-modal!
+            .close close-modal!
             .show? $ fn (self)
               hint-fn $ {}
                 :args $ [] 'respo-alerts.core/PluginNodeCursorState
@@ -468,6 +462,42 @@
                 = true $ read-field state :show?
           :examples $ []
           :schema $ :: 'Impl
+          :tests $ [] $ %{} 'TestEntry (:name |preserves-dispatch-return-and-visibility)
+            :code $ quote $ let
+                cursor $ [] :modal-contract
+                plugin $ modal-actions-plugin :plugin
+                  respo.schema/Component :name :modal-contract :effects ([]) :listeners ([]) :tree $ Option :none
+                  , cursor $ {}
+                calls $ ref $ assert-type ([]) (:: 'List 'Enum)
+                dispatch! $ fn (op)
+                  hint-fn $ {}
+                    :args $ [] 'Enum
+                    :return 'Number
+                  reset! calls $ .append @calls op
+                  , 42
+                unit-dispatch! $ fn (op)
+                  hint-fn $ {}
+                    :args $ [] 'Enum
+                    :return 'Unit
+                  , &unit
+              assert= 42 $ .show plugin dispatch!
+              assert= 42 $ .close plugin dispatch!
+              assert= 2 $ .len @calls
+              match
+                .unwrap $ first @calls
+                (:states received-cursor received-state)
+                  do (assert= cursor received-cursor)
+                    assert= (Option :some true) (get received-state :show?)
+                _ $ assert= true false
+              match
+                .unwrap $ last @calls
+                (:states received-cursor received-state)
+                  do (assert= cursor received-cursor)
+                    assert= (Option :some false) (get received-state :show?)
+                _ $ assert= true false
+              assert= &unit $ .show plugin unit-dispatch!
+              assert= &unit $ .close plugin unit-dispatch!
+            :tags $ #{} :regression :unit
         '%modal-menu-actions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defimpl %modal-menu-actions ModalMenuActions
             .render $ fn (self)
@@ -627,8 +657,20 @@
             .render $ :: 'Fn $ {}
               :args $ [] 'respo-alerts.core/PluginNodeCursorState
               :return 'respo.schema/Component
-            .show :fn
-            .close :fn
+            .show $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PluginNodeCursorState $ :: 'Fn
+                {}
+                  :args $ [] 'Enum
+                  :return 'R
+              :return 'R
+              :generics $ [] 'R
+            .close $ :: 'Fn $ {}
+              :args $ [] 'respo-alerts.core/PluginNodeCursorState $ :: 'Fn
+                {}
+                  :args $ [] 'Enum
+                  :return 'R
+              :return 'R
+              :generics $ [] 'R
             .show? $ :: 'Fn $ {}
               :args $ [] 'respo-alerts.core/PluginNodeCursorState
               :return 'Bool
@@ -740,6 +782,24 @@
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'Unit)
             :args $ [] 'Dynamic
+        'close-modal! $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn close-modal! (self d!)
+            hint-fn $ {}
+              :args $ [] 'respo-alerts.core/PluginNodeCursorState $ :: 'Fn
+                {}
+                  :args $ [] 'Enum
+                  :return 'R
+              :return 'R
+              :generics $ [] 'R
+            match self $
+              :plugin node cursor state
+              d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'R)
+            :args $ [] 'respo-alerts.core/PluginNodeCursorState $ :: 'Fn
+              {} (:return 'R)
+                :args $ [] 'Enum
+            :generics $ [] 'R
         'comp-alert-modal $ %{} 'CodeEntry
           :doc "||Alert modal component. Shows a simple message dialog with a confirm button. Used internally by use-alert hook."
           :code $ quote $ defcomp comp-alert-modal (options show? on-read! on-close!)
@@ -1472,6 +1532,24 @@
           :schema $ :: 'Fn $ {} (:return 'String)
             :args $ [] 'T
             :generics $ [] 'T
+        'show-modal! $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn show-modal! (self d!)
+            hint-fn $ {}
+              :args $ [] 'respo-alerts.core/PluginNodeCursorState $ :: 'Fn
+                {}
+                  :args $ [] 'Enum
+                  :return 'R
+              :return 'R
+              :generics $ [] 'R
+            match self $
+              :plugin node cursor state
+              d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
+          :examples $ []
+          :schema $ :: 'Fn $ {} (:return 'R)
+            :args $ [] 'respo-alerts.core/PluginNodeCursorState $ :: 'Fn
+              {} (:return 'R)
+                :args $ [] 'Enum
+            :generics $ [] 'R
         'store-prompt-task! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn store-prompt-task! (cursor task)
             reset! *prompt-tasks $ &map:assoc @*prompt-tasks cursor task

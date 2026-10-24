@@ -71,6 +71,14 @@ test('canonical attached tests replay on native and generated JavaScript', async
       { timeout: 60000, stdio: 'inherit' });
     console.log(`Alerts: ${selected.tests.length} canonical tests replayed on native/generated JS`);
 
+    // Replayed wrappers are temporary execution fixtures, not migrated library code.
+    // Remove them before checking independent callback proof against the canonical graph.
+    const cleanup = ['edit', 'transaction', '--code', JSON.stringify([
+      ...calls.map(([target]) => ['edit', 'rm-def', target]), ['edit', 'rm-def', entry],
+    ]), '--format', 'json'];
+    const cleanupPreview = JSON.parse(invoke(snapshot, ...cleanup, '--dry-run'));
+    invoke(snapshot, ...cleanup, '--expect-revision', cleanupPreview.scoped_revision);
+
     // The old cursor/data callback must fail before a user clicks Confirm (#102).
     const legacyTarget = 'respo-alerts.core/legacy-confirm-dispatch';
     const legacyOperations = [['edit', 'def', legacyTarget, '--input-format', 'cirru', '--code',
@@ -114,6 +122,38 @@ test('canonical attached tests replay on native and generated JavaScript', async
         assert.match(`${error.stdout}${error.stderr}`, /W_METHOD_ARG_TYPE_MISMATCH|E_CALL_ARGUMENT_MISMATCH|E_ERASED_GENERIC_RELATION/);
         return true;
       });
+      invoke(snapshot, 'edit', 'rm-def', target);
+    }
+
+    // #110: plain Modal preserves dispatcher R instead of erasing it to Dynamic.
+    // This exercises independent return proof as well as the original arity gate.
+    for (const [name, badDispatch] of [['modal-number-return-contract', false], ['modal-legacy-dispatch-contract', true]]) {
+      const target = `respo-alerts.core/${name}`;
+      const body = ['defn', name, [],
+        ['hint-fn', ['{}', [':args', ['[]']], [':return', "'Number"]]],
+        ['let', [['plugin', ['use-modal', ['{}', [':cursor', ['[]']]], ['{}']]]],
+          ['.show', 'plugin', ['fn', badDispatch ? ['cursor', 'data'] : ['op'],
+            ['hint-fn', ['{}', [':args', ['[]', ...(badDispatch ? ["'Dynamic", "'Dynamic"] : ["'Enum"])]], [':return', "'Number"]]], '42']],
+          ['.close', 'plugin', ['fn', ['op'], ['hint-fn', ['{}', [':args', ['[]', "'Enum"]], [':return', "'Number"]]], '42']]]];
+      const transaction = ['edit', 'transaction', '--code', JSON.stringify([
+        ['edit', 'def', target, '--input-format', 'json-ast', '--code', JSON.stringify(body)],
+        ['config', 'set', 'init-fn', target],
+        ['config', 'set', 'reload-fn', target],
+      ]), '--format', 'json'];
+      const preview = JSON.parse(invoke(snapshot, ...transaction, '--dry-run'));
+      invoke(snapshot, ...transaction, '--expect-revision', preview.scoped_revision);
+      const check = () => invoke(snapshot, '--check-only', '--init-fn', target, '--reload-fn', target);
+      if (badDispatch) assert.throws(check, error => {
+        assert.equal(error.status, 1);
+        assert.match(`${error.stdout}${error.stderr}`, /W_METHOD_ARG_TYPE_MISMATCH|E_CALL_ARGUMENT_MISMATCH|E_ERASED_GENERIC_RELATION/);
+        return true;
+      });
+      else {
+        check();
+        const proof = JSON.parse(invoke(snapshot, 'fix', '--workflow', 'strict', '--verify', '--format', 'json'));
+        assert.equal(proof.data.workflow.status, 'passed');
+        assert.deepEqual(proof.diagnostics, []);
+      }
       invoke(snapshot, 'edit', 'rm-def', target);
     }
   } finally {
