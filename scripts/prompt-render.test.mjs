@@ -71,6 +71,14 @@ test('canonical attached tests replay on native and generated JavaScript', async
       { timeout: 60000, stdio: 'inherit' });
     console.log(`Alerts: ${selected.tests.length} canonical tests replayed on native/generated JS`);
 
+    // Replayed wrappers are temporary execution fixtures, not migrated library code.
+    // Remove them before checking independent callback proof against the canonical graph.
+    const cleanup = ['edit', 'transaction', '--code', JSON.stringify([
+      ...calls.map(([target]) => ['edit', 'rm-def', target]), ['edit', 'rm-def', entry],
+    ]), '--format', 'json'];
+    const cleanupPreview = JSON.parse(invoke(snapshot, ...cleanup, '--dry-run'));
+    invoke(snapshot, ...cleanup, '--expect-revision', cleanupPreview.scoped_revision);
+
     // The old cursor/data callback must fail before a user clicks Confirm (#102).
     const legacyTarget = 'respo-alerts.core/legacy-confirm-dispatch';
     const legacyOperations = [['edit', 'def', legacyTarget, '--input-format', 'cirru', '--code',
@@ -126,7 +134,7 @@ test('canonical attached tests replay on native and generated JavaScript', async
         ['let', [['plugin', ['use-modal', ['{}', [':cursor', ['[]']]], ['{}']]]],
           ['.show', 'plugin', ['fn', badDispatch ? ['cursor', 'data'] : ['op'],
             ['hint-fn', ['{}', [':args', ['[]', ...(badDispatch ? ["'Dynamic", "'Dynamic"] : ["'Enum"])]], [':return', "'Number"]]], '42']],
-          ['.close', 'plugin', ['fn', ['op'], ['hint-fn', ['{}', [':args', ['[]', "'Enum"]], [':return', "'Number"]]], '42']]];
+          ['.close', 'plugin', ['fn', ['op'], ['hint-fn', ['{}', [':args', ['[]', "'Enum"]], [':return', "'Number"]]], '42']]]];
       const transaction = ['edit', 'transaction', '--code', JSON.stringify([
         ['edit', 'def', target, '--input-format', 'json-ast', '--code', JSON.stringify(body)],
         ['config', 'set', 'init-fn', target],

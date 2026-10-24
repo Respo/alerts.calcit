@@ -12,6 +12,10 @@ Demo http://repo.respo-mvc.org/alerts.calcit/ .
 错误的旧双参数 dispatcher 会更早被门禁拒绝；原本被擦除签名的合法回调可能需要补明实际合同。
 这不收紧 Drawer/Alert/Menu 的开放 payload，不声称全部插件类型闭合。
 
+正式 0.30.1 在共享基础 Enum 的独立 impl 上可能生成同名 callable（[Calcit #2357](https://github.com/calcit-lang/calcit/issues/2357)）。
+本维护版仅将 Modal 的原 show/close 执行体提取为 `show-modal!` / `close-modal!`，由原 impl 引用，
+不重命名公开插件或基础 Enum，不改变名义身份，不新增编译器规则；两个具名入口保留同一泛型合同。
+
 Demo 仅为普通 Modal 按钮补真实 EventHandler 声明，不改执行体；保留实际 `hud!`。
 原测试和回放入口保持，在既有测试内补本次返回关系及错误 arity 的针对性回归，不加框架或验证脚本。
 关联 [#110](https://github.com/Respo/alerts.calcit/issues/110)。发布状态以精确正式 tag 为准，
