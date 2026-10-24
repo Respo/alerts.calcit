@@ -53,7 +53,7 @@ const inspect=(which,visible)=>['match',['.unwrap',[which,'@calls']],
   [[':states','received-cursor','received-state'],['do',['assert=','cursor','received-cursor'],['assert=',['Option',':some',visible],['get','received-state',':show?']]]],
   ['_',['assert=','true','false']]];
 const test={name:'preserves-dispatch-return-and-visibility',tags:['regression','unit'],code:['let',[
-  ['cursor',['[]',':modal-contract']],['plugin',['modal-actions-plugin',':plugin',node,'cursor',['{}']]],['calls',['ref',['[]']]],['dispatch!',numberDispatch],['unit-dispatch!',unitDispatch]],
+  ['cursor',['[]',':modal-contract']],['plugin',['modal-actions-plugin',':plugin',node,'cursor',['{}']]],['calls',['ref',['assert-type',['[]'],['::',"'List","'Enum"]]]],['dispatch!',numberDispatch],['unit-dispatch!',unitDispatch]],
   ['assert=','42',['.show','plugin','dispatch!']],['assert=','42',['.close','plugin','dispatch!']],['assert=','2',['.len','@calls']],
   inspect('first','true'),inspect('last','false'),['assert=','&unit',['.show','plugin','unit-dispatch!']],['assert=','&unit',['.close','plugin','unit-dispatch!']]]};
 assert.equal(impl.tests.length,0);impl.tests.push(test);

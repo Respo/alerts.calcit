@@ -58,6 +58,32 @@ jobs:
           git diff --quiet -- scripts
           cp calcit.cirru acceptance/snapshot.cirru
           cp -R dist acceptance/dist
+      - name: Check out original reporting Docs consumer
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: calcit-lang/docs-workflow
+          ref: cf7480696d490735fa586c3fcc3e631792e17b2f
+          path: .calcit/docs-consumer
+          persist-credentials: false
+      - name: Verify real consumer without Unit return workaround
+        working-directory: .calcit/docs-consumer
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = cf7480696d490735fa586c3fcc3e631792e17b2f
+          caps --strict --ci
+          yarn install --immutable
+          caps verify --toolchain
+          git diff --quiet -- deps.cirru package.json yarn.lock .yarnrc.yml
+          # Explicit local Alerts candidate overlay, not a published Caps install.
+          cp "$GITHUB_WORKSPACE/calcit.cirru" "$GITHUB_WORKSPACE/deps.cirru" .calcit/modules/alerts.calcit/
+          node "$GITHUB_WORKSPACE/accept-docs-consumer.mjs"
+          calcit --check-only --all-defs
+          calcit fix --workflow strict --verify --format json | tee "$GITHUB_WORKSPACE/acceptance/docs-consumer/strict.json" | jq -e '.data.workflow.status == "passed" and .diagnostics == []'
+          calcit test --require-match --format json | tee "$GITHUB_WORKSPACE/acceptance/docs-consumer/tests.json"
+          calcit js
+          node --test test/navigation.test.mjs | tee "$GITHUB_WORKSPACE/acceptance/docs-consumer/navigation.log"
+          yarn vite build --base=./
+          cp -R dist "$GITHUB_WORKSPACE/acceptance/docs-consumer/dist"
       - uses: actions/upload-artifact@v7.0.1
         if: always()
         with:
