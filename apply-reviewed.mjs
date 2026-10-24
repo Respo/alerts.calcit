@@ -24,9 +24,18 @@ for(const method of ['.show','.close']){
   const ti=trait.code.findIndex(p=>Array.isArray(p)&&p[0]===method);
   assert.equal(trait.code[ti][1],':fn');replace(trait.id,[ti,1],':fn',['::',"'Fn",contract]);trait.code[ti][1]=structuredClone(['::',"'Fn",contract]);
   const ii=impl.code.findIndex(p=>Array.isArray(p)&&p[0]===method);
-  const old=impl.code[ii][1][2];assert.deepEqual(old,['hint-fn',['{}',[':args',['[]',"'Dynamic","'Fn"]],[':return',"'Dynamic"]]]);
-  replace(impl.id,[ii,1,2],old,['hint-fn',contract]);impl.code[ii][1][2]=structuredClone(['hint-fn',contract]);
+  const original=impl.code[ii][1];assert.deepEqual(original[2],['hint-fn',['{}',[':args',['[]',"'Dynamic","'Fn"]],[':return',"'Dynamic"]]]);
+  const name=method==='.show'?'show-modal!':'close-modal!';
+  const id='respo-alerts.core/'+name;assert.ok(!expected.defs.some(d=>d.id===id));
+  const code=['defn',name,original[1],['hint-fn',contract],...original.slice(3)];
+  const schema=['{}',[':kind',':fn'],...contract.slice(1)];
+  const helper={...structuredClone(impl),id,code,schema,tests:[]};
+  ops.push(['edit','def',id,'--input-format','json-ast','--code',JSON.stringify(code)]);
+  ops.push(['edit','schema',id,'--input-format','json-ast','--code',JSON.stringify(['::',"'Fn",contract])]);
+  expected.defs.push(helper);
+  replace(impl.id,[ii,1],original,name);impl.code[ii][1]=name;
 }
+expected.namespaces.find(n=>n.namespace==='respo-alerts.core').definition_count+=2;
 const eventArgs=q('def','respo.schema/EventHandler').schema.find(p=>Array.isArray(p)&&p[0]===':args')[1];
 assert.deepEqual(eventArgs,['[]',['::',"'Map","'Tag","'Dynamic"],['::',"'Fn",['{}',[':rest',"'Dynamic"],[':return',"'Unit"],[':args',['[]',"'Dynamic"]]]]]);
 let buttons=0;
@@ -49,7 +58,7 @@ const test={name:'preserves-dispatch-return-and-visibility',tags:['regression','
   inspect('first','true'),inspect('last','false'),['assert=','&unit',['.show','plugin','unit-dispatch!']],['assert=','&unit',['.close','plugin','unit-dispatch!']]]};
 assert.equal(impl.tests.length,0);impl.tests.push(test);
 ops.push(['edit','add-test',impl.id,test.name,'--input-format','json-ast','--code',JSON.stringify(test.code),'--tags',test.tags.join(',')]);
-assert.equal(ops.length,6);
+assert.equal(ops.length,10);assert.equal(expected.defs.length,100);
 for(const d of before.defs){const e=expected.defs.find(x=>x.id===d.id);for(const k of Object.keys(d).filter(k=>!['code','tests'].includes(k)))assert.deepEqual(e[k],d[k]);if(d.id!==impl.id)assert.deepEqual(e.tests,d.tests);if(![trait.id,impl.id,demo.id].includes(d.id))assert.deepEqual(e.code,d.code);}
 mkdirSync('acceptance',{recursive:true});for(const[name,value]of Object.entries({before,expected,sites,operations:ops}))writeFileSync('acceptance/'+name+'.json',JSON.stringify(value,null,2));
 const txn=['edit','transaction','--file','acceptance/operations.json','--format','json'];const preview=JSON.parse(run(...txn,'--dry-run'));assert.ok(preview.scoped_revision);
