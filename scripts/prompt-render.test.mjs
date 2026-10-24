@@ -126,7 +126,7 @@ test('canonical attached tests replay on native and generated JavaScript', async
         ['let', [['plugin', ['use-modal', ['{}', [':cursor', ['[]']]], ['{}']]]],
           ['.show', 'plugin', ['fn', badDispatch ? ['cursor', 'data'] : ['op'],
             ['hint-fn', ['{}', [':args', ['[]', ...(badDispatch ? ["'Dynamic", "'Dynamic"] : ["'Enum"])]], [':return', "'Number"]]], '42']],
-          ['.close', 'plugin', ['fn', ['op'], ['hint-fn', ['{}', [':args', ['[]', "'Enum"]], [':return', "'Number"]]], '42']]];
+          ['.close', 'plugin', ['fn', ['op'], ['hint-fn', ['{}', [':args', ['[]', "'Enum"]], [':return', "'Number"]]], '42']]]];
       const transaction = ['edit', 'transaction', '--code', JSON.stringify([
         ['edit', 'def', target, '--input-format', 'json-ast', '--code', JSON.stringify(body)],
         ['config', 'set', 'init-fn', target],
