@@ -82,7 +82,7 @@ jobs:
       uses: actions/checkout@v7.0.1
       with:
         repository: worktools/qrcode-shelf
-        ref: dd7d02d0cffca31f964d730642de53bf70c68016
+        ref: c30377eced479d12f8f139a14b863cda6a5e07b6
         path: .calcit/consumer
         persist-credentials: false
 
