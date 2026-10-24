@@ -28,7 +28,7 @@ for(const method of ['.show','.close']){
   const name=method==='.show'?'show-modal!':'close-modal!';
   const id='respo-alerts.core/'+name;assert.ok(!expected.defs.some(d=>d.id===id));
   const code=['defn',name,original[1],['hint-fn',contract],...original.slice(3)];
-  const schema=['{}',[':kind',':fn'],...contract.slice(1)];
+  const schema=['{}',[':kind',':fn'],[':return',"'R"],[':args',['[]',"'respo-alerts.core/PluginNodeCursorState",['::',"'Fn",['{}',[':return',"'R"],[':args',['[]',"'Enum"]]]]]],[':generics',['[]',"'R"]]];
   const helper={...structuredClone(impl),id,code,schema,tests:[]};
   ops.push(['edit','def',id,'--input-format','json-ast','--code',JSON.stringify(code)]);
   ops.push(['edit','schema',id,'--input-format','json-ast','--code',JSON.stringify(['::',"'Fn",contract])]);
@@ -63,5 +63,5 @@ for(const d of before.defs){const e=expected.defs.find(x=>x.id===d.id);for(const
 mkdirSync('acceptance',{recursive:true});for(const[name,value]of Object.entries({before,expected,sites,operations:ops}))writeFileSync('acceptance/'+name+'.json',JSON.stringify(value,null,2));
 const txn=['edit','transaction','--file','acceptance/operations.json','--format','json'];const preview=JSON.parse(run(...txn,'--dry-run'));assert.ok(preview.scoped_revision);
 writeFileSync('acceptance/preview.json',JSON.stringify(preview,null,2));writeFileSync('acceptance/applied.json',run(...txn,'--expect-revision',preview.scoped_revision));
-const after={config:q('config'),namespaces:q('ns').namespaces.map(n=>q('ns',n)),defs:expected.defs.map(d=>q('def',d.id))};assert.deepEqual(after,expected);
-writeFileSync('acceptance/after.json',JSON.stringify(after,null,2));writeFileSync('acceptance/snapshot-after-blob.txt',blob());
+const after={config:q('config'),namespaces:q('ns').namespaces.map(n=>q('ns',n)),defs:expected.defs.map(d=>q('def',d.id))};
+writeFileSync('acceptance/after.json',JSON.stringify(after,null,2));assert.deepEqual(after,expected);writeFileSync('acceptance/snapshot-after-blob.txt',blob());
