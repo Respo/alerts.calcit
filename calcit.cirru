@@ -69,13 +69,13 @@
                 div
                   {} $ :style $ {} (:padding "|8px 0px")
                   button $ {} (:inner-text "|show modal") (:class-name css/button)
-                    :on-click $ fn (e d!) (.show demo-modal d!)
+                    :on-click $ dispatch-fn (e d!) (.show demo-modal d!)
                   =< 8 nil
                   button $ {} (:inner-text "|show modal menu") (:class-name css/button)
-                    :on-click $ fn (e d!) (.show demo-modal-menu d!)
+                    :on-click $ dispatch-fn (e d!) (.show demo-modal-menu d!)
                   =< 8 nil
                   button $ {} (:inner-text "|show drawer") (:class-name css/button)
-                    :on-click $ fn (e d!) (.show demo-drawer d!)
+                    :on-click $ dispatch-fn (e d!) (.show demo-drawer d!)
                   .render demo-modal
                   .render demo-modal-menu
                   .render demo-drawer
@@ -141,11 +141,11 @@
                         show? $ .show? alert-plugin
                       if (bool? show?) show? $ raise "|alert visibility must be Bool"
                     button $ {} (:inner-text "|show alert") (:class-name css/button)
-                      :on-click $ fn (e d!) (.show alert-plugin d! nil)
+                      :on-click $ dispatch-fn (e d!) (.show alert-plugin d! nil)
                     , nil
                   =< 8 nil
                   button $ {} (:inner-text "|show alert text") (:class-name css/button)
-                    :on-click $ fn (e d!) (.show alert-text-plugin d! "|DEMO text")
+                    :on-click $ dispatch-fn (e d!) (.show alert-text-plugin d! "|DEMO text")
                   =< 8 nil
                   button $ {} (:inner-text "|show confirm") (:class-name css/button)
                     :on-click $ fn (e d!)
@@ -156,6 +156,7 @@
                             :return 'Unit
                         :return 'Unit
                       .show confirm-plugin d! $ fn () $ println "|after confirmed"
+                      , &unit
                   =< 8 nil
                   button $ {} (:inner-text "|show confirm with text") (:class-name css/button)
                     :on-click $ fn (e d!)
@@ -171,12 +172,12 @@
                       , &unit
                   =< 8 nil
                   button $ {} (:inner-text "|show prompt") (:class-name css/button)
-                    :on-click $ fn (e d!)
+                    :on-click $ dispatch-fn (e d!)
                       .show prompt-plugin d! $ fn (text)
                         println "|read from prompt" $ to-lispy-string text
                   =< 8 nil
                   button $ {} (:inner-text "|show multilines prompt") (:class-name css/button)
-                    :on-click $ fn (e d!)
+                    :on-click $ dispatch-fn (e d!)
                       .show prompt-multilines-plugin d! $ fn (text)
                         println "|read from prompt" $ to-lispy-string text
                   =< 8 nil
@@ -185,7 +186,7 @@
                         show? $ .show? prompt-validation-plugin
                       if (bool? show?) show? $ raise "|prompt visibility must be Bool"
                     button $ {} (:inner-text "|show validated prompt") (:class-name css/button)
-                      :on-click $ fn (e d!)
+                      :on-click $ dispatch-fn (e d!)
                         .show prompt-validation-plugin d! $ fn (text)
                           println "|read from prompt" $ to-lispy-string text
                     , nil
@@ -224,7 +225,7 @@
           :require (respo-ui.core :as ui)
             respo.css :refer $ defstyle
             respo-ui.css :as css
-            respo.core :refer $ defcomp >> <> div button textarea span img a
+            respo.core :refer $ defcomp >> <> div button textarea span img a dispatch-fn
             respo.comp.space :refer $ =<
             reel.comp.reel :refer $ comp-typed-reel
             respo-alerts.config :refer $ dev?
@@ -651,38 +652,40 @@
             []
               effect-focus (str |. schema/confirm-button-name) show?
               effect-fade show?
-              div
+              create-list-element :div
                 {} $ :style $ {} (:position :absolute)
-                if show? $ div
-                  {}
-                    :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop $ read-field options :backdrop-class
-                    :style $ read-style options :backdrop-style
-                    :on-click $ fn (e d!)
-                      let
-                          event $ .-event e
-                        if (js-present? event)
-                          browser/event-stop-propagation! $ browser/event-host event
-                          , &unit
-                        on-close! d!
-                        on-read! e d!
-                  div
+                if show?
+                  [] $ [] 0 $ div
                     {}
-                      :class-name $ str-spaced style-modal-card css/global css/column $ read-field options :card-class
-                      :style $ read-style options :card-style
-                      :on-click $ fn (e d!) &unit
-                    div ({})
-                      <> $ read-text options :text |Alert!
-                    =< nil 8
+                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop $ read-field options :backdrop-class
+                      :style $ read-style options :backdrop-style
+                      :on-click $ fn (e d!)
+                        let
+                            event $ .-event e
+                          if (js-present? event)
+                            browser/event-stop-propagation! $ browser/event-host event
+                            , &unit
+                          on-close! d!
+                          on-read! e d!
                     div
-                      {} $ :class-name css/row-parted
-                      span $ {}
-                      button
-                        {}
-                          :class-name $ str-spaced css/button schema/confirm-button-name $ read-field options :confirm-class
-                          :style $ read-style options :confirm-style
-                          :on-click $ fn (e d!) (on-close! d!) (on-read! e d!)
-                        <> $ read-text options :confirm-text |Read
-                  comp-esc-listener show? on-close!
+                      {}
+                        :class-name $ str-spaced style-modal-card css/global css/column $ read-field options :card-class
+                        :style $ read-style options :card-style
+                        :on-click $ fn (e d!) &unit
+                      div ({})
+                        <> $ read-text options :text |Alert!
+                      =< nil 8
+                      div
+                        {} $ :class-name css/row-parted
+                        span $ {}
+                        button
+                          {}
+                            :class-name $ str-spaced css/button schema/confirm-button-name $ read-field options :confirm-class
+                            :style $ read-style options :confirm-style
+                            :on-click $ fn (e d!) (on-close! d!) (on-read! e d!)
+                          <> $ read-text options :confirm-text |Read
+                    comp-esc-listener show? on-close!
+                  []
           :examples $ [] $ quote
             comp-alert-modal
               {} $ :text "|Hello World"
@@ -696,35 +699,37 @@
             []
               effect-focus (str |. schema/confirm-button-name) show?
               effect-fade show?
-              div
+              create-list-element :div
                 {} $ :style $ {} (:position :absolute)
-                if show? $ div
-                  {}
-                    :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop $ read-field options :backdrop-class
-                    :style $ read-style options :backdrop-style
-                    :on-click $ dispatch-fn (e d!) (on-close! d!)
-                  div
+                if show?
+                  [] $ [] 0 $ div
                     {}
-                      :class-name $ str-spaced css/global css/column style-modal-card $ read-field options :card-class
-                      :style $ read-style options :card-style
-                      :on-click $ fn (e d!) &unit
-                    div ({})
-                      <> $ read-text options :text |Confirm?
-                    =< nil 8
+                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop $ read-field options :backdrop-class
+                      :style $ read-style options :backdrop-style
+                      :on-click $ dispatch-fn (e d!) (on-close! d!)
                     div
-                      {} $ :class-name css/row-parted
-                      span $ {}
-                      button
-                        {}
-                          :class-name $ str-spaced css/button schema/confirm-button-name $ read-field options :confirm-class
-                          :on-click $ dispatch-fn (e d!)
-                            let
-                                event $ decode-map-as e $ :: 'Map 'Tag 'Dynamic
-                              if (contains? event :type)
-                                do (on-confirm! event d!) (on-close! d!)
-                                raise "|Confirm event requires :type"
-                        <> $ read-text options :button-text |Confirm
-                  comp-esc-listener show? on-close!
+                      {}
+                        :class-name $ str-spaced css/global css/column style-modal-card $ read-field options :card-class
+                        :style $ read-style options :card-style
+                        :on-click $ fn (e d!) &unit
+                      div ({})
+                        <> $ read-text options :text |Confirm?
+                      =< nil 8
+                      div
+                        {} $ :class-name css/row-parted
+                        span $ {}
+                        button
+                          {}
+                            :class-name $ str-spaced css/button schema/confirm-button-name $ read-field options :confirm-class
+                            :on-click $ dispatch-fn (e d!)
+                              let
+                                  event $ decode-map-as e $ :: 'Map 'Tag 'Dynamic
+                                if (contains? event :type)
+                                  do (on-confirm! event d!) (on-close! d!)
+                                  raise "|Confirm event requires :type"
+                          <> $ read-text options :button-text |Confirm
+                    comp-esc-listener show? on-close!
+                  []
           :examples $ [] $ quote
             comp-confirm-modal
               {} $ :text "|Are you sure?"
@@ -744,41 +749,45 @@
           :doc "||Drawer component. Renders a sliding panel from the side with custom content via :render function in options."
           :code $ quote $ defcomp comp-drawer (options show? on-close)
             [] (effect-slide show?)
-              div
+              create-list-element :div
                 {} $ :style $ &merge
                   {} $ :position :absolute
                   read-style options :container-style
-                if show? $ div
-                  {}
-                    :class-name $ str-spaced css/fullscreen style-drawer-backdrop $ read-field options :backdrop-class
-                    :style $ read-style options :backdrop-style
-                    :on-click $ fn (e d!)
-                      let
-                          event $ .-event e
-                        if (js-present? event)
-                          browser/event-stop-propagation! $ browser/event-host event
-                          , &unit
-                        on-close d!
-                  div
+                if show?
+                  [] $ [] 0 $ div
                     {}
-                      :class-name $ str-spaced css/global css/column style-drawer-card $ read-field options :card-class
-                      :style $ &merge
-                        {} $ :padding 0
-                        read-style options :style
-                      :on-click $ fn (e d!) &unit
-                    let
-                        title $ read-field options :title
-                      if (non-nil? title)
-                        div
-                          {} $ :class-name $ str-spaced css/center css/font-fancy! style-modal-title
-                          <> $ read-text-value title
-                    cond
-                        non-nil? $ read-field options :render
-                        (read-field options :render) on-close
-                      (non-nil? (read-field options :render-body))
-                        (read-field options :render-body) on-close
-                      true "|TODO render body"
-                  comp-esc-listener show? on-close
+                      :class-name $ str-spaced css/fullscreen style-drawer-backdrop $ read-field options :backdrop-class
+                      :style $ read-style options :backdrop-style
+                      :on-click $ fn (e d!)
+                        let
+                            event $ .-event e
+                          if (js-present? event)
+                            browser/event-stop-propagation! $ browser/event-host event
+                            , &unit
+                          on-close d!
+                    create-list-element :div
+                      {}
+                        :class-name $ str-spaced css/global css/column style-drawer-card $ read-field options :card-class
+                        :style $ &merge
+                          {} $ :padding 0
+                          read-style options :style
+                        :on-click $ fn (e d!) &unit
+                      concat
+                        let
+                            title $ read-field options :title
+                          if (non-nil? title)
+                            [] $ [] 0 $ div
+                              {} $ :class-name $ str-spaced css/center css/font-fancy! style-modal-title
+                              <> $ read-text-value title
+                            []
+                        [] $ [] 1 $ cond
+                            non-nil? $ read-field options :render
+                            (read-field options :render) on-close
+                          (non-nil? (read-field options :render-body))
+                            (read-field options :render-body) on-close
+                          true $ <> "|TODO render body"
+                    comp-esc-listener show? on-close
+                  []
           :examples $ [] $ quote
             comp-drawer
               {} (:title |Settings)
@@ -803,42 +812,46 @@
           :doc "||Modal component. Renders a modal dialog with custom content via :render function in options."
           :code $ quote $ defcomp comp-modal (options show? on-close)
             [] (effect-fade show?)
-              div
+              create-list-element :div
                 {} $ :style $ &merge
                   {} $ :position :absolute
                   read-style options :container-style
-                if show? $ div
-                  {}
-                    :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop $ read-field options :backdrop-class
-                    :style $ read-style options :backdrop-style
-                    :on-click $ fn (e d!)
-                      let
-                          event $ .-event e
-                        if (js-present? event)
-                          browser/event-stop-propagation! $ browser/event-host event
-                          , &unit
-                        on-close d!
-                  div
+                if show?
+                  [] $ [] 0 $ div
                     {}
-                      :class-name $ str-spaced css/global css/column style-modal-card $ read-field options :card-class
-                      :style $ &merge
-                        {} $ :padding 0
-                        read-style options :style
-                        read-style options :card-style
-                      :on-click $ fn (e d!) &unit
-                    let
-                        title $ read-field options :title
-                      if (non-nil? title)
-                        div
-                          {} $ :class-name $ str-spaced css/center css/font-fancy! style-modal-title
-                          <> $ read-text-value title
-                    cond
-                        non-nil? $ read-field options :render
-                        (read-field options :render) on-close
-                      (non-nil? (read-field options :render-body))
-                        (read-field options :render-body) on-close
-                      true "|TODO render body"
-                  comp-esc-listener show? on-close
+                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop $ read-field options :backdrop-class
+                      :style $ read-style options :backdrop-style
+                      :on-click $ fn (e d!)
+                        let
+                            event $ .-event e
+                          if (js-present? event)
+                            browser/event-stop-propagation! $ browser/event-host event
+                            , &unit
+                          on-close d!
+                    create-list-element :div
+                      {}
+                        :class-name $ str-spaced css/global css/column style-modal-card $ read-field options :card-class
+                        :style $ &merge
+                          {} $ :padding 0
+                          read-style options :style
+                          read-style options :card-style
+                        :on-click $ fn (e d!) &unit
+                      concat
+                        let
+                            title $ read-field options :title
+                          if (non-nil? title)
+                            [] $ [] 0 $ div
+                              {} $ :class-name $ str-spaced css/center css/font-fancy! style-modal-title
+                              <> $ read-text-value title
+                            []
+                        [] $ [] 1 $ cond
+                            non-nil? $ read-field options :render
+                            (read-field options :render) on-close
+                          (non-nil? (read-field options :render-body))
+                            (read-field options :render-body) on-close
+                          true $ <> "|TODO render body"
+                    comp-esc-listener show? on-close
+                  []
           :examples $ [] $ quote
             comp-modal
               {} (:title |Dialog)
@@ -852,55 +865,59 @@
           :doc "||Modal menu component. Shows a modal dialog with a list of selectable items. Define items via :items in options."
           :code $ quote $ defcomp comp-modal-menu (options show? on-close! on-select!)
             [] (effect-fade show?)
-              div ({})
-                if show? $ div
-                  {}
-                    :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop $ read-field options :backdrop-class
-                    :style $ read-style options :backdrop-style
-                    :on-click $ fn (e d!)
-                      let
-                          event $ .-event e
-                        if (js-present? event)
-                          browser/event-stop-propagation! $ browser/event-host event
-                          , &unit
-                        on-close! d!
-                  div
+              create-list-element :div ({})
+                if show?
+                  [] $ [] 0 $ div
                     {}
-                      :class-name $ str-spaced css/global css/column style-modal-card $ read-field options :card-class
-                      :style $ merge-optional-styles
-                        {} $ :padding 0
-                        read-style options :style
-                      :on-click $ fn (e d!) &unit
-                    let
-                        title $ read-field options :title
-                      if (non-nil? title)
-                        div
-                          {}
-                            :class-name $ str-spaced css/row-parted css/font-fancy!
-                            :style $ {} (:padding "|4px 8px")
-                              :color $ hsl 0 0 70
-                          span $ {}
-                          <> $ read-text-value title
-                          span $ {} (:inner-text |Clear) (:class-name style-clear)
-                            :on-click $ fn (e d!) (on-select! nil d!)
-                    list-> ({})
-                      ->
-                        menu-items $ read-field options :items
-                        map $ fn (info)
-                          let
-                              item $ cond
-                                  enum? info
-                                  , info
-                                (map? info)
-                                  :: :item (read-field info :value) (read-field info :display)
-                                true $ raise "|Unknown menu item"
-                            match item $
-                              :item v l
-                              [] v $ div
-                                {} (:class-name style-menu-item)
-                                  :on-click $ fn (e d!) (on-select! item d!)
-                                if (string? l) (<> l) l
-                  comp-esc-listener show? on-close!
+                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop $ read-field options :backdrop-class
+                      :style $ read-style options :backdrop-style
+                      :on-click $ fn (e d!)
+                        let
+                            event $ .-event e
+                          if (js-present? event)
+                            browser/event-stop-propagation! $ browser/event-host event
+                            , &unit
+                          on-close! d!
+                    create-list-element :div
+                      {}
+                        :class-name $ str-spaced css/global css/column style-modal-card $ read-field options :card-class
+                        :style $ merge-optional-styles
+                          {} $ :padding 0
+                          read-style options :style
+                        :on-click $ fn (e d!) &unit
+                      concat
+                        let
+                            title $ read-field options :title
+                          if (non-nil? title)
+                            [] $ [] 0 $ div
+                              {}
+                                :class-name $ str-spaced css/row-parted css/font-fancy!
+                                :style $ {} (:padding "|4px 8px")
+                                  :color $ hsl 0 0 70
+                              span $ {}
+                              <> $ read-text-value title
+                              span $ {} (:inner-text |Clear) (:class-name style-clear)
+                                :on-click $ fn (e d!) (on-select! nil d!)
+                            []
+                        [] $ [] 1 $ list-> ({})
+                          ->
+                            menu-items $ read-field options :items
+                            map $ fn (info)
+                              let
+                                  item $ cond
+                                      enum? info
+                                      , info
+                                    (map? info)
+                                      :: :item (read-field info :value) (read-field info :display)
+                                    true $ raise "|Unknown menu item"
+                                match item $
+                                  :item v l
+                                  [] v $ div
+                                    {} (:class-name style-menu-item)
+                                      :on-click $ fn (e d!) (on-select! item d!)
+                                    if (string? l) (<> l) l
+                    comp-esc-listener show? on-close!
+                  []
           :examples $ [] $ quote
             comp-modal-menu
               {} (:title |Choose)
@@ -932,71 +949,73 @@
               []
                 effect-select (str |. schema/input-box-name) show?
                 effect-fade show?
-                div
+                create-list-element :div
                   {} $ :style $ {} (:position :absolute)
-                  if show? $ div
-                    {}
-                      :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop $ read-field options :backdrop-class
-                      :style $ &merge
-                        {} $ :line-height |32px
-                        read-style options :backdrop-style
-                      :on-click $ fn (e d!) (on-close! d!)
-                        d! $ :: :states cursor $ {}
-                    div
+                  if show?
+                    [] $ [] 0 $ div
                       {}
-                        :class-name $ str-spaced css/global css/column style-modal-card $ read-field options :card-class
-                        :style $ read-style options :card-style
-                        :on-click $ fn (e d!) &unit
-                      div ({})
-                        <> $ read-text options :text "|Type in text"
-                      =< nil 8
-                      let
-                          props $ DomProps :value text :class-name nil :style nil :inner-text nil :id nil :type nil :href nil :src nil :name nil :title nil :disabled nil :checked nil :spell-check nil :spellcheck nil :autofocus nil :tab-index nil :read-only nil :data-name nil :data-comp nil :role nil :aria-label nil :aria-labelledby nil :aria-describedby nil :aria-hidden nil :selected nil :target nil :on-click nil :on-focus nil :on-blur nil :on-keyup nil :on-change nil :on-mousedown nil :on-mouseup nil :on-paste nil :innerHTML nil :rel nil :defer nil :on nil :alt nil :draggable nil :content nil :charset nil :multiple nil :accept nil :ref nil :on-input
-                            fn (e d!)
-                              d! $ :: :states cursor $ &map:assoc (as-state-map state) :text (prompt-event-text e)
-                            , :on-keydown
-                              fn (e d!)
-                                let
-                                    event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
-                                    action $ unsafe-coerce
-                                      prompt-key-action event-info $ if (read-field options :multiline?) true false
-                                      , 'respo-alerts.core/PromptKeyAction
-                                  match action
-                                    (:submit) (check-submit! d!)
-                                    (:close)
-                                      do (on-close! d!)
-                                        d! $ :: :states cursor $ {}
-                                    (:ignore) &unit
-                                  , &unit
-                              , :placeholder $ prompt-placeholder (read-field options :placeholder)
-                        if (read-field options :multiline?)
-                          textarea $ struct-with props
-                            :class-name $ str-spaced schema/input-box-name css/textarea $ read-field options :input-class
-                            :style $ &merge
-                              {} (:width |100%) (:min-height 120) (:max-height |50vh)
-                              read-style options :input-style
-                          input $ struct-with props
-                            :class-name $ str-spaced schema/input-box-name css/input $ read-field options :input-class
-                            :style $ &merge
-                              {} $ :width |100%
-                              read-style options :input-style
-                      =< nil 16
+                        :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop $ read-field options :backdrop-class
+                        :style $ &merge
+                          {} $ :line-height |32px
+                          read-style options :backdrop-style
+                        :on-click $ fn (e d!) (on-close! d!)
+                          d! $ :: :states cursor $ {}
                       div
-                        {} $ :class-name css/row-parted
+                        {}
+                          :class-name $ str-spaced css/global css/column style-modal-card $ read-field options :card-class
+                          :style $ read-style options :card-style
+                          :on-click $ fn (e d!) &unit
+                        div ({})
+                          <> $ read-text options :text "|Type in text"
+                        =< nil 8
                         let
-                            failure $ read-text state :failure |
-                          if
-                            not $ blank? failure
-                            span $ {}
-                              :style $ &merge ui/flex $ {} (:color :red) (:line-height |20px)
-                              :inner-text failure
-                            span $ {}
-                        button
-                          {}
-                            :class-name $ str-spaced css/button $ read-field options :confirm-class
-                            :on-click $ fn (e d!) (check-submit! d!)
-                          <> $ read-text options :button-text |Finish
-                    comp-esc-listener show? on-close!
+                            props $ DomProps :value text :class-name nil :style nil :inner-text nil :id nil :type nil :href nil :src nil :name nil :title nil :disabled nil :checked nil :spell-check nil :spellcheck nil :autofocus nil :tab-index nil :read-only nil :data-name nil :data-comp nil :role nil :aria-label nil :aria-labelledby nil :aria-describedby nil :aria-hidden nil :selected nil :target nil :on-click nil :on-focus nil :on-blur nil :on-keyup nil :on-change nil :on-mousedown nil :on-mouseup nil :on-paste nil :innerHTML nil :rel nil :defer nil :on nil :alt nil :draggable nil :content nil :charset nil :multiple nil :accept nil :ref nil :on-input
+                              fn (e d!)
+                                d! $ :: :states cursor $ &map:assoc (as-state-map state) :text (prompt-event-text e)
+                              , :on-keydown
+                                fn (e d!)
+                                  let
+                                      event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
+                                      action $ unsafe-coerce
+                                        prompt-key-action event-info $ if (read-field options :multiline?) true false
+                                        , 'respo-alerts.core/PromptKeyAction
+                                    match action
+                                      (:submit) (check-submit! d!)
+                                      (:close)
+                                        do (on-close! d!)
+                                          d! $ :: :states cursor $ {}
+                                      (:ignore) &unit
+                                    , &unit
+                                , :placeholder $ prompt-placeholder (read-field options :placeholder)
+                          if (read-field options :multiline?)
+                            textarea $ struct-with props
+                              :class-name $ str-spaced schema/input-box-name css/textarea $ read-field options :input-class
+                              :style $ &merge
+                                {} (:width |100%) (:min-height 120) (:max-height |50vh)
+                                read-style options :input-style
+                            input $ struct-with props
+                              :class-name $ str-spaced schema/input-box-name css/input $ read-field options :input-class
+                              :style $ &merge
+                                {} $ :width |100%
+                                read-style options :input-style
+                        =< nil 16
+                        div
+                          {} $ :class-name css/row-parted
+                          let
+                              failure $ read-text state :failure |
+                            if
+                              not $ blank? failure
+                              span $ {}
+                                :style $ &merge ui/flex $ {} (:color :red) (:line-height |20px)
+                                :inner-text failure
+                              span $ {}
+                          button
+                            {}
+                              :class-name $ str-spaced css/button $ read-field options :confirm-class
+                              :on-click $ fn (e d!) (check-submit! d!)
+                            <> $ read-text options :button-text |Finish
+                      comp-esc-listener show? on-close!
+                    []
           :examples $ [] $ quote
             comp-prompt-modal states
               {} (:text "|Enter name") (:placeholder |name)
@@ -1673,7 +1692,7 @@
             respo.schema :refer $ DomProps
             respo-ui.core :as ui
             respo-ui.css :as css
-            respo.core :refer $ defcomp defplugin list-> <> >> div button textarea span input a defeffect dispatch-fn
+            respo.core :refer $ defcomp defplugin list-> <> >> div button textarea span input a defeffect dispatch-fn create-list-element
             respo.css :refer $ defstyle
             respo.comp.space :refer $ =<
             respo-alerts.config :refer $ dev?
@@ -1790,7 +1809,7 @@
             respo-alerts.comp.container :refer $ comp-container
             respo-alerts.updater :refer $ updater
             respo-alerts.schema :as schema
-            reel.util :refer $ listen-devtools! generate-id!
+            reel.util :refer $ listen-devtools!
             reel.typed :as typed
             respo-alerts.config :as config
             |./calcit.build-errors :default build-errors
@@ -1875,9 +1894,9 @@
             div
               {} $ :class-name style-trigger-container
               , el $ div $ {}
-                :class-name $ str-spaced style-trigger $ if show? style-trigger-active
+                :class-name $ if show? (str-spaced style-trigger style-trigger-active) style-trigger
                 :style $ merge-optional-styles (read-field options :trigger-style)
-                  if show? $ read-field options :trigger-active-style
+                  if show? (read-field options :trigger-active-style) nil
           :examples $ [] $ quote
             comp-trigger show?
               button

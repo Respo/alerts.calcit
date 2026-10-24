@@ -5,7 +5,7 @@ import { copyFile, mkdir, mkdtemp, readFile, rm, symlink } from 'node:fs/promise
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import * as c from '../js-out/calcit.core.mjs';
-import { comp_prompt_modal, comp_modal_menu, comp_confirm_modal } from '../js-out/respo-alerts.core.mjs';
+import { comp_prompt_modal, comp_modal_menu, comp_confirm_modal, comp_modal, comp_drawer, comp_alert_modal } from '../js-out/respo-alerts.core.mjs';
 import { comp_trigger } from '../js-out/respo-alerts.trigger.mjs';
 import { make_string } from '../js-out/respo.render.html.mjs';
 
@@ -259,3 +259,65 @@ for (const multiline of [false, true]) {
     });
   }
 }
+
+/** Read one field from a nominal Calcit record. */
+const recordField = (record, name) => record.values[record.fields.findIndex((field) => field.value === name)];
+/** Unwrap a component's rendered root Element; optional subtrees must not leave an empty root. */
+const rootElement = (component) => recordField(component, 'tree').extra[0].extra[0];
+/** List the keyed child pairs of an Element, in render order. */
+const childPairs = (element) => [...recordField(element, 'children').items()];
+const childKeys = (element) => childPairs(element).map((pair) => recordField(pair, 'key'));
+const childElement = (element, index) => recordField(childPairs(element)[index], 'node').extra[0].extra[0];
+
+test('optional modal subtrees render as keyed children without implicit nil (#2121)', () => {
+  const noop = () => {};
+  const options = (source) => c.parse_cirru_edn(source);
+  const cases = [
+    ['comp-modal', (show, opts) => comp_modal(opts, show, noop), '{} (:title |T)', true],
+    ['comp-drawer', (show, opts) => comp_drawer(opts, show, noop), '{} (:title |T)', true],
+    ['comp-modal-menu', (show, opts) => comp_modal_menu(opts, show, noop, noop), '{} (:title |T) (:items $ [])', false],
+    ['comp-alert-modal', (show, opts) => comp_alert_modal(opts, show, noop, noop), '{}', true],
+    ['comp-confirm-modal', (show, opts) => comp_confirm_modal(opts, show, noop, noop), '{}', true],
+    ['comp-prompt-modal', (show, opts) => comp_prompt_modal(states, opts, show, noop, noop), '{}', true],
+  ];
+  for (const [name, render, source, positioned] of cases) {
+    const hidden = render(false, options(source));
+    const style = positioned ? ' style="position:absolute;"' : '';
+    assert.equal(make_string(hidden), `<div data-comp="${name}"${style}></div>`, `${name} hidden`);
+    assert.deepEqual(childKeys(rootElement(hidden)), [], `${name} hidden has no children`);
+    const shown = render(true, options(source));
+    assert.deepEqual(childKeys(rootElement(shown)), [0], `${name} keeps backdrop key 0`);
+    // The backdrop keeps the card at 0 and the Esc listener at 1.
+    assert.deepEqual(childKeys(childElement(rootElement(shown), 0)), [0, 1], `${name} backdrop keys`);
+    assert.match(make_string(shown), /data-comp="comp-esc-listener"/);
+  }
+});
+
+test('modal, drawer and menu titles are optional keyed card children', () => {
+  const noop = () => {};
+  const card = (component) => childElement(childElement(rootElement(component), 0), 0);
+  for (const [render, items] of [
+    [(opts) => comp_modal(opts, true, noop), ''],
+    [(opts) => comp_drawer(opts, true, noop), ''],
+    [(opts) => comp_modal_menu(opts, true, noop, noop), ' (:items $ [])'],
+  ]) {
+    const titled = render(c.parse_cirru_edn(`{} (:title |T)${items}`));
+    const untitled = render(c.parse_cirru_edn(`{}${items}`));
+    assert.deepEqual(childKeys(card(titled)), [0, 1]);
+    assert.deepEqual(childKeys(card(untitled)), [1]);
+    assert.match(make_string(titled), /<span>T<\/span>/);
+    assert.doesNotMatch(make_string(untitled), /style-modal-title|>Clear</);
+  }
+  // Without a render callback the body falls back to a text node instead of a bare string child.
+  assert.match(make_string(comp_modal(c.parse_cirru_edn('{}'), true, noop)), /<span>TODO render body<\/span>/);
+  assert.match(make_string(comp_drawer(c.parse_cirru_edn('{}'), true, noop)), /<span>TODO render body<\/span>/);
+});
+
+test('trigger active class is explicit in both branches', () => {
+  const child = comp_prompt_modal(states, c.parse_cirru_edn('{}'), false, () => {}, () => {});
+  const idle = make_string(comp_trigger(false, child, null));
+  const active = make_string(comp_trigger(true, child, null));
+  assert.match(idle, /<div class="style-trigger__respo-alerts_trigger"><\/div><\/div>$/);
+  assert.doesNotMatch(idle, /style-trigger-active/);
+  assert.match(active, /<div class="style-trigger__respo-alerts_trigger style-trigger-active__respo-alerts_trigger"><\/div><\/div>$/);
+});
