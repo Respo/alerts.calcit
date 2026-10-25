@@ -2,9 +2,20 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
+### 当前 0.31 预发布维护线
+
+使用者影响：CLI 与 `@calcit/procs` 同步到已发布的 `0.31.0-alpha.4`，仍是
+预发布；消费方需协调依赖图并重新生成 JS。旧 0.30.1 消费方继续使用原维护线。
+本次不改 hooks、回调、HUD、cursor、存档和部署路径，不发布新的模块 tag。
+只将 prompt 任务附带测试中的旧 `atom` 改为 `ref`，保留原 23 项测试及断言。
+下文 0.10.x / 0.30.1 描述为历史维护线，当前版本以依赖声明为准。
+原 Shelf 消费者门禁继续保留，固定到已通过准备 CI 的 Shelf #27 精确候选提交，
+消费者 CLI/runtime 同为 alpha.4，Feather 使用已发布的 0.5.0-alpha.2 tag。
+这仍是显式本地候选依赖图，不冒称通过已发布 Alerts tag 的干净消费者验收。
+
 Demo http://repo.respo-mvc.org/alerts.calcit/ .
 
-### 0.10.57 候选：正式 Calcit 0.30.1 配对
+### 历史：0.10.57 候选与正式 Calcit 0.30.1 配对
 
 使用者影响：CLI/runtime 切到已配对发布的正式 **0.30.1**，模块依赖固定正式
 Reel0.6.41、UI0.8.0、Respo0.16.124、JS-FFI0.2.5。消费者应协调整张依赖图、
@@ -336,8 +347,9 @@ let
 
 https://github.com/calcit-lang/respo-calcit-workflow
 
-当前源码配对已发布的正式 Calcit/procs `0.30.1` 和 Node.js 24。
-候选模块为 `0.10.57`，发布前不要以 main/hash 代替正式 tag；旧工具链消费者需同步升级整张依赖图，不混装工具链。
+当前 0.31 维护线配对已发布的 Calcit/procs `0.31.0-alpha.4`（预发布）和 Node.js 24。
+模块元数据仍为 `0.11.0-alpha.1`，本 PR 不发布新 tag；消费者不要以 main/hash 代替发布依赖，
+旧工具链消费者需同步升级整张依赖图，不混装工具链。上文正式 `0.30.1` / `0.10.57` 图为历史维护线。
 生成的前端产物上传后，
 由 COS action 的内置功能验证公开可访问性；生产路径是
 `https://cos-sh.tiye.me/Respo/alerts.calcit/`，PR 使用独立的
@@ -401,7 +413,8 @@ yarn vite build
 JS 回放使用独立进程隔离 trait registry，临时入口显式设置 native mode，不重写正常 `js-out`。
 原有初始文字重开、提交、Reel 渲染断言保留，新增 placeholder、菜单选择和 trigger 样式回归。
 CI 用当前严格检查覆盖全部公开命名空间，并阻断废弃调用；弱类型报告按需运行，
-不保留重复数字预算。历史 0.10.54 使用稳定 0.30.0，0.10.55 / 0.10.56 使用上述 alpha 图；当前 0.10.57 候选使用本文开头的正式 0.30.1 图。
+不保留重复数字预算。历史 0.10.54 使用稳定 0.30.0，0.10.55 / 0.10.56 使用上述 alpha 图，
+0.10.57 候选使用正式 0.30.1 图；当前 0.31 维护线以 Workflow 中的 alpha.4 配对为准。
 保留 prompt/menu/plugin 的既有行为，不宣称开放业务 payload 已全面静态化。
 本仓库 npm 新包安装隔离期按既有授权统一为一小时，不设置逐版本豁免。
 Prompt 回调和 demo Reel 的命名空间状态使用首选 `defref` 写法，保留初始化与热重载语义。

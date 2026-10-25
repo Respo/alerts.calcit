@@ -1475,7 +1475,7 @@
           :tests $ [] $ %{} 'TestEntry (:name |persists-across-renders)
             :code $ quote $ let
                 cursor $ [] :prompt-test
-                *called $ atom |
+                *called $ ref |
                 callback $ fn (text)
                   hint-fn $ {}
                     :args $ [] 'String
