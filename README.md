@@ -2,6 +2,17 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
+### 当前 0.31 预发布维护线
+
+使用者影响：CLI 与 `@calcit/procs` 同步到已发布的 `0.31.0-alpha.4`，仍是
+预发布；消费方需协调依赖图并重新生成 JS。旧 0.30.1 消费方继续使用原维护线。
+本次不改 hooks、回调、HUD、cursor、存档和部署路径，不发布新的模块 tag。
+只将 prompt 任务附带测试中的旧 `atom` 改为 `ref`，保留原 23 项测试及断言。
+下文 0.10.x / 0.30.1 描述为历史维护线，当前版本以依赖声明为准。
+原 Shelf 消费者门禁继续保留，固定到已通过准备 CI 的 Shelf #27 精确候选提交，
+消费者 CLI/runtime 同为 alpha.4，Feather 使用已发布的 0.5.0-alpha.2 tag。
+这仍是显式本地候选依赖图，不冒称通过已发布 Alerts tag 的干净消费者验收。
+
 Demo http://repo.respo-mvc.org/alerts.calcit/ .
 
 ### 0.10.57 候选：正式 Calcit 0.30.1 配对
