@@ -1,0 +1,165 @@
+name: Prepare reviewed Alerts alpha4 migration
+on:
+  push:
+    branches: [prepare/alpha4-attached-tests]
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6.5.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: |
+          corepack enable
+          corepack prepare yarn@4.18.0 --activate
+      - uses: calcit-lang/setup-calcit@v1.5.0
+        with:
+          tools: calcit,caps
+          caps-version: "0.1.1"
+          deps-file: deps.cirru
+      - name: Original alpha2 root gates
+        run: |
+          set -euo pipefail
+          test "$(calcit -v)" = 0.31.0-alpha.2
+          caps --strict --ci
+          yarn install --immutable
+          caps verify --toolchain
+          calcit calcit.cirru edit format
+          git diff --quiet -- calcit.cirru deps.cirru package.json yarn.lock
+          bash reviewed-gates.sh
+      - name: Check out real Shelf consumer
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: worktools/qrcode-shelf
+          ref: 7f5fb9af07b6b9f2f87cf7d663b88392fc7d9703
+          path: .calcit/consumer
+          persist-credentials: false
+  
+      - name: Check out unpublished Feather candidate
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: Respo/respo-feather.calcit
+          ref: be6110c5967ffb0fef1df168ffa48691c3b8d416
+          path: .calcit/consumer/.calcit/modules/respo-feather.calcit
+          persist-credentials: false
+  
+      - name: Validate real consumer with local candidates
+        run: |
+          set -euo pipefail
+          consumer="$GITHUB_WORKSPACE/.calcit/consumer"
+          cp -RL .calcit/modules/. "$consumer/.calcit/modules/"
+          mkdir -p "$consumer/.calcit/modules/alerts.calcit"
+          cp calcit.cirru deps.cirru "$consumer/.calcit/modules/alerts.calcit/"
+          # Explicit local candidate graph, NOT a Caps-resolved release install.
+          # The consumer Snapshot remains unchanged.
+          cat > "$consumer/deps.cirru" <<'EOF'
+          {} (:calcit-version |0.31.0-alpha.2) (:version |0.1.0)
+            :dependencies $ {} (|Respo/reel.calcit |0.7.0-alpha.1)
+              |Respo/respo-ui.calcit |0.9.0-alpha.1
+              |Respo/respo.calcit |0.17.0-alpha.2
+              |Respo/respo-feather.calcit |0.5.0-alpha.1
+              |Respo/alerts.calcit |0.11.0-alpha.1
+              |calcit-lang/js-ffi |0.2.5
+          EOF
+          cd "$consumer"
+          yarn add --exact @calcit/procs@0.31.0-alpha.2
+          calcit calcit.cirru edit format
+          git diff --exit-code -- calcit.cirru
+          calcit calcit.cirru --check-only --all-defs
+          calcit calcit.cirru fix --workflow strict --verify --format json > "$RUNNER_TEMP/shelf-strict.json"
+          jq -e '.data.workflow.status == "passed" and (.diagnostics | length == 0)' "$RUNNER_TEMP/shelf-strict.json"
+          VITE_BASE_URL=./ yarn build
+          node --test scripts/qrcode-regression.test.mjs
+  
+      - name: Official guarded attached test transaction
+        run: node apply-reviewed.mjs apply
+      - uses: calcit-lang/setup-calcit@v1.5.0
+        with:
+          tools: calcit,caps
+          caps-version: "0.1.1"
+          deps-file: deps.cirru
+      - name: Paired alpha4 root gates
+        run: |
+          set -euo pipefail
+          test "$(calcit -v)" = 0.31.0-alpha.4
+          caps --strict --ci
+          yarn install
+          yarn install --immutable
+          caps verify --toolchain
+          calcit calcit.cirru edit format
+          bash reviewed-gates.sh
+      - name: Restore published compiler for unchanged original consumer
+        uses: calcit-lang/setup-calcit@v1.5.0
+        with:
+          tools: calcit,caps
+          caps-version: "0.1.1"
+          deps-file: reviewed-baseline-deps.cirru
+      - name: Check out real Shelf consumer
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: worktools/qrcode-shelf
+          ref: 7f5fb9af07b6b9f2f87cf7d663b88392fc7d9703
+          path: .calcit/consumer
+          persist-credentials: false
+  
+      - name: Check out unpublished Feather candidate
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: Respo/respo-feather.calcit
+          ref: be6110c5967ffb0fef1df168ffa48691c3b8d416
+          path: .calcit/consumer/.calcit/modules/respo-feather.calcit
+          persist-credentials: false
+  
+      - name: Validate real consumer with local candidates
+        run: |
+          set -euo pipefail
+          consumer="$GITHUB_WORKSPACE/.calcit/consumer"
+          cp -RL .calcit/modules/. "$consumer/.calcit/modules/"
+          mkdir -p "$consumer/.calcit/modules/alerts.calcit"
+          cp calcit.cirru deps.cirru "$consumer/.calcit/modules/alerts.calcit/"
+          # Explicit local candidate graph, NOT a Caps-resolved release install.
+          # The consumer Snapshot remains unchanged.
+          cat > "$consumer/deps.cirru" <<'EOF'
+          {} (:calcit-version |0.31.0-alpha.2) (:version |0.1.0)
+            :dependencies $ {} (|Respo/reel.calcit |0.7.0-alpha.1)
+              |Respo/respo-ui.calcit |0.9.0-alpha.1
+              |Respo/respo.calcit |0.17.0-alpha.2
+              |Respo/respo-feather.calcit |0.5.0-alpha.1
+              |Respo/alerts.calcit |0.11.0-alpha.1
+              |calcit-lang/js-ffi |0.2.5
+          EOF
+          cd "$consumer"
+          yarn add --exact @calcit/procs@0.31.0-alpha.2
+          calcit calcit.cirru edit format
+          git diff --exit-code -- calcit.cirru
+          calcit calcit.cirru --check-only --all-defs
+          calcit calcit.cirru fix --workflow strict --verify --format json > "$RUNNER_TEMP/shelf-strict.json"
+          jq -e '.data.workflow.status == "passed" and (.diagnostics | length == 0)' "$RUNNER_TEMP/shelf-strict.json"
+          VITE_BASE_URL=./ yarn build
+          node --test scripts/qrcode-regression.test.mjs
+  
+      - name: Restore target compiler for guarded export
+        uses: calcit-lang/setup-calcit@v1.5.0
+        with:
+          tools: calcit,caps
+          caps-version: "0.1.1"
+          deps-file: deps.cirru
+      - name: Export only fully verified source
+        run: |
+          set -euo pipefail
+          node apply-reviewed.mjs verify
+          git diff --quiet -- scripts .github/workflows/upload.yaml .yarnrc.yml
+      - uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: alerts-alpha4-source
+          path: acceptance
+          if-no-files-found: error
+          retention-days: 30
