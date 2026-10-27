@@ -91,7 +91,7 @@ jobs:
       uses: actions/checkout@v7.0.1
       with:
         repository: Respo/respo-feather.calcit
-        ref: 0.5.0-alpha.2
+        ref: 0.5.0-alpha.3
         path: .calcit/consumer/.calcit/modules/respo-feather.calcit
         persist-credentials: false
 
@@ -106,12 +106,12 @@ jobs:
         # The consumer Snapshot remains unchanged.
         cat > "$consumer/deps.cirru" <<'EOF'
         {} (:calcit-version |0.31.0) (:version |0.1.0)
-          :dependencies $ {} (|Respo/reel.calcit |0.7.0-alpha.2)
-            |Respo/respo-ui.calcit |0.9.0-alpha.2
-            |Respo/respo.calcit |0.17.0-alpha.2
-            |Respo/respo-feather.calcit |0.5.0-alpha.2
-            |Respo/alerts.calcit |0.11.0-alpha.2
-            |calcit-lang/js-ffi |0.2.5
+          :dependencies $ {} (|Respo/reel.calcit |0.7.0-alpha.3)
+            |Respo/respo-ui.calcit |0.9.0-alpha.3
+            |Respo/respo.calcit |0.17.0-alpha.3
+            |Respo/respo-feather.calcit |0.5.0-alpha.3
+            |Respo/alerts.calcit |0.11.0-alpha.3
+            |calcit-lang/js-ffi |0.2.6
         EOF
         cd "$consumer"
         # Pair this fixed alpha.7 source fixture with the actual target runtime.
