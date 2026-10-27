@@ -18,7 +18,8 @@ Demo 的普通 Modal 按钮明确使用现有入口的 `Fn<Enum, Unit>`，不伪
 原完整 strict、unit、附带测试 native/JS 重放、渲染回归和 Shelf 消费者门禁保留；
 复用已发布修复的返回/可见性回归，不新增 runner 或质量预算。
 Shelf 仍固定原已评审的 alpha.7 源码夹具，只有临时夹具的 npm runtime/lock 配对到 0.31.0，
-随后执行 immutable 安装和 toolchain 配对校验。Feather 保持发布的 0.5.0-alpha.2 tag。
+随后执行 immutable 安装及原类型、构建与交互回归。库根继续执行 Caps strict 与 toolchain 校验。
+Feather 保持发布的 0.5.0-alpha.2 tag。
 这是明确标注的本地候选依赖图，不等于已发布 Alerts tag 的干净消费者验收。
 
 Demo http://repo.respo-mvc.org/alerts.calcit/ .
