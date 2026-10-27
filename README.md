@@ -2,17 +2,24 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
-### 当前 0.31 预发布维护线
+### 0.11.0-alpha.2 候选：使用者先注意
 
-使用者影响：CLI 与 `@calcit/procs` 同步到已发布的 `0.31.0-alpha.7`，仍是
-预发布；消费方需协调依赖图并重新生成 JS。旧 0.30.1 消费方继续使用原维护线。
-本次不改 hooks、回调、HUD、cursor、存档和部署路径，不发布新的模块 tag。
-此前已将 prompt 任务附带测试中的旧 `atom` 改为 `ref`；本轮只补三个原 confirm 测试回调的类型合同，保留原断言。
-下文 0.10.x / 0.30.1 描述为历史维护线，当前版本以依赖声明为准。
-原 Shelf 消费者门禁继续保留，固定到已通过完整 CI 的 Shelf #31 精确候选提交，
-消费者 CLI/runtime 同为 alpha.7，使用该提交的 manifest/lockfile 做 immutable 安装，
-Feather 使用已发布的 0.5.0-alpha.2 tag。
-这仍是显式本地候选依赖图，不冒称通过已发布 Alerts tag 的干净消费者验收。
+CLI 与 `@calcit/procs` 配对升级到正式 **0.31.0**，模块自身仍为 alpha 候选，未发版。
+消费者需协调完整图并重新生成 JS；旧 0.30.1 消费者继续使用原维护线。
+Reel / UI 使用已发布的 0.7.0-alpha.2 / 0.9.0-alpha.2，Respo / js-ffi 保持图内一致的
+0.17.0-alpha.2 / 0.2.5；不能用未发布 main 或 hash 替代这些 tag。
+
+本轮把正式 0.10.59 已发布的 Modal 修复迁入当前分支：`.show` / `.close` 保留
+dispatcher 的泛型返回类型，仍各调用一次并直接返回其结果；`.render` 明确为 Component。
+这解除了 Docs Workflow 把 Unit 回调结果视为 unknown 的类型阻塞，消费者无需额外吞掉返回值。
+状态操作、cursor、异常、HUD 和部署路径不变，其他 hooks 不顺带扩改。
+Demo 的普通 Modal 按钮明确使用现有入口的 `Fn<Enum, Unit>`，不伪绑某个名义 Op 或 Dynamic slot。
+
+原完整 strict、unit、附带测试 native/JS 重放、渲染回归和 Shelf 消费者门禁保留；
+复用已发布修复的返回/可见性回归，不新增 runner 或质量预算。
+Shelf 仍固定原已评审的 alpha.7 源码夹具，只有临时夹具的 npm runtime/lock 配对到 0.31.0，
+随后执行 immutable 安装和 toolchain 配对校验。Feather 保持发布的 0.5.0-alpha.2 tag。
+这是明确标注的本地候选依赖图，不等于已发布 Alerts tag 的干净消费者验收。
 
 Demo http://repo.respo-mvc.org/alerts.calcit/ .
 
