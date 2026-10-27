@@ -4,8 +4,8 @@
 
 ### 0.11.0-alpha.3 候选：使用者先注意
 
-CLI 与 `@calcit/procs` 保持正式 **0.31.0**；本轮对齐已发布 Reel / UI
-`0.7.0-alpha.3` / `0.9.0-alpha.3`、Respo `0.17.0-alpha.3` 与 JS-FFI `0.2.6`。
+CLI 与 `@calcit/procs` 保持正式 **0.31.0**；本轮候选对齐 Reel / UI
+`0.7.0-alpha.4` / `0.9.0-alpha.4`、Respo `0.17.0-alpha.4` 与 JS-FFI `0.2.7`。
 模块仍是 alpha 候选，尚未发布；消费者需协调完整图并重新生成 JS，不混装旧图或
 用 main/hash 代替 tag。旧 0.30.1 消费者继续使用原维护线。
 
@@ -20,6 +20,8 @@ immutable、类型、构建与原回归。库根继续执行 Caps strict/toolcha
 本地候选图不等于尚未发布 Alerts tag 的干净消费者安装。
 
 Demo http://repo.respo-mvc.org/alerts.calcit/ .
+
+旧 JS-FFI 0.2.6 tag 实际声明 0.30.1；本轮采用新 0.2.7，并沿 Respo/Router/UI/Reel 对齐正式 0.31 声明，见 [发布配对问题](https://github.com/calcit-lang/js-ffi/issues/195)。Respo/Router/UI/Reel 新 tag 均已通过各自原 CI 与 Demo 流程并发布；JS-FFI 0.2.7 通过原 CI 后发布，不涉及 Demo/服务部署。本候选将以这些实际 tag 验收，不改写旧 tag。Shelf 中 Feather 仍是固定已发布源码配合本地候选宿主图的兼容验收，不能据此宣称 Feather 自身发布依赖图已经同步。
 
 ### 历史：0.10.57 候选与正式 Calcit 0.30.1 配对
 
