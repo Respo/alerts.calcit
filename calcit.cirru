@@ -352,6 +352,9 @@
                 plugin $ confirm-actions-plugin :plugin node cursor $ {}
               .show plugin
                 fn (op)
+                  hint-fn $ {}
+                    :args $ [] 'Enum
+                    :return 'Unit
                   assert=
                     :: :states cursor $ {} (:show? true) (:text |)
                     , op
@@ -363,12 +366,18 @@
               assert= (Option :none) (take-prompt-task! cursor)
               .show-with-text plugin
                 fn (op)
+                  hint-fn $ {}
+                    :args $ [] 'Enum
+                    :return 'Unit
                   assert=
                     :: :states cursor $ {} (:show? true) (:text |override)
                     , op
                   , &unit
                 , |override $ fn () &unit
               .close plugin $ fn (op)
+                hint-fn $ {}
+                  :args $ [] 'Enum
+                  :return 'Unit
                 assert=
                   :: :states cursor $ {} $ :show? false
                   , op
