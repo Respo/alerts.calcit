@@ -49,7 +49,7 @@ jobs:
         calcit calcit.cirru edit format
         git diff --exit-code -- calcit.cirru
         calcit calcit.cirru --check-only --all-defs
-        calcit calcit.cirru fix --workflow strict --verify --format edn
+        calcit calcit.cirru fix --workflow strict --verify --format json | jq -e '.data.workflow.status == "passed" and .diagnostics == []'
         calcit calcit.cirru test --tag unit --require-match
         calcit calcit.cirru analyze weak-types --only deprecated-call --summary-only --format json | jq -e '.data.summary.calls == 0'
 
@@ -105,15 +105,17 @@ jobs:
         # Explicit local candidate graph, NOT a Caps-resolved release install.
         # The consumer Snapshot remains unchanged.
         cat > "$consumer/deps.cirru" <<'EOF'
-        {} (:calcit-version |0.31.0-alpha.7) (:version |0.1.0)
-          :dependencies $ {} (|Respo/reel.calcit |0.7.0-alpha.1)
-            |Respo/respo-ui.calcit |0.9.0-alpha.1
+        {} (:calcit-version |0.31.0) (:version |0.1.0)
+          :dependencies $ {} (|Respo/reel.calcit |0.7.0-alpha.2)
+            |Respo/respo-ui.calcit |0.9.0-alpha.2
             |Respo/respo.calcit |0.17.0-alpha.2
             |Respo/respo-feather.calcit |0.5.0-alpha.2
-            |Respo/alerts.calcit |0.11.0-alpha.1
+            |Respo/alerts.calcit |0.11.0-alpha.2
             |calcit-lang/js-ffi |0.2.5
         EOF
         cd "$consumer"
+        # Pair this fixed alpha.7 source fixture with the actual target runtime.
+        yarn add --exact @calcit/procs@0.31.0
         yarn install --immutable
         calcit calcit.cirru edit format
         git diff --exit-code -- calcit.cirru

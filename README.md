@@ -2,17 +2,25 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
-### 当前 0.31 预发布维护线
+### 0.11.0-alpha.2 候选：使用者先注意
 
-使用者影响：CLI 与 `@calcit/procs` 同步到已发布的 `0.31.0-alpha.7`，仍是
-预发布；消费方需协调依赖图并重新生成 JS。旧 0.30.1 消费方继续使用原维护线。
-本次不改 hooks、回调、HUD、cursor、存档和部署路径，不发布新的模块 tag。
-此前已将 prompt 任务附带测试中的旧 `atom` 改为 `ref`；本轮只补三个原 confirm 测试回调的类型合同，保留原断言。
-下文 0.10.x / 0.30.1 描述为历史维护线，当前版本以依赖声明为准。
-原 Shelf 消费者门禁继续保留，固定到已通过完整 CI 的 Shelf #31 精确候选提交，
-消费者 CLI/runtime 同为 alpha.7，使用该提交的 manifest/lockfile 做 immutable 安装，
-Feather 使用已发布的 0.5.0-alpha.2 tag。
-这仍是显式本地候选依赖图，不冒称通过已发布 Alerts tag 的干净消费者验收。
+CLI 与 `@calcit/procs` 配对升级到正式 **0.31.0**，模块自身仍为 alpha 候选，未发版。
+消费者需协调完整图并重新生成 JS；旧 0.30.1 消费者继续使用原维护线。
+Reel / UI 使用已发布的 0.7.0-alpha.2 / 0.9.0-alpha.2，Respo / js-ffi 保持图内一致的
+0.17.0-alpha.2 / 0.2.5；不能用未发布 main 或 hash 替代这些 tag。
+
+本轮把正式 0.10.59 已发布的 Modal 修复迁入当前分支：`.show` / `.close` 保留
+dispatcher 的泛型返回类型，仍各调用一次并直接返回其结果；`.render` 明确为 Component。
+这解除了 Docs Workflow 把 Unit 回调结果视为 unknown 的类型阻塞，消费者无需额外吞掉返回值。
+状态操作、cursor、异常、HUD 和部署路径不变，其他 hooks 不顺带扩改。
+Demo 的普通 Modal 按钮明确使用现有入口的 `Fn<Enum, Unit>`，不伪绑某个名义 Op 或 Dynamic slot。
+
+原完整 strict、unit、附带测试 native/JS 重放、渲染回归和 Shelf 消费者门禁保留；
+复用已发布修复的返回/可见性回归，不新增 runner 或质量预算。
+Shelf 仍固定原已评审的 alpha.7 源码夹具，只有临时夹具的 npm runtime/lock 配对到 0.31.0，
+随后执行 immutable 安装及原类型、构建与交互回归。库根继续执行 Caps strict 与 toolchain 校验。
+Feather 保持发布的 0.5.0-alpha.2 tag。
+这是明确标注的本地候选依赖图，不等于已发布 Alerts tag 的干净消费者验收。
 
 Demo http://repo.respo-mvc.org/alerts.calcit/ .
 
@@ -348,8 +356,8 @@ let
 
 https://github.com/calcit-lang/respo-calcit-workflow
 
-当前 0.31 维护线配对已发布的 Calcit/procs `0.31.0-alpha.7`（预发布）和 Node.js 24。
-模块元数据仍为 `0.11.0-alpha.1`，本 PR 不发布新 tag；消费者不要以 main/hash 代替发布依赖，
+当前 0.31 维护线配对已发布的正式 Calcit/procs `0.31.0` 和 Node.js 24。
+模块元数据为候选 `0.11.0-alpha.2`，尚未发布；消费者不要以 main/hash 代替发布依赖，
 旧工具链消费者需同步升级整张依赖图，不混装工具链。上文正式 `0.30.1` / `0.10.57` 图为历史维护线。
 生成的前端产物上传后，
 由 COS action 的内置功能验证公开可访问性；生产路径是
@@ -415,7 +423,7 @@ JS 回放使用独立进程隔离 trait registry，临时入口显式设置 nati
 原有初始文字重开、提交、Reel 渲染断言保留，新增 placeholder、菜单选择和 trigger 样式回归。
 CI 用当前严格检查覆盖全部公开命名空间，并阻断废弃调用；弱类型报告按需运行，
 不保留重复数字预算。历史 0.10.54 使用稳定 0.30.0，0.10.55 / 0.10.56 使用上述 alpha 图，
-0.10.57 候选使用正式 0.30.1 图；当前 0.31 维护线以 Workflow 中的 alpha.7 配对为准。
+0.10.57 候选使用正式 0.30.1 图；当前 0.31 维护线以 Workflow 中的正式 0.31.0 配对为准。
 保留 prompt/menu/plugin 的既有行为，不宣称开放业务 payload 已全面静态化。
 本仓库 npm 新包安装隔离期按既有授权统一为一小时，不设置逐版本豁免。
 Prompt 回调和 demo Reel 的命名空间状态使用首选 `defref` 写法，保留初始化与热重载语义。
