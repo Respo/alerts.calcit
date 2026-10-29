@@ -1341,19 +1341,19 @@
                 :opacity 0.6
               |&:hover $ {} $ :opacity 1
           :examples $ []
-          :schema $ quote Dynamic
+          :schema $ quote String
         'style-drawer-backdrop $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle style-drawer-backdrop
             {} $ |& $ &merge style/backdrop
               {} $ :padding 0
           :examples $ []
-          :schema $ quote Dynamic
+          :schema $ quote String
         'style-drawer-card $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle style-drawer-card
             {} $ |& $ &merge style/card
               {} (:line-height |32px) (:height |100%) (:max-height |100vh) (:margin-right 0) (:border-radius |0px) (:max-width |50vw) (:width |24vw) (:min-width 360) (:box-shadow "|-2px 0px 24px 2px hsla(0,0%,0%,0.2)") (:transition-property |opacity,transform)
           :examples $ []
-          :schema $ quote Dynamic
+          :schema $ quote String
         'style-menu-item $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle style-menu-item
             {}
@@ -1365,23 +1365,23 @@
                 :line-height |40px
               |&:hover $ {} $ :background-color (hsl 0 0 97)
           :examples $ []
-          :schema $ quote Dynamic
+          :schema $ quote String
         'style-modal-backdrop $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle style-modal-backdrop
             {} $ |& style/backdrop
           :examples $ []
-          :schema $ quote Dynamic
+          :schema $ quote String
         'style-modal-card $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle style-modal-card
             {} $ |& $ &merge style/card
               {} (:line-height |32px) (:box-shadow "|0px 2px 24px 0px hsl(0,0%,0%,0.2)") (:transition-property |opacity,transform)
           :examples $ []
-          :schema $ quote Dynamic
+          :schema $ quote String
         'style-modal-title $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle style-modal-title
             {} $ |& $ {} (:padding |8px)
           :examples $ []
-          :schema $ quote Dynamic
+          :schema $ quote String
         'take-prompt-task! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn take-prompt-task! (cursor)
             let
@@ -1803,17 +1803,17 @@
             {} $ |& $ {} (:border-radius |50%) (:position :absolute) (:transform "|translate(-50%,-50%)") (:top |50%) (:left |50%) (:width 0) (:height 0) (:transition-duration |300ms) (:transition-delay |100ms) (:pointer-events :none) (:z-index |900) (:opacity 1)
               :background $ str "|radial-gradient(" (hsl 0 0 70 0.8) "|0% ," (hsl 0 0 60 0.0) "| 50%)"
           :examples $ []
-          :schema $ quote Dynamic
+          :schema $ quote String
         'style-trigger-active $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle style-trigger-active
             {} $ |& $ {} (:width 2000) (:height 2000) (:opacity 0.3) (:transition-delay |0ms)
           :examples $ []
-          :schema $ quote Dynamic
+          :schema $ quote String
         'style-trigger-container $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle style-trigger-container
             {} $ |& $ {} (:display :inline-block) (:position :relative)
           :examples $ []
-          :schema $ quote Dynamic
+          :schema $ quote String
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns respo-alerts.trigger
           :require
