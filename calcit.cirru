@@ -144,11 +144,13 @@
                         show? $ .show? alert-plugin
                       if (bool? show?) show? $ raise "|alert visibility must be Bool"
                     button $ {} (:inner-text "|show alert") (:class-name css/button)
-                      :on-click $ dispatch-fn (e d!) (.show alert-plugin d! nil)
+                      :on-click $ dispatch-fn (e d!)
+                        .show alert-plugin d! $ Option :none
                     , nil
                   =< 8 nil
                   button $ {} (:inner-text "|show alert text") (:class-name css/button)
-                    :on-click $ dispatch-fn (e d!) (.show alert-text-plugin d! "|DEMO text")
+                    :on-click $ dispatch-fn (e d!)
+                      .show alert-text-plugin d! $ Option :some "|DEMO text"
                   =< 8 nil
                   button $ {} (:inner-text "|show confirm") (:class-name css/button)
                     :on-click $ fn (e d!)
@@ -254,12 +256,14 @@
                 :plugin node cursor state
                 , node
             .show $ fn (self d! text)
-              hint-fn $ Fn Dynamic Fn (Optional String) (-> Dynamic)
+              hint-fn $ Fn Dynamic Fn (Option String) (-> Dynamic)
               match self $
                 :plugin node cursor state
-                if (non-nil? text)
-                  d! $ :: :states cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text text)
-                  d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
+                match text
+                  (:some t)
+                    d! $ :: :states cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text t)
+                  (:none)
+                    d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
             .close $ fn (self d!)
               hint-fn $ Fn Dynamic Fn $ -> Dynamic
               match self $
@@ -272,6 +276,35 @@
                 = true $ read-field state :show?
           :examples $ []
           :schema $ quote Impl
+          :tests $ [] $ %{} 'TestEntry (:name |show-takes-optional-text)
+            :code $ quote $ let
+                cursor $ [] :alert-contract
+                plugin $ alert-actions-plugin :plugin
+                  respo.schema/Component :name :alert-contract :effects ([]) :listeners ([]) :tree $ Option :none
+                  , cursor $ {}
+                calls $ ref $ assert-type ([])
+                  quote $ List Enum
+                dispatch! $ fn (op)
+                  hint-fn $ Fn Enum $ -> Unit
+                  reset! calls $ .append @calls op
+                  , &unit
+              .show plugin dispatch! $ Option :some |hello
+              .show plugin dispatch! $ Option :none
+              assert= 2 $ .len @calls
+              match
+                .unwrap $ first @calls
+                (:states received-cursor received-state)
+                  do (assert= cursor received-cursor)
+                    assert= (Option :some |hello) (get received-state :text)
+                _ $ assert= true false
+              match
+                .unwrap $ last @calls
+                (:states received-cursor received-state)
+                  do
+                    assert= (Option :some true) (get received-state :show?)
+                    assert= (Option :none) (get received-state :text)
+                _ $ assert= true false
+            :tags $ #{} :regression :unit
         '%confirm-actions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defimpl %confirm-actions ConfirmActions
             .render $ fn (self)
@@ -1433,7 +1466,8 @@
                 alert-plugin $ use-alert (>> states :alert)
                   {} $ :text |demo
               button
-                {} $ :on-click $ fn (e d!) (.show alert-plugin d!)
+                {} $ :on-click $ fn (e d!)
+                  .show alert-plugin d! $ Option :none
                 <> |Show
           :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> respo-alerts.core/alert-actions-plugin)
         'use-confirm $ %{} 'CodeEntry
