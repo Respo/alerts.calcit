@@ -22,7 +22,7 @@ immutable、类型、构建与原回归。库根继续执行 Caps strict/toolcha
 
 Demo http://repo.respo-mvc.org/alerts.calcit/ .
 
-旧 JS-FFI 0.2.6 tag 实际声明 0.30.1；本轮采用新 0.2.7，并沿 Respo/Router/UI/Reel 对齐正式 0.31 声明，见 [发布配对问题](https://github.com/calcit-lang/js-ffi/issues/195)。Respo/Router/UI/Reel 新 tag 均已通过各自原 CI 与 Demo 流程并发布；JS-FFI 0.2.7 通过原 CI 后发布，不涉及 Demo/服务部署。本候选将以这些实际 tag 验收，不改写旧 tag。Shelf 中 Feather 仍是固定已发布源码配合本地候选宿主图的兼容验收，不能据此宣称 Feather 自身发布依赖图已经同步。
+历史（0.31 候选，非当前 0.32.1 配对）：旧 JS-FFI 0.2.6 tag 实际声明 0.30.1；本轮采用新 0.2.7，并沿 Respo/Router/UI/Reel 对齐正式 0.31 声明，见 [发布配对问题](https://github.com/calcit-lang/js-ffi/issues/195)。Respo/Router/UI/Reel 新 tag 均已通过各自原 CI 与 Demo 流程并发布；JS-FFI 0.2.7 通过原 CI 后发布，不涉及 Demo/服务部署。本候选将以这些实际 tag 验收，不改写旧 tag。Shelf 中 Feather 仍是固定已发布源码配合本地候选宿主图的兼容验收，不能据此宣称 Feather 自身发布依赖图已经同步。
 
 ### 历史：0.10.57 候选与正式 Calcit 0.30.1 配对
 
