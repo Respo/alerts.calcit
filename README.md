@@ -2,20 +2,21 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
-### 0.11.0-alpha.3 候选：使用者先注意
+### 0.11.0-alpha.4 候选：使用者先注意
 
-CLI 与 `@calcit/procs` 保持正式 **0.31.0**；本轮候选对齐 Reel / UI
-`0.7.0-alpha.4` / `0.9.0-alpha.4`、Respo `0.17.0-alpha.4` 与 JS-FFI `0.2.7`。
+CLI 与 `@calcit/procs` 升到正式 **0.32.1**；本轮候选对齐 Reel / UI
+`0.7.0-alpha.5` / `0.9.0`、Respo `0.17.1` 与 JS-FFI `0.2.9`。Snapshot 已用
+`calcit edit format` 迁移为 0.32 类型写法。
 模块仍是 alpha 候选，尚未发布；消费者需协调完整图并重新生成 JS，不混装旧图或
-用 main/hash 代替 tag。旧 0.30.1 消费者继续使用原维护线。
+用 main/hash 代替 tag。旧 0.30.1 / 0.31 消费者继续使用原维护线。
 
-本次不改 Snapshot、公开 API、原测试或断言。沿用已发布 alpha.2 的 Modal 修复：
+本次除类型迁移外不改公开 API、原测试或断言。沿用已发布 alpha.2 的 Modal 修复：
 `.show` / `.close` 保留 dispatcher 的泛型返回关系，仍各调用一次并直接返回其结果；
 `.render` 返回 Component。状态操作、cursor、异常、HUD、Demo callback 和部署路径保持。
 
 原完整 strict、unit、附带测试 native/JS 重放、渲染回归及 Shelf 消费者门禁保留，
-不增加 runner 或类型预算。Shelf 固定原已评审的源码夹具，runtime 配对正式 0.31.0，
-并使用已发布 Feather `0.5.0-alpha.3` 与当前本地候选图；原 Snapshot 保持，执行
+不增加 runner 或类型预算。Shelf 固定原已评审的源码夹具，runtime 配对正式 0.32.1，
+并使用 Feather `0.5.0-alpha.6` 与当前本地候选图；Shelf 固定到已迁移 0.32 类型写法的评审提交，执行
 immutable、类型、构建与原回归。库根继续执行 Caps strict/toolchain 校验。
 本地候选图不等于尚未发布 Alerts tag 的干净消费者安装。
 
