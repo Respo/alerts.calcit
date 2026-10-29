@@ -101,10 +101,10 @@ let
     states $ {} (:cursor $ [])
     alert-plugin $ use-alert (>> states :alert) ({} (:text "|demo"))
     on-click $ fn (e dispatch!)
-      .show alert-plugin dispatch! nil
+      .show alert-plugin dispatch! $ Option :none
 ```
 
-extra argument can be added to overwrite `:text` field:
+the third argument is an `Option String`; pass `Option :some text` to overwrite the `:text` field, or `Option :none` to keep it:
 
 ```cirru.no-run
 ns app.main
@@ -116,7 +116,7 @@ let
     states $ {} (:cursor $ [])
     alert-plugin $ use-alert (>> states :alert) ({} (:text "|demo"))
     on-click $ fn (e dispatch!)
-      .show alert-plugin dispatch! "|Extra text"
+      .show alert-plugin dispatch! $ Option :some "|Extra text"
 ```
 
 #### `use-confirm`
@@ -284,7 +284,7 @@ let
       button
         {} (:inner-text "|show alert")
           :on-click $ fn (e dispatch!)
-            .show alert-plugin dispatch! nil
+            .show alert-plugin dispatch! $ Option :none
       button
         {} (:inner-text "|show confirm")
           :on-click $ fn (e dispatch!)
