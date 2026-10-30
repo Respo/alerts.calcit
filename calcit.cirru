@@ -1893,15 +1893,23 @@
           :doc "|Validate optional style containers, preserving nil and right-hand overrides. CSS key/value validation remains owned by Respo."
           :code $ quote $ defn merge-optional-styles (base active)
             let
-                checked-base $ if (nil? base) base $ if (map? base)
-                  decode-map-as base $ :: 'Map 'Dynamic 'Dynamic
-                  raise "|Style must be Map or nil"
-                checked-active $ if (nil? active) active $ if (map? active)
-                  decode-map-as active $ :: 'Map 'Dynamic 'Dynamic
-                  raise "|Style must be Map or nil"
-              if (nil? checked-base) checked-active $ if (nil? checked-active) checked-base $ &merge
-                decode-map-as checked-base $ :: 'Map 'Dynamic 'Dynamic
-                decode-map-as checked-active $ :: 'Map 'Dynamic 'Dynamic
+                checked-base $ if (nil? base) (Option :none)
+                  if (map? base)
+                    Option :some $ decode-map-as base $ :: 'Map 'Dynamic 'Dynamic
+                    raise "|Style must be Map or nil"
+                checked-active $ if (nil? active) (Option :none)
+                  if (map? active)
+                    Option :some $ decode-map-as active $ :: 'Map 'Dynamic 'Dynamic
+                    raise "|Style must be Map or nil"
+              match checked-base
+                (:none)
+                  match checked-active
+                    (:none) nil
+                    (:some a) a
+                (:some b)
+                  match checked-active
+                    (:none) b
+                    (:some a) (&merge b a)
           :examples $ []
           :schema $ quote $ Fn B A
             -> $ JsNullish $ Map Dynamic Dynamic
