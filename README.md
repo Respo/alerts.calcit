@@ -2,7 +2,19 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
-### 0.11.0-alpha.4 候选：使用者先注意
+### 0.11.0-alpha.5：`use-alert` 的 `.show` 改收 Option
+
+`use-alert` 插件 `.show` 的第三个参数从旧的 `Optional String`（可传 nil）改为
+`Option String`，为 Calcit 0.33 删除 `Optional<T>`（calcit-lang/calcit#2233）做准备。
+调用方需要把 `.show plugin d! nil` 改成 `.show plugin d! $ Option :none`，把
+`.show plugin d! "|text"` 改成 `.show plugin d! $ Option :some "|text"`；不改的调用会在类型检查阶段报错。
+`respo-alerts.util/merge-optional-styles` 内部改用 Option 选择样式，返回值与行为不变。
+另外 10 个 `defstyle` 的 schema 从 Dynamic 收紧为 String。
+
+工具链与依赖图与 alpha.4 相同：Calcit / `@calcit/procs` **0.32.1**，Reel `0.7.0-alpha.5`、
+UI `0.9.0`、Respo `0.17.1`、JS-FFI `0.2.9`。
+
+### 历史：0.11.0-alpha.4 候选
 
 CLI 与 `@calcit/procs` 升到正式 **0.32.1**；本轮候选对齐 Reel / UI
 `0.7.0-alpha.5` / `0.9.0`、Respo `0.17.1` 与 JS-FFI `0.2.9`。Snapshot 已用
