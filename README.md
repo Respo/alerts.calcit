@@ -2,17 +2,28 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
-### 正式 0.11.0 候选：配对正式 Reel 0.7.0
+### 0.11.1 候选：适配 Respo 0.18 的 Option DomProps
 
-使用者影响：本候选仍需正式 Calcit / `@calcit/procs` **0.32.1**，依赖从 Reel
-`0.7.0-alpha.5` 改为已发布正式 **0.7.0**；UI **0.9.0**、Respo **0.17.1**
-和 JS FFI **0.2.9** 保持。UI 自身固定的 Router 预发布传递依赖保留，不擅自覆盖。
-0.11.0 tag 尚未发布；消费者等正式 tag 后正常重新安装完整图，不引用 main/hash。
+使用者影响：继续配对正式 Calcit CLI / `@calcit/procs` **0.32.1**，依赖图升级为
+Respo **0.18.0**、UI **0.10.0**、Reel **0.7.1**、JS-FFI **0.2.9**（传递 Router **0.9.0**）。
+应用须协调同一精确图并重新生成 JS；直接构造 DomProps 的应用也需按上游 Option 字段迁移。
+Alerts 的公开 hook、`.show` Option 参数、状态/cursor 和回调顺序保持。
+0.11.0 已发布且不移动；0.11.1 仍为候选，正式依赖图验收及发版以实际 tag 和 PR 为准，不引用 main/hash。
 
-相对已发布 alpha.5，库源码、公开合同、状态/cursor、原测试与断言不变；下文
-`.show` 的 Option 参数迁移要求仍适用。只同步模块版本及原 Shelf 消费者夹具的
-依赖声明，继续完整 strict、native/JS、渲染与真实消费者门禁，不增 runner 或预算。
-夹具仍明确使用本地候选，不能冒称是尚未发布的 0.11.0 干净安装验收。
+Prompt 的 DomProps 只写实际使用的字段，有值字段用 Option :some，缺省字段省略。
+事件函数补上受编译器检查的 EventHandler 合同；input/textarea 分支的 class/style 同样保留 Option。
+公开 `prompt-placeholder` 的 JsNullish 返回合同不变，在 DOM 字段前显式转为 Option，
+保留缺省、空字符串、Unicode 和非法输入拒绝行为；不新增强转、默认回退或编译器特判。
+
+保留全部原门禁和断言：完整 strict、native/生成 JS 回放、Prompt/typed Reel 渲染及固定 Shelf 源码夹具。
+夹具的宿主版本声明与本候选同步，但它仍是本地候选源码图，不能冒称 Alerts 0.11.1 的已发布安装验收。
+不新增 runner、预算或重复 COS 校验脚本；npm 新候选一小时包龄及原前端部署路径保持。
+
+### 历史：0.11.0 正式配对
+
+0.11.0 已发布到 488d67c，使用 Reel 0.7.0、UI 0.9.0、Respo 0.17.1 和 JS-FFI 0.2.9；
+UI 保留自身 Router 预发布传递依赖。相对 alpha.5 只同步发布图，原源码和公开合同不变。
+以下 `.show` 的 Option 参数迁移要求仍适用。
 
 ### 0.11.0-alpha.5：`use-alert` 的 `.show` 改收 Option
 
@@ -409,8 +420,8 @@ MIT
 ### Prompt 的 placeholder 边界
 
 `:placeholder` 允许 String 或缺失值：缺失时不生成该 DOM 属性，空字符串保留为空字符串。
-从开放 options 读取后，通过 `prompt-placeholder` 检查，再进入 `DomProps` 的
-`JsNullish<String>` 字段。Number、Bool、Tag、Map、List 会明确失败，不做隐式字符串转换。
+从开放 options 读取后，通过 `prompt-placeholder` 检查，保留其公开
+`JsNullish<String>` 返回合同，再通过 `js-nullish->option` 进入 `DomProps` 的 Option 字段。Number、Bool、Tag、Map、List 会明确失败，不做隐式字符串转换。
 `input` 与 `textarea` 共用此边界；不改变初始文字、提交、关闭、validator 或样式定制。
 
 历史 `0.10.55` / `0.10.56` 图固定 Calcit/procs `0.30.1-alpha.4`、Respo `0.16.122`、
