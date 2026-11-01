@@ -2,6 +2,18 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
+### 正式 0.11.0 候选：配对正式 Reel 0.7.0
+
+使用者影响：本候选仍需正式 Calcit / `@calcit/procs` **0.32.1**，依赖从 Reel
+`0.7.0-alpha.5` 改为已发布正式 **0.7.0**；UI **0.9.0**、Respo **0.17.1**
+和 JS FFI **0.2.9** 保持。UI 自身固定的 Router 预发布传递依赖保留，不擅自覆盖。
+0.11.0 tag 尚未发布；消费者等正式 tag 后正常重新安装完整图，不引用 main/hash。
+
+相对已发布 alpha.5，库源码、公开合同、状态/cursor、原测试与断言不变；下文
+`.show` 的 Option 参数迁移要求仍适用。只同步模块版本及原 Shelf 消费者夹具的
+依赖声明，继续完整 strict、native/JS、渲染与真实消费者门禁，不增 runner 或预算。
+夹具仍明确使用本地候选，不能冒称是尚未发布的 0.11.0 干净安装验收。
+
 ### 0.11.0-alpha.5：`use-alert` 的 `.show` 改收 Option
 
 `use-alert` 插件 `.show` 的第三个参数从旧的 `Optional String`（可传 nil）改为
