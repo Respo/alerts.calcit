@@ -117,12 +117,12 @@ function findElement(node, name, seen = new WeakSet()) {
   return null;
 }
 
-/** Read a rendered Element's click callback, failing if the expected handler is absent. */
-function clickHandler(element) {
-  assert.ok(element, 'click target must be rendered');
+/** Read a rendered Element's callback, failing if the expected handler is absent. */
+function eventHandler(element, name = 'click') {
+  assert.ok(element, 'event target must be rendered');
   const events = element.values[element.fields.findIndex((field) => field.value === 'event')];
-  const index = events.chunk.findIndex((key) => key?.value === 'click');
-  assert.ok(index >= 0, 'target must have a click handler');
+  const index = events.chunk.findIndex((key) => key?.value === name);
+  assert.ok(index >= 0, `target must have a ${name} handler`);
   return events.chunk[index + 1];
 }
 
@@ -133,7 +133,7 @@ test('confirm delivers the checked event map and dispatch before closing', () =>
   const component = comp_confirm_modal(c.parse_cirru_edn('{}'), true,
     (received, receivedDispatch) => calls.push(['confirm', received, receivedDispatch]),
     (receivedDispatch) => calls.push(['close', receivedDispatch]));
-  const click = clickHandler(findElement(component, 'button'));
+  const click = eventHandler(findElement(component, 'button'));
   click(event, dispatch);
   assert.deepEqual(calls, [['confirm', event, dispatch], ['close', dispatch]]);
   calls.length = 0;
@@ -190,13 +190,46 @@ test('menu renders and selects Enum and Map items, including clear and style ove
     }
     return null;
   };
-  clickHandler(findClick(component, '>A<'))({}, () => {});
-  clickHandler(findClick(component, '>B<'))({}, () => {});
-  clickHandler(findClick(component, '>Clear<'))({}, () => {});
+  eventHandler(findClick(component, '>A<'))({}, () => {});
+  eventHandler(findClick(component, '>B<'))({}, () => {});
+  eventHandler(findClick(component, '>Clear<'))({}, () => {});
   assert.deepEqual(selected.map((item) => item === null ? null : c.to_js_data(item)),
     [['item', 'a', 'A'], ['item', 'b', 'B'], null]);
   assert.throws(() => comp_modal_menu(c.parse_cirru_edn('{} (:items $ {})'), true,
     () => {}, () => assert.fail('invalid input must not call selection')), /Menu items must be List/);
+});
+
+test('prompt input and keyboard handlers preserve state and callbacks in both modes', () => {
+  for (const multiline of [false, true]) {
+    const options = c.parse_cirru_edn(`{} (:multiline? ${multiline})`);
+    const text = '更新文本 🐈';
+    const calls = [];
+    const updates = [];
+    const dispatch = (op) => { updates.push(op); };
+    const finish = (value, d) => { calls.push(['finish', value, d]); };
+    const close = (d) => { calls.push(['close', d]); };
+    const render = (state) => comp_prompt_modal(state, options, true, finish, close);
+    const name = multiline ? 'textarea' : 'input';
+    let control = findElement(render(states), name);
+
+    eventHandler(control, 'input')(c.parse_cirru_edn('{} (:type :input) (:value "|更新文本 🐈")'), dispatch);
+    const changed = updates.at(-1);
+    assert.equal(changed.tag.value, 'states');
+    assert.deepEqual(c.to_js_data(changed.extra[0]), []);
+    assert.equal(c.to_js_data(changed.extra[1]).text, text);
+    assert.deepEqual(calls, []);
+
+    control = findElement(render(c.assoc(states, c.turn_tag('data'), changed.extra[1])), name);
+    eventHandler(control, 'keydown')(c.parse_cirru_edn(`{} (:key-code 13) (:meta? ${multiline})`), dispatch);
+    assert.deepEqual(calls, [['finish', text, dispatch], ['close', dispatch]]);
+    assert.equal(updates.at(-1).extra[1].chunk.length, 0);
+
+    calls.length = 0;
+    updates.length = 0;
+    eventHandler(control, 'keydown')(c.parse_cirru_edn('{} (:key-code 27)'), dispatch);
+    assert.deepEqual(calls, [['close', dispatch]]);
+    assert.equal(updates.at(-1).extra[1].chunk.length, 0);
+  }
 });
 
 test('prompt reopens with its current initial value after submitting', () => {
