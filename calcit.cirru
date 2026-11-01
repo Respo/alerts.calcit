@@ -946,11 +946,17 @@
                           <> $ read-text options :text "|Type in text"
                         =< nil 8
                         let
-                            props $ DomProps :value text :class-name nil :style nil :inner-text nil :id nil :type nil :href nil :src nil :name nil :title nil :disabled nil :checked nil :spell-check nil :spellcheck nil :autofocus nil :tab-index nil :read-only nil :data-name nil :data-comp nil :role nil :aria-label nil :aria-labelledby nil :aria-describedby nil :aria-hidden nil :selected nil :target nil :on-click nil :on-focus nil :on-blur nil :on-keyup nil :on-change nil :on-mousedown nil :on-mouseup nil :on-paste nil :innerHTML nil :rel nil :defer nil :on nil :alt nil :draggable nil :content nil :charset nil :multiple nil :accept nil :ref nil :on-input
-                              fn (e d!)
+                            props $ DomProps :value (Option :some text) :on-input
+                              Option :some $ fn (e d!)
+                                hint-fn $ Fn (Map Tag Dynamic)
+                                  Fn *dispatch-op $ -> Unit
+                                  -> Unit
                                 d! $ :: :states cursor $ &map:assoc (as-state-map state) :text (prompt-event-text e)
                               , :on-keydown
-                                fn (e d!)
+                                Option :some $ fn (e d!)
+                                  hint-fn $ Fn (Map Tag Dynamic)
+                                    Fn *dispatch-op $ -> Unit
+                                    -> Unit
                                   let
                                       event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
                                       action $ unsafe-coerce
@@ -963,16 +969,17 @@
                                           d! $ :: :states cursor $ {}
                                       (:ignore) &unit
                                     , &unit
-                                , :placeholder $ prompt-placeholder (read-field options :placeholder)
+                                , :placeholder $ js-nullish->option
+                                  prompt-placeholder $ read-field options :placeholder
                           if (read-field options :multiline?)
                             textarea $ struct-with props
-                              :class-name $ str-spaced schema/input-box-name css/textarea $ read-field options :input-class
-                              :style $ &merge
+                              :class-name $ Option :some $ str-spaced schema/input-box-name css/textarea (read-field options :input-class)
+                              :style $ Option :some $ &merge
                                 {} (:width |100%) (:min-height 120) (:max-height |50vh)
                                 read-style options :input-style
                             input $ struct-with props
-                              :class-name $ str-spaced schema/input-box-name css/input $ read-field options :input-class
-                              :style $ &merge
+                              :class-name $ Option :some $ str-spaced schema/input-box-name css/input (read-field options :input-class)
+                              :style $ Option :some $ &merge
                                 {} $ :width |100%
                                 read-style options :input-style
                         =< nil 16
