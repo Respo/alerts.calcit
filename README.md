@@ -2,7 +2,13 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
-### 0.11.1 候选：适配 Respo 0.18 的 Option DomProps
+### 0.11.2 候选
+
+使用者请将 CLI 和 `@calcit/procs` 同步到正式 **0.34.1**，并配对 Reel **0.8.0**、UI **0.12.0**、Respo **0.18.0**、JS FFI **0.2.9**，再生成 JS。直接使用 UI 的 Store 或 Router 的调用方还需适配其具名 Router 类型。
+
+`backdrop`、`card` 和 `button` 三个公开样式常量使用 UI 提供的 `Map<Tag,StyleValue>`，值可以是 String、Number 或 Tag。Demo 的 Inspector 和 Reel 使用显式 Option 控制显示。CI 在同一份 Shelf 源码上运行候选依赖图及其原回归。
+
+### 历史 0.11.1
 
 使用者影响：继续配对正式 Calcit CLI / `@calcit/procs` **0.32.1**，依赖图升级为
 Respo **0.18.0**、UI **0.10.0**、Reel **0.7.1**、JS-FFI **0.2.9**（传递 Router **0.9.0**）。
