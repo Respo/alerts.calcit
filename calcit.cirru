@@ -27,13 +27,20 @@
                     img $ {} (:class-name style-logo)
                       :src |https://cos-sh.tiye.me/cos-up/bb4c2755050318e864b56f59145d726e-SubstractRespo.png
                 =< nil 40
-                comp-hooks-usages $ decode-map-as (>> states :hooks) (:: 'Map 'Tag 'Dynamic)
+                comp-hooks-usages $ decode-map-as (>> states :hooks)
+                  quote $ Map Tag Dynamic
                 =< nil 40
-                comp-controlled-modals $ decode-map-as (>> states :controlled) (:: 'Map 'Tag 'Dynamic)
+                comp-controlled-modals $ decode-map-as (>> states :controlled)
+                  quote $ Map Tag Dynamic
                 =< nil 40
-                comp-demo-trigger $ decode-map-as (>> states :trigger) (:: 'Map 'Tag 'Dynamic)
-                when dev? $ comp-inspect |states states $ {} (:bottom 0)
-                when dev? $ comp-typed-reel (>> states :reel) reel $ {}
+                comp-demo-trigger $ decode-map-as (>> states :trigger)
+                  quote $ Map Tag Dynamic
+                if dev?
+                  Option :some $ comp-inspect |states states $ {} (:bottom 0)
+                  Option :none
+                if dev?
+                  Option :some $ comp-typed-reel (>> states :reel) reel $ {}
+                  Option :none
           :examples $ []
           :schema $ quote $ Fn
             reel.typed/State Enum $ Map Dynamic Dynamic
@@ -558,7 +565,7 @@
           :examples $ []
           :schema $ quote Trait
         'PluginNodeCursorState $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defenum PluginNodeCursorState (:plugin 'respo.schema/Component 'Dynamic 'Dynamic)
+          :code $ quote $ defenum PluginNodeCursorState (:plugin respo.schema/Component Dynamic Dynamic)
           :examples $ []
           :schema $ quote EnumDef
         'PromptActions $ %{} 'CodeEntry (:doc |)
@@ -566,7 +573,7 @@
           :examples $ []
           :schema $ quote Trait
         'PromptEvent $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defstruct PromptEvent (:text 'String) (:keycode 'Number) (:meta? 'Bool) (:ctrl? 'Bool)
+          :code $ quote $ defstruct PromptEvent (:text String) (:keycode Number) (:meta? Bool) (:ctrl? Bool)
           :examples $ []
           :schema $ quote StructDef
         'PromptKeyAction $ %{} 'CodeEntry (:doc |)
@@ -574,7 +581,7 @@
           :examples $ []
           :schema $ quote EnumDef
         'PromptPluginNodeCursorState $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defenum PromptPluginNodeCursorState (:plugin 'respo.schema/Component 'Dynamic 'Dynamic)
+          :code $ quote $ defenum PromptPluginNodeCursorState (:plugin respo.schema/Component Dynamic Dynamic)
           :examples $ []
           :schema $ quote EnumDef
         'alert-actions-plugin $ %{} 'CodeEntry (:doc |)
@@ -709,7 +716,7 @@
                             :class-name $ str-spaced css/button schema/confirm-button-name $ read-field options :confirm-class
                             :on-click $ dispatch-fn (e d!)
                               let
-                                  event $ decode-map-as e $ :: 'Map 'Tag 'Dynamic
+                                  event $ decode-map-as e $ quote (Map Tag Dynamic)
                                 if (contains? event :type)
                                   do (on-confirm! event d!) (on-close! d!)
                                   raise "|Confirm event requires :type"
@@ -1754,16 +1761,16 @@
           :code $ quote $ defenum Op
             :states
               quote $ List Dynamic
-              , 'Dynamic
-            :content 'Dynamic
-            :hydrate-storage 'Dynamic
+              , Dynamic
+            :content Dynamic
+            :hydrate-storage Dynamic
             :reel/toggle
-            :reel/recall 'Number
+            :reel/recall Number
             :reel/run
             :reel/step
             :reel/merge
             :reel/reset
-            :reel/remove 'Number
+            :reel/remove Number
           :examples $ []
           :schema $ quote EnumDef
         'confirm-button-name $ %{} 'CodeEntry (:doc |)
@@ -1793,13 +1800,13 @@
               :z-index |999
               :padding 16
           :examples $ []
-          :schema $ quote Map
+          :schema $ quote $ Map Tag respo-ui.schema/StyleValue
         'button $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def button
             &merge ui/button $ {} (:border-radius |4px) (:background-color :white)
               :border-color $ hsl 240 60 90
           :examples $ []
-          :schema $ quote Map
+          :schema $ quote $ Map Tag respo-ui.schema/StyleValue
         'card $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def card
             {}
@@ -1813,7 +1820,7 @@
               :margin :auto
               :padding 16
           :examples $ []
-          :schema $ quote Map
+          :schema $ quote $ Map Tag respo-ui.schema/StyleValue
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns respo-alerts.style
           :require
@@ -1902,11 +1909,11 @@
             let
                 checked-base $ if (nil? base) (Option :none)
                   if (map? base)
-                    Option :some $ decode-map-as base $ :: 'Map 'Dynamic 'Dynamic
+                    Option :some $ decode-map-as base $ quote (Map Dynamic Dynamic)
                     raise "|Style must be Map or nil"
                 checked-active $ if (nil? active) (Option :none)
                   if (map? active)
-                    Option :some $ decode-map-as active $ :: 'Map 'Dynamic 'Dynamic
+                    Option :some $ decode-map-as active $ quote (Map Dynamic Dynamic)
                     raise "|Style must be Map or nil"
               match checked-base
                 (:none)
