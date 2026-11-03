@@ -6,7 +6,7 @@
 
 使用者影响：CLI 与 `@calcit/procs` 同步到正式 **0.34.2**，配对 Reel **0.8.1**、UI **0.12.1**、Respo **0.18.1**、JS-FFI **0.2.9**（传递 Router **0.10.1**）。保留 Map 事件与已有 Router struct，不能与 Respo 0.19 新事件图混装；公开 hooks、回调顺序、nil/Option 样式行为与三项样式常量 union 合同保持。
 
-Snapshot、schema、原测试和断言与 0.11.2 逐字节相同。仅同步正式图、procs/锁文件和说明；原 Shelf 精确源码夹具只在本地候选图中配对 procs 0.34.2，源码不改，不冒充 Shelf 自身正式发布图验收。本地全部 287 定义、完整 strict、原 19 项 unit、28 项 Node 渲染回归、构建及 Shelf 原门禁/回归通过。UI 0.12.1 尚待正式发布，随后还需 Caps strict 真实图和远端完整 CI，当前不宣称完成。
+Snapshot、schema、原测试和断言与 0.11.2 逐字节相同。仅同步正式图、procs/锁文件和说明；原 Shelf 精确源码夹具只在本地候选图中配对 procs 0.34.2，源码不改，不冒充 Shelf 自身正式发布图验收。本地全部 287 定义、完整 strict、原 19 项 unit、28 项 Node 渲染回归、构建及 Shelf 原门禁/回归通过。UI 0.12.1 / Router 0.10.1 已正式发布，随后已通过 Caps strict 真实图及 toolchain 验收，安装 Snapshot 与预检源码逐字节相同；远端完整 CI 与评审仍需完成，当前不宣称已发版。
 
 ### 历史 0.11.2
 
