@@ -2,7 +2,19 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
-### 0.11.3 / Calcit 0.34.2 维护候选
+### 0.12.0 / 现代 Respo 事件图候选
+
+使用者影响：配对正式 Calcit CLI / `@calcit/procs` **0.34.2**、Reel **0.9.0**、UI **0.14.1**、Respo **0.19.2**、JS-FFI **0.2.10** 与传递 Router **0.11.2**。消费者需协调完整精确图并重新生成 JS，不能与旧 Map DOM 事件图混装。0.12.0 尚未发布。
+
+公开 hooks、`.show` 的 Option 参数、状态 key、样式和回调顺序保持。Confirm / Alert 的应用回调继续收到 Map；在一个具名的受检 DOM 入口将名义 RespoEvent 转为 Map，旧 Map 沿用原 Tag 键校验与字段语义，非法 Map 或其他 Struct 拒绝。这个入口保留真实 raw Dynamic，不用有限 union 假装开放事件字段已经封闭。公开 Prompt Map 辅助接口及原默认值行为保持，DOM handler 本身标注具体 RespoEvent。
+
+Demo 和 typed Reel 原测试进入 managed memo frame，保证组件构建与实际渲染同处一个 frame。15 处旧 spacer 按原非 nil 宽度优先规则迁移为等宽/等高 space-x / space-y。八处已有 guard / 返回类型证明的强转移除，unsafe 8→0；全部 98 个原定义的 schema、附带测试和示例保持。
+
+修复实际页面验收发现的 [#125](https://github.com/Respo/alerts.calcit/issues/125)：Prompt 用 Enter 提交并由回调打开 Confirm 时，先阻止原生默认行为，避免同一次 Enter 自动点击新 Confirm。多行普通 Enter 仍换行，Escape 和回调次序保持。复用原键盘回归使用真实 RespoEvent 夹具；新增断言在修复前失败、修复后通过，不增加 checker 或编译器规则。
+
+本地 293 个可达定义、完整 strict、原 19 项 unit、原 28 项 Node（含附带 native/JS 回放）、构建通过，dynamic-method/deprecated 为零，门禁未放宽。原 Shelf 精确源码夹具在同一候选图下通过 277 个定义、完整 strict、构建与原七项回归，Snapshot 字节保持；这是显式本地候选图，不冒称已发布 Alerts 的 Caps 安装验收。实际 Chrome 已验收 Confirm、Alert、单/多行 Prompt、空输入与非法 Cirru 校验、Modal/Menu/Drawer、Escape 及刷新；修复后捕获到 Enter defaultPrevented=true，Confirm 等待独立点击，控制台无错误。精确 Linux CI、隔离 COS 内置校验与评审仍待完成。
+
+### 历史 0.11.3 / Calcit 0.34.2 维护记录
 
 使用者影响：CLI 与 `@calcit/procs` 同步到正式 **0.34.2**，配对 Reel **0.8.1**、UI **0.12.1**、Respo **0.18.1**、JS-FFI **0.2.9**（传递 Router **0.10.1**）。保留 Map 事件与已有 Router struct，不能与 Respo 0.19 新事件图混装；公开 hooks、回调顺序、nil/Option 样式行为与三项样式常量 union 合同保持。
 

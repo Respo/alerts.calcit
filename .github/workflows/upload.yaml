@@ -106,12 +106,12 @@ jobs:
         # The consumer Snapshot remains unchanged.
         cat > "$consumer/deps.cirru" <<'EOF'
         {} (:calcit-version |0.34.2) (:version |0.1.0)
-          :dependencies $ {} (|Respo/reel.calcit |0.8.1)
-            |Respo/respo-ui.calcit |0.12.1
-            |Respo/respo.calcit |0.18.1
+          :dependencies $ {} (|Respo/reel.calcit |0.9.0)
+            |Respo/respo-ui.calcit |0.14.1
+            |Respo/respo.calcit |0.19.2
             |Respo/respo-feather.calcit |0.5.1
-            |Respo/alerts.calcit |0.11.3
-            |calcit-lang/js-ffi |0.2.9
+            |Respo/alerts.calcit |0.12.0
+            |calcit-lang/js-ffi |0.2.10
         EOF
         cd "$consumer"
         yarn add --exact @calcit/procs@0.34.2

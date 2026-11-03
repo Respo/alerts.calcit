@@ -8,8 +8,18 @@ import * as c from '../js-out/calcit.core.mjs';
 import { comp_prompt_modal, comp_modal_menu, comp_confirm_modal, comp_modal, comp_drawer, comp_alert_modal } from '../js-out/respo-alerts.core.mjs';
 import { comp_trigger } from '../js-out/respo-alerts.trigger.mjs';
 import { make_string } from '../js-out/respo.render.html.mjs';
+import { RespoEvent } from '../js-out/respo.schema.mjs';
 
 const states = c.parse_cirru_edn('{} (:cursor $ [])');
+const respoEvent = (source, nativeEvent) => {
+  const fields = c.parse_cirru_edn(source);
+  return c._$n__PCT__$M_(RespoEvent, ...RespoEvent.fields.flatMap(tag => {
+    const value = fields.get(tag);
+    const fallback = tag.value === 'type' ? c.newTag('keydown')
+      : tag.value === 'event' || tag.value === 'original-event' ? nativeEvent : null;
+    return [tag, value == null ? fallback : value];
+  }));
+};
 
 test('canonical attached tests replay on native and generated JavaScript', async () => {
   const invoke = (snapshot, ...args) => execFileSync(process.env.CALCIT_BIN ?? 'calcit', [snapshot, ...args],
@@ -220,7 +230,15 @@ test('prompt input and keyboard handlers preserve state and callbacks in both mo
     assert.deepEqual(calls, []);
 
     control = findElement(render(c.assoc(states, c.turn_tag('data'), changed.extra[1])), name);
-    eventHandler(control, 'keydown')(c.parse_cirru_edn(`{} (:key-code 13) (:meta? ${multiline})`), dispatch);
+    let prevented = 0;
+    const nativeEvent = { preventDefault() { prevented += 1; } };
+    if (multiline) {
+      eventHandler(control, 'keydown')(respoEvent('{} (:key-code 13)', nativeEvent), dispatch);
+      assert.deepEqual(calls, []);
+      assert.equal(prevented, 0, 'plain Enter must retain textarea newline behavior');
+    }
+    eventHandler(control, 'keydown')(respoEvent(`{} (:key-code 13) (:meta? ${multiline})`, nativeEvent), dispatch);
+    assert.equal(prevented, 1, 'consume submit Enter before a callback can focus a new button');
     assert.deepEqual(calls, [['finish', text, dispatch], ['close', dispatch]]);
     assert.equal(updates.at(-1).extra[1].chunk.length, 0);
 

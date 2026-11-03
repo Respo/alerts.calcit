@@ -26,13 +26,13 @@
                     {} (:href |https://respo-mvc.org/) (:target |_blank)
                     img $ {} (:class-name style-logo)
                       :src |https://cos-sh.tiye.me/cos-up/bb4c2755050318e864b56f59145d726e-SubstractRespo.png
-                =< nil 40
+                space-y 40
                 comp-hooks-usages $ decode-map-as (>> states :hooks)
                   quote $ Map Tag Dynamic
-                =< nil 40
+                space-y 40
                 comp-controlled-modals $ decode-map-as (>> states :controlled)
                   quote $ Map Tag Dynamic
-                =< nil 40
+                space-y 40
                 comp-demo-trigger $ decode-map-as (>> states :trigger)
                   quote $ Map Tag Dynamic
                 if dev?
@@ -78,14 +78,14 @@
                   {} $ :style $ {} (:padding "|8px 0px")
                   button $ {} (:inner-text "|show modal") (:class-name css/button)
                     :on-click $ fn (e d!)
-                      hint-fn $ Fn (Map Tag Dynamic)
+                      hint-fn $ Fn respo.schema/RespoEvent
                         Fn Enum $ -> Unit
                         -> Unit
                       .show demo-modal d!
-                  =< 8 nil
+                  space-x 8
                   button $ {} (:inner-text "|show modal menu") (:class-name css/button)
                     :on-click $ dispatch-fn (e d!) (.show demo-modal-menu d!)
-                  =< 8 nil
+                  space-x 8
                   button $ {} (:inner-text "|show drawer") (:class-name css/button)
                     :on-click $ dispatch-fn (e d!) (.show demo-drawer d!)
                   .render demo-modal
@@ -154,39 +154,39 @@
                       :on-click $ dispatch-fn (e d!)
                         .show alert-plugin d! $ Option :none
                     , nil
-                  =< 8 nil
+                  space-x 8
                   button $ {} (:inner-text "|show alert text") (:class-name css/button)
                     :on-click $ dispatch-fn (e d!)
                       .show alert-text-plugin d! $ Option :some "|DEMO text"
-                  =< 8 nil
+                  space-x 8
                   button $ {} (:inner-text "|show confirm") (:class-name css/button)
                     :on-click $ fn (e d!)
-                      hint-fn $ Fn (Map Tag Dynamic)
+                      hint-fn $ Fn respo.schema/RespoEvent
                         Fn Enum $ -> Unit
                         -> Unit
                       .show confirm-plugin d! $ fn () $ println "|after confirmed"
                       , &unit
-                  =< 8 nil
+                  space-x 8
                   button $ {} (:inner-text "|show confirm with text") (:class-name css/button)
                     :on-click $ fn (e d!)
-                      hint-fn $ Fn (Map Tag Dynamic)
+                      hint-fn $ Fn respo.schema/RespoEvent
                         Fn Enum $ -> Unit
                         -> Unit
                       .show confirm-prompt-plugin d! $ fn (text)
                         .show-with-text confirm-plugin d! (str "|Confirmed: " text)
                           fn () $ println |after-confirmed
                       , &unit
-                  =< 8 nil
+                  space-x 8
                   button $ {} (:inner-text "|show prompt") (:class-name css/button)
                     :on-click $ dispatch-fn (e d!)
                       .show prompt-plugin d! $ fn (text)
                         println "|read from prompt" $ to-lispy-string text
-                  =< 8 nil
+                  space-x 8
                   button $ {} (:inner-text "|show multilines prompt") (:class-name css/button)
                     :on-click $ dispatch-fn (e d!)
                       .show prompt-multilines-plugin d! $ fn (text)
                         println "|read from prompt" $ to-lispy-string text
-                  =< 8 nil
+                  space-x 8
                   comp-trigger
                     let
                         show? $ .show? prompt-validation-plugin
@@ -230,7 +230,7 @@
             respo.css :refer $ defstyle
             respo-ui.css :as css
             respo.core :refer $ defcomp >> <> div button textarea span img a dispatch-fn
-            respo.comp.space :refer $ =<
+            respo.comp.space :refer $ space-x space-y
             reel.comp.reel :refer $ comp-typed-reel
             respo-alerts.config :refer $ dev?
             respo-alerts.core :refer $ comp-modal comp-modal-menu use-alert use-confirm use-prompt use-modal use-modal-menu use-drawer as-state-map
@@ -655,13 +655,18 @@
                       :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop $ read-field options :backdrop-class
                       :style $ read-style options :backdrop-style
                       :on-click $ fn (e d!)
+                        hint-fn $ Fn respo.schema/RespoEvent
+                          Fn *dispatch-op $ -> Unit
+                          -> Unit
+                          :features :js-ffi
                         let
-                            event $ .-event e
+                            event $ :event e
                           if (js-present? event)
                             browser/event-stop-propagation! $ browser/event-host event
                             , &unit
                           on-close! d!
-                          on-read! e d!
+                          on-read! (event-fields e) d!
+                        , &unit
                     div
                       {}
                         :class-name $ str-spaced style-modal-card css/global css/column $ read-field options :card-class
@@ -669,7 +674,7 @@
                         :on-click $ fn (e d!) &unit
                       div ({})
                         <> $ read-text options :text |Alert!
-                      =< nil 8
+                      space-y 8
                       div
                         {} $ :class-name css/row-parted
                         span $ {}
@@ -677,7 +682,14 @@
                           {}
                             :class-name $ str-spaced css/button schema/confirm-button-name $ read-field options :confirm-class
                             :style $ read-style options :confirm-style
-                            :on-click $ fn (e d!) (on-close! d!) (on-read! e d!)
+                            :on-click $ fn (e d!)
+                              hint-fn $ Fn respo.schema/RespoEvent
+                                Fn *dispatch-op $ -> Unit
+                                -> Unit
+                                :features :js-ffi
+                              on-close! d!
+                              on-read! (event-fields e) d!
+                              , &unit
                           <> $ read-text options :confirm-text |Read
                     comp-esc-listener show? on-close!
                   []
@@ -707,7 +719,7 @@
                         :on-click $ fn (e d!) &unit
                       div ({})
                         <> $ read-text options :text |Confirm?
-                      =< nil 8
+                      space-y 8
                       div
                         {} $ :class-name css/row-parted
                         span $ {}
@@ -716,7 +728,7 @@
                             :class-name $ str-spaced css/button schema/confirm-button-name $ read-field options :confirm-class
                             :on-click $ dispatch-fn (e d!)
                               let
-                                  event $ decode-map-as e $ quote (Map Tag Dynamic)
+                                  event $ event-fields e
                                 if (contains? event :type)
                                   do (on-confirm! event d!) (on-close! d!)
                                   raise "|Confirm event requires :type"
@@ -951,26 +963,28 @@
                           :on-click $ fn (e d!) &unit
                         div ({})
                           <> $ read-text options :text "|Type in text"
-                        =< nil 8
+                        space-y 8
                         let
                             props $ DomProps :value (Option :some text) :on-input
                               Option :some $ fn (e d!)
-                                hint-fn $ Fn (Map Tag Dynamic)
+                                hint-fn $ Fn respo.schema/RespoEvent
                                   Fn *dispatch-op $ -> Unit
                                   -> Unit
-                                d! $ :: :states cursor $ &map:assoc (as-state-map state) :text (prompt-event-text e)
+                                d! $ :: :states cursor $ &map:assoc (as-state-map state) :text
+                                  prompt-event-text $ event-fields e
                               , :on-keydown
                                 Option :some $ fn (e d!)
-                                  hint-fn $ Fn (Map Tag Dynamic)
+                                  hint-fn $ Fn respo.schema/RespoEvent
                                     Fn *dispatch-op $ -> Unit
                                     -> Unit
                                   let
-                                      event-info $ unsafe-coerce (read-prompt-event e) 'respo-alerts.core/PromptEvent
-                                      action $ unsafe-coerce
-                                        prompt-key-action event-info $ if (read-field options :multiline?) true false
-                                        , 'respo-alerts.core/PromptKeyAction
+                                      event-info $ read-prompt-event $ event-fields e
+                                      action $ prompt-key-action event-info $ if (read-field options :multiline?) true false
                                     match action
-                                      (:submit) (check-submit! d!)
+                                      (:submit)
+                                        do
+                                          .prevent-default! $ :event e
+                                          check-submit! d!
                                       (:close)
                                         do (on-close! d!)
                                           d! $ :: :states cursor $ {}
@@ -989,7 +1003,7 @@
                               :style $ Option :some $ &merge
                                 {} $ :width |100%
                                 read-style options :input-style
-                        =< nil 16
+                        space-y 16
                         div
                           {} $ :class-name css/row-parted
                           let
@@ -1161,6 +1175,18 @@
               _ &unit
           :examples $ []
           :schema $ quote $ Fn Bool (-> respo.schema/Effect) (:features :js-ffi)
+        'event-fields $ %{} 'CodeEntry
+          :doc "|At the raw DOM/legacy callback boundary, validate nominal RespoEvent or a Tag-key Map; retain legacy field semantics and rejection behavior."
+          :code $ quote $ defn event-fields (event)
+            if (struct? event)
+              struct-match event
+                respo.schema/RespoEvent checked $ .to-map checked
+                _ _ $ raise "|Expected RespoEvent at DOM boundary"
+              decode-map-as event $ quote $ Map Tag Dynamic
+          :examples $ []
+          :schema $ quote $ Fn Dynamic
+            -> $ Map Tag Dynamic
+          :tags $ #{} :internal
         'menu-items $ %{} 'CodeEntry
           :doc "|Validate the required list container without guessing the heterogeneous item payload or replacing invalid input with an empty list."
           :code $ quote $ defn menu-items (value)
@@ -1205,7 +1231,7 @@
         'prompt-event-text $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn prompt-event-text (event)
             let
-                event-info $ unsafe-coerce (read-prompt-event event) 'respo-alerts.core/PromptEvent
+                event-info $ read-prompt-event event
               :text event-info
           :examples $ []
           :schema $ quote $ Fn (Map Tag Dynamic) (-> String) (:features :js-ffi)
@@ -1288,7 +1314,7 @@
               :tags $ #{} :unit
         'prompt-validation-error $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn prompt-validation-error (value)
-            if (string? value) (unsafe-coerce value 'String) |
+            if (string? value) value |
           :examples $ []
           :schema $ quote $ Fn T (-> String) (:generics T) (:features :js-ffi)
           :tests $ []
@@ -1304,14 +1330,14 @@
           :code $ quote $ defn read-prompt-event (event)
             let
                 raw-text $ or (read-field event :value) |
-                text $ if (string? raw-text) (unsafe-coerce raw-text 'String) |
+                text $ if (string? raw-text) raw-text |
                 raw-key $ or (read-field event :key-code)
                   or (read-field event :keycode) 0
-                keycode $ if (number? raw-key) (unsafe-coerce raw-key 'Number) 0
+                keycode $ if (number? raw-key) raw-key 0
                 raw-meta $ read-field event :meta?
-                meta? $ if (bool? raw-meta) (unsafe-coerce raw-meta 'Bool) false
+                meta? $ if (bool? raw-meta) raw-meta false
                 raw-ctrl $ read-field event :ctrl?
-                ctrl? $ if (bool? raw-ctrl) (unsafe-coerce raw-ctrl 'Bool) false
+                ctrl? $ if (bool? raw-ctrl) raw-ctrl false
               PromptEvent :text text :keycode keycode :meta? meta? :ctrl? ctrl?
           :examples $ []
           :schema $ quote $ Fn (Map Tag Dynamic) (-> respo-alerts.core/PromptEvent) (:features :js-ffi)
@@ -1643,7 +1669,7 @@
             respo-ui.css :as css
             respo.core :refer $ defcomp defplugin list-> <> >> div button textarea span input a defeffect dispatch-fn create-list-element
             respo.css :refer $ defstyle
-            respo.comp.space :refer $ =<
+            respo.comp.space :refer $ space-x space-y
             respo-alerts.config :refer $ dev?
             respo-alerts.style :as style
             respo-alerts.schema :as schema
@@ -1732,9 +1758,9 @@
             -> $ reel.typed/State Enum $ Map Dynamic Dynamic
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
-            render!
+            render-with!
               narrow-element $ mount-target
-              comp-container @*reel
+              fn () $ comp-container @*reel
               fn (op)
                 if (enum? op) (dispatch! op) (raise "|alert renderer operation must be an Enum")
           :examples $ []
@@ -1742,7 +1768,7 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns respo-alerts.main
           :require
-            respo.core :refer $ render! clear-cache! realize-ssr!
+            respo.core :refer $ render-with! clear-cache! realize-ssr!
             respo.ffi.browser :refer $ narrow-element
             respo-alerts.comp.container :refer $ comp-container
             respo-alerts.updater :refer $ updater
