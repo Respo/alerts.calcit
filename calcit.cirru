@@ -27,14 +27,11 @@
                     img $ {} (:class-name style-logo)
                       :src |https://cos-sh.tiye.me/cos-up/bb4c2755050318e864b56f59145d726e-SubstractRespo.png
                 space-y 40
-                comp-hooks-usages $ decode-map-as (>> states :hooks)
-                  quote $ Map Tag Dynamic
+                comp-hooks-usages $ decode-map-as (>> states :hooks) (Map Tag Dynamic)
                 space-y 40
-                comp-controlled-modals $ decode-map-as (>> states :controlled)
-                  quote $ Map Tag Dynamic
+                comp-controlled-modals $ decode-map-as (>> states :controlled) (Map Tag Dynamic)
                 space-y 40
-                comp-demo-trigger $ decode-map-as (>> states :trigger)
-                  quote $ Map Tag Dynamic
+                comp-demo-trigger $ decode-map-as (>> states :trigger) (Map Tag Dynamic)
                 if dev?
                   Option :some $ comp-inspect |states states $ {} (:bottom 0)
                   Option :none
@@ -536,20 +533,20 @@
         'ConfirmActions $ %{} 'CodeEntry
           :doc "|Confirm plugin: .show(plugin, dispatch!, next-task) and .show-with-text(plugin, dispatch!, text, next-task). dispatch! receives one Enum operation, including (:: :states cursor data), and returns Unit; next-task receives no arguments and returns Unit. Do not pass the retired (cursor,data) state callback. .close clears the pending task before dispatching closed state."
           :code $ quote $ deftrait ConfirmActions
-            .render $ quote $ Fn respo-alerts.core/PluginNodeCursorState (-> respo.schema/Component)
-            .show $ quote $ Fn respo-alerts.core/PluginNodeCursorState
+            .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
+            .show $ Fn respo-alerts.core/PluginNodeCursorState
               Fn Enum $ -> Unit
               Fn $ -> Unit
               -> Unit
-            .show-with-text $ quote $ Fn respo-alerts.core/PluginNodeCursorState
+            .show-with-text $ Fn respo-alerts.core/PluginNodeCursorState
               Fn Enum $ -> Unit
               , String
                 Fn $ -> Unit
                 -> Unit
-            .close $ quote $ Fn respo-alerts.core/PluginNodeCursorState
+            .close $ Fn respo-alerts.core/PluginNodeCursorState
               Fn Enum $ -> Unit
               -> Unit
-            .show? $ quote $ Fn respo-alerts.core/PluginNodeCursorState (-> Bool)
+            .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
           :examples $ []
           :schema $ quote Trait
         'DrawerActions $ %{} 'CodeEntry (:doc |)
@@ -754,7 +751,9 @@
             [] (effect-slide show?)
               create-list-element :div
                 {} $ :style $ &merge
-                  {} $ :position :absolute
+                  assert-type
+                    {} $ :position :absolute
+                    Map Tag respo-ui.schema/InlineStyleValue
                   read-style options :container-style
                 if show?
                   [] $ [] 0 $ div
@@ -772,7 +771,9 @@
                       {}
                         :class-name $ str-spaced css/global css/column style-drawer-card $ read-field options :card-class
                         :style $ &merge
-                          {} $ :padding 0
+                          assert-type
+                            {} $ :padding 0
+                            Map Tag respo-ui.schema/InlineStyleValue
                           read-style options :style
                         :on-click $ fn (e d!) &unit
                       concat
@@ -814,7 +815,9 @@
             [] (effect-fade show?)
               create-list-element :div
                 {} $ :style $ &merge
-                  {} $ :position :absolute
+                  assert-type
+                    {} $ :position :absolute
+                    Map Tag respo-ui.schema/InlineStyleValue
                   read-style options :container-style
                 if show?
                   [] $ [] 0 $ div
@@ -832,7 +835,9 @@
                       {}
                         :class-name $ str-spaced css/global css/column style-modal-card $ read-field options :card-class
                         :style $ &merge
-                          {} $ :padding 0
+                          assert-type
+                            {} $ :padding 0
+                            Map Tag respo-ui.schema/InlineStyleValue
                           read-style options :style
                           read-style options :card-style
                         :on-click $ fn (e d!) &unit
@@ -952,7 +957,9 @@
                       {}
                         :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop $ read-field options :backdrop-class
                         :style $ &merge
-                          {} $ :line-height |32px
+                          assert-type
+                            {} $ :line-height |32px
+                            Map Tag respo-ui.schema/InlineStyleValue
                           read-style options :backdrop-style
                         :on-click $ fn (e d!) (on-close! d!)
                           d! $ :: :states cursor $ {}
@@ -996,12 +1003,16 @@
                             textarea $ struct-with props
                               :class-name $ Option :some $ str-spaced schema/input-box-name css/textarea (read-field options :input-class)
                               :style $ Option :some $ &merge
-                                {} (:width |100%) (:min-height 120) (:max-height |50vh)
+                                assert-type
+                                  {} (:width |100%) (:min-height 120) (:max-height |50vh)
+                                  Map Tag respo-ui.schema/InlineStyleValue
                                 read-style options :input-style
                             input $ struct-with props
                               :class-name $ Option :some $ str-spaced schema/input-box-name css/input (read-field options :input-class)
                               :style $ Option :some $ &merge
-                                {} $ :width |100%
+                                assert-type
+                                  {} $ :width |100%
+                                  Map Tag respo-ui.schema/InlineStyleValue
                                 read-style options :input-style
                         space-y 16
                         div
@@ -1182,7 +1193,7 @@
               struct-match event
                 respo.schema/RespoEvent checked $ .to-map checked
                 _ _ $ raise "|Expected RespoEvent at DOM boundary"
-              decode-map-as event $ quote $ Map Tag Dynamic
+              decode-map-as event $ Map Tag Dynamic
           :examples $ []
           :schema $ quote $ Fn Dynamic
             -> $ Map Tag Dynamic
@@ -1191,7 +1202,7 @@
           :doc "|Validate the required list container without guessing the heterogeneous item payload or replacing invalid input with an empty list."
           :code $ quote $ defn menu-items (value)
             if (list? value)
-              assert-type value $ quote $ List Dynamic
+              assert-type value $ List Dynamic
               raise "|Menu items must be List"
           :examples $ []
           :schema $ quote $ Fn T
@@ -1352,7 +1363,8 @@
               :code $ quote $ let
                   event $ read-prompt-event $ {} (:key-code 27) (:keycode 13)
                 is $ = 27 $ :keycode event
-        'read-style $ %{} 'CodeEntry (:doc "|读取样式选项并校验为 map，nil 视为空 map。")
+        'read-style $ %{} 'CodeEntry
+          :doc "|读取样式选项，nil 视为空 Map。沿原 guard 校验 Tag 键，每个值受检解码为 respo-ui.schema/InlineStyleValue（标量或 Option）；单属性 nil 应改为 Option :none。"
           :code $ quote $ defn read-style (options k)
             &let
               v $ read-field options k
@@ -1360,17 +1372,37 @@
                 if (map? v)
                   foldl v ({})
                     defn %read-style-entry (acc pair)
-                      hint-fn $ Fn (Map Tag Dynamic) (List Dynamic)
-                        -> $ Map Tag Dynamic
+                      hint-fn $ Fn (Map Tag respo-ui.schema/InlineStyleValue) (List Dynamic)
+                        -> $ Map Tag respo-ui.schema/InlineStyleValue
                       &let
                         style-key $ &list:nth pair 0
                         if (tag? style-key)
-                          &map:assoc acc style-key $ &list:nth pair 1
+                          &map:assoc acc style-key $ decode-map-as (&list:nth pair 1) respo-ui.schema/InlineStyleValue
                           raise $ str "|respo-alerts expected style keys as tags, got: " style-key
                   raise $ str "|respo-alerts expected a style map at " k "|, got: " $ type-of v
           :examples $ []
           :schema $ quote $ Fn Dynamic Tag
-            -> $ Map Tag Dynamic
+            -> $ Map Tag respo-ui.schema/InlineStyleValue
+          :tests $ [] $ %{} 'TestEntry (:name |checked-inline-style-values)
+            :code $ quote $ let
+                style $ {} (:color |red) (:padding 8) (:display :flex)
+                  :opacity $ Option :some 0.5
+                  :transform $ Option :none
+              assert= style $ read-style
+                {} $ :style style
+                , :style
+              assert= ({})
+                read-style ({}) :style
+              assert= true $ try
+                do
+                  read-style
+                    {} $ :style $ {} (:color true)
+                    , :style
+                  , false
+                fn (message)
+                  hint-fn $ Fn String $ -> Bool
+                  , true
+            :tags $ #{} :unit
         'read-text $ %{} 'CodeEntry (:doc "|读取文本选项并校验为字符串，nil 时使用默认文本。")
           :code $ quote $ defn read-text (options k default-text)
             &let
@@ -1718,8 +1750,7 @@
         'next-reel $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn next-reel (op)
             let
-                reel $ assert-type @*reel $ quote
-                  reel.typed/State Enum $ Map Dynamic Dynamic
+                reel $ assert-type @*reel $ reel.typed/State Enum (Map Dynamic Dynamic)
               if (enum? op)
                 match (typed/decode-control op)
                   (:some control) (typed/apply-control updater reel control)
@@ -1751,8 +1782,8 @@
         'reloaded-reel $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reloaded-reel ()
             typed/refresh updater
-              assert-type @*reel $ quote $ reel.typed/State Enum (Map Dynamic Dynamic)
-              assert-type schema/store $ quote $ Map Dynamic Dynamic
+              assert-type @*reel $ reel.typed/State Enum $ Map Dynamic Dynamic
+              assert-type schema/store $ Map Dynamic Dynamic
           :examples $ []
           :schema $ quote $ Fn
             -> $ reel.typed/State Enum $ Map Dynamic Dynamic
@@ -1785,9 +1816,7 @@
         'Op $ %{} 'CodeEntry
           :doc "|Ops the demo app dispatches. Bound to Respo's :dispatch-op slot, so d! in handlers is checked against it; :states carries component state written by alerts' plugins."
           :code $ quote $ defenum Op
-            :states
-              quote $ List Dynamic
-              , Dynamic
+            :states (List Dynamic) Dynamic
             :content Dynamic
             :hydrate-storage Dynamic
             :reel/toggle
@@ -1935,11 +1964,11 @@
             let
                 checked-base $ if (nil? base) (Option :none)
                   if (map? base)
-                    Option :some $ decode-map-as base $ quote (Map Dynamic Dynamic)
+                    Option :some $ decode-map-as base $ Map Dynamic Dynamic
                     raise "|Style must be Map or nil"
                 checked-active $ if (nil? active) (Option :none)
                   if (map? active)
-                    Option :some $ decode-map-as active $ quote (Map Dynamic Dynamic)
+                    Option :some $ decode-map-as active $ Map Dynamic Dynamic
                     raise "|Style must be Map or nil"
               match checked-base
                 (:none)
