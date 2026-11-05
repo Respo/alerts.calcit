@@ -2,7 +2,28 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
-### 0.12.0 / 现代 Respo 事件图候选
+### 0.13.0 候选：使用者影响
+
+CLI / `@calcit/procs` 配对正式 **0.35.0**、Reel **0.9.1**、UI **0.15.0**、
+Respo **0.19.3**、JS-FFI **0.2.12** / Router **0.12.0**。消费者需统一精确图并重新生成 JS。
+样式选项现在在读取时逐值受检为 UI 既有 `InlineStyleValue`：String、Number、Tag 或
+`Option StyleValue`。整个样式选项缺省/nil 仍是空 Map；单属性 nil 请改为 `Option :none`。
+Bool、集合、函数等非法 CSS 值会更早拒绝，因此按 minor 发布。公开 hooks、状态 key、
+回调次序、Prompt Enter 防误触修复与 HUD 保持。
+
+沿用原逐项循环和 Tag-key 错误检查，仅在原取值位置增加 union 解码；不另跑一遍
+完整样式 Map 验证。返回值和循环累加器保留具体 union，减少三处显式 Dynamic。
+七份已知 CSS 字面量补共同 union 上下文，保持原合并/覆盖顺序；用于规避已有的
+[泛型参数顺序推断限制](https://github.com/calcit-lang/calcit/issues/2608)，没有回退 Dynamic。
+
+复用原测试 runner，只补一个附带 unit 覆盖样式 scalar/some/none、缺省与非法 Bool。
+原严格门禁、预算、消费者测试和部署路径保留；精确验收见本 PR。
+Shelf 仍为固定旧源码夹具，正式 Feather 对齐 **0.6.1**。仅在隔离副本中用官方 formatter
+规范化旧类型写法，随后检查/构建必须保持该规范源码不变；这不等于 Shelf 自己的
+Caps 发布图或真实页面交互验收，不修改、合并或部署 Shelf。
+
+### 历史 0.12.0 / 现代 Respo 事件图
+
 
 使用者影响：配对正式 Calcit CLI / `@calcit/procs` **0.34.2**、Reel **0.9.0**、UI **0.14.1**、Respo **0.19.2**、JS-FFI **0.2.10** 与传递 Router **0.11.2**。消费者需协调完整精确图并重新生成 JS，不能与旧 Map DOM 事件图混装。0.12.0 尚未发布。
 
