@@ -580,8 +580,14 @@
         'ModalActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ModalActions
             .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
-            .show $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
-            .close $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+            .show $ Fn respo-alerts.core/PluginNodeCursorState
+              Fn AnyEnum $ -> R
+              -> R
+              :generics R
+            .close $ Fn respo-alerts.core/PluginNodeCursorState
+              Fn AnyEnum $ -> R
+              -> R
+              :generics R
             .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
           :examples $ []
           :schema $ quote Trait
