@@ -91,7 +91,7 @@ jobs:
       uses: actions/checkout@v7.0.1
       with:
         repository: Respo/respo-feather.calcit
-        ref: 0.6.1
+        ref: 0.6.2
         path: .calcit/consumer/.calcit/modules/respo-feather.calcit
         persist-credentials: false
 
@@ -105,16 +105,16 @@ jobs:
         # Explicit local candidate graph, NOT a Caps-resolved release install.
         # Only official type formatting prepares this legacy fixture; subsequent checks must keep that normalized source unchanged.
         cat > "$consumer/deps.cirru" <<'EOF'
-        {} (:calcit-version |0.35.0) (:version |0.1.0)
-          :dependencies $ {} (|Respo/reel.calcit |0.9.1)
-            |Respo/respo-ui.calcit |0.15.0
-            |Respo/respo.calcit |0.19.3
-            |Respo/respo-feather.calcit |0.6.1
-            |Respo/alerts.calcit |0.13.0
-            |calcit-lang/js-ffi |0.2.12
+        {} (:calcit-version |0.35.1) (:version |0.1.0)
+          :dependencies $ {} (|Respo/reel.calcit |0.9.2)
+            |Respo/respo-ui.calcit |0.15.1
+            |Respo/respo.calcit |0.19.4
+            |Respo/respo-feather.calcit |0.6.2
+            |Respo/alerts.calcit |0.13.1
+            |calcit-lang/js-ffi |0.2.13
         EOF
         cd "$consumer"
-        yarn add --exact @calcit/procs@0.35.0
+        yarn add --exact @calcit/procs@0.35.1
         yarn install --immutable
         calcit calcit.cirru edit format
         git add -- calcit.cirru
