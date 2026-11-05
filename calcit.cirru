@@ -546,7 +546,7 @@
           :code $ quote $ deftrait AlertActions
             .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
             .show $ Fn respo-alerts.core/PluginNodeCursorState AnyFn (Option String) (-> Unit)
-            .close $ Fn respo-alerts.core/PluginNodeCursorState AnyFn (-> Unit)
+            .close $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
             .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
           :examples $ []
           :schema $ quote Trait
@@ -572,24 +572,24 @@
         'DrawerActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait DrawerActions
             .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
-            .show $ Fn respo-alerts.core/PluginNodeCursorState AnyFn (-> Unit)
-            .close $ Fn respo-alerts.core/PluginNodeCursorState AnyFn (-> Unit)
+            .show $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+            .close $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
             .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
           :examples $ []
           :schema $ quote Trait
         'ModalActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ModalActions
             .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
-            .show $ Fn respo-alerts.core/PluginNodeCursorState AnyFn (-> Unit)
-            .close $ Fn respo-alerts.core/PluginNodeCursorState AnyFn (-> Unit)
+            .show $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+            .close $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
             .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
           :examples $ []
           :schema $ quote Trait
         'ModalMenuActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ModalMenuActions
             .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
-            .show $ Fn respo-alerts.core/PluginNodeCursorState AnyFn (-> Unit)
-            .close $ Fn respo-alerts.core/PluginNodeCursorState AnyFn (-> Unit)
+            .show $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+            .close $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
             .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
           :examples $ []
           :schema $ quote Trait
@@ -600,8 +600,8 @@
         'PromptActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait PromptActions
             .render $ Fn respo-alerts.core/PromptPluginNodeCursorState $ -> respo.schema/Component
-            .show $ Fn respo-alerts.core/PromptPluginNodeCursorState AnyFn AnyFn (-> Unit)
-            .close $ Fn respo-alerts.core/PromptPluginNodeCursorState AnyFn (-> Unit)
+            .show $ Fn respo-alerts.core/PromptPluginNodeCursorState AnyFn AnyFn $ -> Unit
+            .close $ Fn respo-alerts.core/PromptPluginNodeCursorState AnyFn $ -> Unit
             .show? $ Fn respo-alerts.core/PromptPluginNodeCursorState $ -> Bool
           :examples $ []
           :schema $ quote Trait
