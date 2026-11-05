@@ -2,7 +2,17 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
-### 0.13.0 候选：使用者影响
+### 0.13.1 候选：使用者影响
+
+CLI / `@calcit/procs` 配对正式 **0.35.1**、Reel **0.9.2**、UI **0.15.1**、
+Respo **0.19.4**、JS-FFI **0.2.13** / Router **0.12.1**。消费者须统一精确图并重新生成 JS。
+相对 #128 main，Snapshot、原 hooks / 回调 / HUD、受检样式 union 与具体 action 合同保持。
+旧样式的单属性 nil 仍请改用 `Option :none`；本 patch 不新增输入行为变化。
+原 Shelf 夹具使用正式 Feather **0.6.2** 及同版宿主图，固定源码和原门禁保持；
+它是隔离候选图验收，不代表 Shelf 自己的生产发布图或页面交互验收。
+精确 PR / main CI 通过后再发布；原前端 COS 内置校验及 Demo rsync 路径保持。
+
+### 历史 0.13.0 配对
 
 CLI / `@calcit/procs` 配对正式 **0.35.0**、Reel **0.9.1**、UI **0.15.0**、
 Respo **0.19.3**、JS-FFI **0.2.12** / Router **0.12.0**。消费者需统一精确图并重新生成 JS。
