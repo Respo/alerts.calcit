@@ -1402,6 +1402,15 @@
                 fn (message)
                   hint-fn $ Fn String $ -> Bool
                   , true
+              assert= true $ try
+                do
+                  read-style
+                    {} $ :style $ {} (:color |red) (:transform nil)
+                    , :style
+                  , false
+                fn (message)
+                  hint-fn $ Fn String $ -> Bool
+                  , true
             :tags $ #{} :unit
         'read-text $ %{} 'CodeEntry (:doc "|读取文本选项并校验为字符串，nil 时使用默认文本。")
           :code $ quote $ defn read-text (options k default-text)
