@@ -273,7 +273,7 @@
                       d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
                       , &unit
             .close $ fn (self d!)
-              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn (-> Unit)
+              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
               match self $
                 :plugin node cursor state
                 do
@@ -399,14 +399,14 @@
                 :plugin node cursor state
                 , node
             .show $ fn (self d!)
-              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn (-> Unit)
+              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
               match self $
                 :plugin node cursor state
                 do
                   d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
                   , &unit
             .close $ fn (self d!)
-              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn (-> Unit)
+              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
               match self $
                 :plugin node cursor state
                 do
@@ -476,14 +476,14 @@
                 :plugin node cursor state
                 , node
             .show $ fn (self d!)
-              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn (-> Unit)
+              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
               match self $
                 :plugin node cursor state
                 do
                   d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
                   , &unit
             .close $ fn (self d!)
-              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn (-> Unit)
+              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
               match self $
                 :plugin node cursor state
                 do
@@ -504,7 +504,7 @@
                 :plugin node cursor state
                 , node
             .show $ fn (self d! next-task)
-              hint-fn $ Fn respo-alerts.core/PromptPluginNodeCursorState AnyFn AnyFn (-> Unit)
+              hint-fn $ Fn respo-alerts.core/PromptPluginNodeCursorState AnyFn AnyFn $ -> Unit
               match self $
                 :plugin node cursor state
                 do
@@ -512,7 +512,7 @@
                   d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
                   , &unit
             .close $ fn (self d!)
-              hint-fn $ Fn respo-alerts.core/PromptPluginNodeCursorState AnyFn (-> Unit)
+              hint-fn $ Fn respo-alerts.core/PromptPluginNodeCursorState AnyFn $ -> Unit
               match self $
                 :plugin node cursor state
                 do (clear-prompt-task! cursor)
