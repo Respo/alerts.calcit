@@ -170,6 +170,7 @@
                         Fn AnyEnum $ -> Unit
                         -> Unit
                       .show confirm-prompt-plugin d! $ fn (text)
+                        hint-fn $ Fn String $ -> Unit
                         .show-with-text confirm-plugin d! (str "|Confirmed: " text)
                           fn () $ println |after-confirmed
                       , &unit
@@ -177,11 +178,13 @@
                   button $ {} (:inner-text "|show prompt") (:class-name css/button)
                     :on-click $ dispatch-fn (e d!)
                       .show prompt-plugin d! $ fn (text)
+                        hint-fn $ Fn String $ -> Unit
                         println "|read from prompt" $ to-lispy-string text
                   space-x 8
                   button $ {} (:inner-text "|show multilines prompt") (:class-name css/button)
                     :on-click $ dispatch-fn (e d!)
                       .show prompt-multilines-plugin d! $ fn (text)
+                        hint-fn $ Fn String $ -> Unit
                         println "|read from prompt" $ to-lispy-string text
                   space-x 8
                   comp-trigger
@@ -191,6 +194,7 @@
                     button $ {} (:inner-text "|show validated prompt") (:class-name css/button)
                       :on-click $ dispatch-fn (e d!)
                         .show prompt-validation-plugin d! $ fn (text)
+                          hint-fn $ Fn String $ -> Unit
                           println "|read from prompt" $ to-lispy-string text
                     , nil
                 .render alert-plugin
@@ -260,7 +264,10 @@
                 :plugin node cursor state
                 , node
             .show $ fn (self d! text)
-              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn (Option String) (-> Unit)
+              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
+                Fn *dispatch-op $ -> Unit
+                Option String
+                -> Unit
               match self $
                 :plugin node cursor state
                 match text
@@ -273,7 +280,9 @@
                       d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
                       , &unit
             .close $ fn (self d!)
-              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
+                Fn *dispatch-op $ -> Unit
+                -> Unit
               match self $
                 :plugin node cursor state
                 do
@@ -330,7 +339,9 @@
               match self $
                 :plugin node cursor state
                 do
-                  store-prompt-task! cursor $ as-prompt-task $ fn (ignored) (next-task)
+                  store-prompt-task! cursor $ as-prompt-task $ fn (ignored)
+                    hint-fn $ Fn String $ -> Unit
+                    next-task
                   d! $ :: :states cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text |)
             .show-with-text $ fn (self d! text next-task)
               hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
@@ -341,7 +352,9 @@
               match self $
                 :plugin node cursor state
                 do
-                  store-prompt-task! cursor $ as-prompt-task $ fn (ignored) (next-task)
+                  store-prompt-task! cursor $ as-prompt-task $ fn (ignored)
+                    hint-fn $ Fn String $ -> Unit
+                    next-task
                   d! $ :: :states cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text text)
             .close $ fn (self d!)
               hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
@@ -399,14 +412,18 @@
                 :plugin node cursor state
                 , node
             .show $ fn (self d!)
-              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
+                Fn *dispatch-op $ -> Unit
+                -> Unit
               match self $
                 :plugin node cursor state
                 do
                   d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
                   , &unit
             .close $ fn (self d!)
-              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
+                Fn *dispatch-op $ -> Unit
+                -> Unit
               match self $
                 :plugin node cursor state
                 do
@@ -476,14 +493,18 @@
                 :plugin node cursor state
                 , node
             .show $ fn (self d!)
-              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
+                Fn *dispatch-op $ -> Unit
+                -> Unit
               match self $
                 :plugin node cursor state
                 do
                   d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
                   , &unit
             .close $ fn (self d!)
-              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
+                Fn *dispatch-op $ -> Unit
+                -> Unit
               match self $
                 :plugin node cursor state
                 do
@@ -504,7 +525,11 @@
                 :plugin node cursor state
                 , node
             .show $ fn (self d! next-task)
-              hint-fn $ Fn respo-alerts.core/PromptPluginNodeCursorState AnyFn AnyFn $ -> Unit
+              hint-fn $ Fn respo-alerts.core/PromptPluginNodeCursorState
+                Fn *dispatch-op $ -> Unit
+                Fn String $ -> R
+                -> Unit
+                :generics R
               match self $
                 :plugin node cursor state
                 do
@@ -512,7 +537,9 @@
                   d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
                   , &unit
             .close $ fn (self d!)
-              hint-fn $ Fn respo-alerts.core/PromptPluginNodeCursorState AnyFn $ -> Unit
+              hint-fn $ Fn respo-alerts.core/PromptPluginNodeCursorState
+                Fn *dispatch-op $ -> Unit
+                -> Unit
               match self $
                 :plugin node cursor state
                 do (clear-prompt-task! cursor)
@@ -545,8 +572,13 @@
         'AlertActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait AlertActions
             .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
-            .show $ Fn respo-alerts.core/PluginNodeCursorState AnyFn (Option String) (-> Unit)
-            .close $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+            .show $ Fn respo-alerts.core/PluginNodeCursorState
+              Fn *dispatch-op $ -> Unit
+              Option String
+              -> Unit
+            .close $ Fn respo-alerts.core/PluginNodeCursorState
+              Fn *dispatch-op $ -> Unit
+              -> Unit
             .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
           :examples $ []
           :schema $ quote Trait
@@ -572,8 +604,12 @@
         'DrawerActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait DrawerActions
             .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
-            .show $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
-            .close $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+            .show $ Fn respo-alerts.core/PluginNodeCursorState
+              Fn *dispatch-op $ -> Unit
+              -> Unit
+            .close $ Fn respo-alerts.core/PluginNodeCursorState
+              Fn *dispatch-op $ -> Unit
+              -> Unit
             .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
           :examples $ []
           :schema $ quote Trait
@@ -594,8 +630,12 @@
         'ModalMenuActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ModalMenuActions
             .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
-            .show $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
-            .close $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+            .show $ Fn respo-alerts.core/PluginNodeCursorState
+              Fn *dispatch-op $ -> Unit
+              -> Unit
+            .close $ Fn respo-alerts.core/PluginNodeCursorState
+              Fn *dispatch-op $ -> Unit
+              -> Unit
             .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
           :examples $ []
           :schema $ quote Trait
@@ -606,8 +646,14 @@
         'PromptActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait PromptActions
             .render $ Fn respo-alerts.core/PromptPluginNodeCursorState $ -> respo.schema/Component
-            .show $ Fn respo-alerts.core/PromptPluginNodeCursorState AnyFn AnyFn $ -> Unit
-            .close $ Fn respo-alerts.core/PromptPluginNodeCursorState AnyFn $ -> Unit
+            .show $ Fn respo-alerts.core/PromptPluginNodeCursorState
+              Fn *dispatch-op $ -> Unit
+              Fn String $ -> R
+              -> Unit
+              :generics R
+            .close $ Fn respo-alerts.core/PromptPluginNodeCursorState
+              Fn *dispatch-op $ -> Unit
+              -> Unit
             .show? $ Fn respo-alerts.core/PromptPluginNodeCursorState $ -> Bool
           :examples $ []
           :schema $ quote Trait
@@ -652,8 +698,10 @@
               f text
               , &unit
           :examples $ []
-          :schema $ quote $ Fn AnyFn
+          :schema $ quote $ Fn
+            Fn String $ -> R
             -> $ Fn String $ -> Unit
+            :generics R
         'as-state-map $ %{} 'CodeEntry (:doc "|在组件状态的开放边界确认其为 map。")
           :code $ quote $ defn as-state-map (value)
             if (map? value) value $ raise $ str "|respo-alerts expected component state as a map, got: " (type-of value)

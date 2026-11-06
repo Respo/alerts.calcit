@@ -82,8 +82,8 @@ jobs:
       uses: actions/checkout@v7.0.1
       with:
         repository: worktools/qrcode-shelf
-        # Original Shelf 0.34.1 source fixture; official type formatting and a local candidate host graph.
-        ref: 2a6f1e2f48d5a4b9f20dc4ec8fd810ce2b69aee8
+        # Shelf 0.35.1 migration with typed Prompt callbacks (worktools/qrcode-shelf#38).
+        ref: ea59e77d417ae5c393bb93690ebcf6dd9c809cc8
         path: .calcit/consumer
         persist-credentials: false
 
@@ -103,14 +103,14 @@ jobs:
         mkdir -p "$consumer/.calcit/modules/alerts.calcit"
         cp calcit.cirru deps.cirru "$consumer/.calcit/modules/alerts.calcit/"
         # Explicit local candidate graph, NOT a Caps-resolved release install.
-        # Only official type formatting prepares this legacy fixture; subsequent checks must keep that normalized source unchanged.
+        # Use the exact consumer source; only official type formatting may normalize it.
         cat > "$consumer/deps.cirru" <<'EOF'
         {} (:calcit-version |0.35.1) (:version |0.1.0)
           :dependencies $ {} (|Respo/reel.calcit |0.9.2)
             |Respo/respo-ui.calcit |0.15.1
             |Respo/respo.calcit |0.19.4
             |Respo/respo-feather.calcit |0.6.2
-            |Respo/alerts.calcit |0.13.1
+            |Respo/alerts.calcit |0.14.0
             |calcit-lang/js-ffi |0.2.13
         EOF
         cd "$consumer"

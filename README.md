@@ -2,7 +2,11 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
-### 0.13.1 候选：使用者影响
+### 0.14.0 候选：输入和分发回调
+
+Prompt 的 `.show` 要求输入回调接收一个 String，结果仍会被丢弃。Alert、Drawer、Modal Menu 和 Prompt 的分发函数接收项目的 `dispatch-op` 类型并返回 Unit。参数类型无法推断时，请用 `hint-fn` 标注实际签名。各弹层的状态更新和回调顺序沿用原行为。
+
+### 历史 0.13.1：使用者影响
 
 CLI / `@calcit/procs` 配对正式 **0.35.1**、Reel **0.9.2**、UI **0.15.1**、
 Respo **0.19.4**、JS-FFI **0.2.13** / Router **0.12.1**。消费者须统一精确图并重新生成 JS。
@@ -269,6 +273,7 @@ let
     prompt-plugin $ use-prompt (>> states :prompt) ({} (:text "|demo"))
     on-click $ fn (e dispatch!)
       .show prompt-plugin dispatch! $ fn (text)
+        hint-fn $ Fn String $ -> Unit
         println "|read from prompt" (pr-str text)
 
   .render prompt-plugin
@@ -384,6 +389,7 @@ let
         {} (:inner-text "|show prompt")
           :on-click $ fn (e dispatch!)
             .show prompt-plugin dispatch! $ fn (text)
+              hint-fn $ Fn String $ -> Unit
               println text
       .render alert-plugin
       .render confirm-plugin
