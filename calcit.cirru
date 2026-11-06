@@ -14,9 +14,8 @@
           :code $ quote $ defcomp comp-container (reel)
             let
                 store $ :store reel
-                states $ read-field-or store :states ({})
-                state $ read-field-or states :data
-                  {} (:selected |) (:show-modal? false) (:show-modal-menu? false)
+                states $ read-field-or store :states $ {}
+                state $ read-field-or states :data $ {} (:selected |) (:show-modal? false) (:show-modal-menu? false)
               div
                 {}
                   :class-name $ str-spaced css/global css/fullscreen css/column
@@ -93,7 +92,7 @@
         'comp-demo-trigger $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-demo-trigger (states)
             let
-                cursor $ read-field-or states :cursor ([])
+                cursor $ read-field-or states :cursor $ []
                 state $ as-state-map $ read-field-or states :data
                   {} $ :visible? false
               div ({})
@@ -875,9 +874,10 @@
                           (:none) ([])
                         [] $ [] 1 $ match (read-field options :render)
                           (:some render) (render on-close)
-                          (:none) $ match (read-field options :render-body)
-                            (:some render) (render on-close)
-                            (:none) $ <> "|TODO render body"
+                          (:none)
+                            match (read-field options :render-body)
+                              (:some render) (render on-close)
+                              (:none) (<> "|TODO render body")
                     comp-esc-listener show? on-close
                   []
           :examples $ [] $ quote
@@ -938,9 +938,10 @@
                           (:none) ([])
                         [] $ [] 1 $ match (read-field options :render)
                           (:some render) (render on-close)
-                          (:none) $ match (read-field options :render-body)
-                            (:some render) (render on-close)
-                            (:none) $ <> "|TODO render body"
+                          (:none)
+                            match (read-field options :render-body)
+                              (:some render) (render on-close)
+                              (:none) (<> "|TODO render body")
                     comp-esc-listener show? on-close
                   []
           :examples $ [] $ quote
@@ -989,7 +990,7 @@
                           (:none) ([])
                         [] $ [] 1 $ list-> ({})
                           ->
-                            menu-items $ read-field-or options :items ([])
+                            menu-items $ read-field-or options :items $ []
                             map $ fn (info)
                               let
                                   item $ cond
@@ -1017,7 +1018,7 @@
           :code $ quote $ defcomp comp-prompt-modal (states options show? on-finish! on-close!)
             let
                 initial-text $ read-text options :initial |
-                cursor $ read-field-or states :cursor ([])
+                cursor $ read-field-or states :cursor $ []
                 state $ as-state-map $ read-field-or states :data
                   {} (:text initial-text) (:failure |)
                 text $ read-field-or state :text initial-text
@@ -1083,8 +1084,9 @@
                                       (:ignore) &unit
                                     , &unit
                                 , :placeholder $ match (read-field options :placeholder)
-                                  (:some placeholder) $ js-nullish->option $ prompt-placeholder placeholder
-                                  (:none) $ Option :none
+                                  (:some placeholder)
+                                    js-nullish->option $ prompt-placeholder placeholder
+                                  (:none) (Option :none)
                           if (read-field-or options :multiline? false)
                             textarea $ struct-with props
                               :class-name $ Option :some $ str-spaced schema/input-box-name css/textarea & (read-field-list options :input-class)
@@ -1453,7 +1455,7 @@
           :doc "|读取样式选项，nil 视为空 Map。沿原 guard 校验 Tag 键，每个值受检解码为 respo-ui.schema/InlineStyleValue（标量或 Option）；单属性 nil 应改为 Option :none。"
           :code $ quote $ defn read-style (options k)
             &let
-              v $ read-field-or options k ({})
+              v $ read-field-or options k $ {}
               if (nil? v) ({})
                 if (map? v)
                   foldl v ({})
@@ -1615,14 +1617,15 @@
           :code $ quote $ defplugin use-alert (states options)
             let
                 options $ as-options-map options
-                cursor $ read-field-or states :cursor ([])
+                cursor $ read-field-or states :cursor $ []
                 state $ as-state-map $ read-field-or states :data
                   match (read-field options :text)
-                    (:some text) ({} (:show? false) (:text text))
-                    (:none) ({} (:show? false))
-                on-read $ read-field-or options :on-read
-                  fn (e d!)
-                    d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
+                    (:some text)
+                      {} (:show? false) (:text text)
+                    (:none)
+                      {} $ :show? false
+                on-read $ read-field-or options :on-read $ fn (e d!)
+                  d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
                 node $ comp-alert-modal
                   match (read-field state :text)
                     (:some text) (&map:assoc options :text text)
@@ -1645,7 +1648,7 @@
           :code $ quote $ defplugin use-confirm (states options)
             let
                 options $ as-options-map options
-                cursor $ read-field-or states :cursor ([])
+                cursor $ read-field-or states :cursor $ []
                 state $ as-state-map $ read-field-or states :data
                   {} (:show? false) (:text |)
                 node $ comp-confirm-modal
@@ -1688,7 +1691,7 @@
           :doc "||Drawer hook. Shows a panel sliding from the side. Use :render function in options to customize content. Supports :style for width and other styles."
           :code $ quote $ defn use-drawer (states options)
             let
-                cursor $ read-field-or states :cursor ([])
+                cursor $ read-field-or states :cursor $ []
                 state $ as-state-map $ read-field-or states :data
                   {} $ :show? false
                 node $ comp-drawer options
@@ -1711,7 +1714,7 @@
           :doc "||Modal dialog hook. Shows a modal with custom content. Use :render function in options to customize content. Returns a plugin object."
           :code $ quote $ defn use-modal (states options)
             let
-                cursor $ read-field-or states :cursor ([])
+                cursor $ read-field-or states :cursor $ []
                 state $ as-state-map $ read-field-or states :data
                   {} $ :show? false
                 node $ comp-modal options
@@ -1733,7 +1736,7 @@
           :doc "||Modal menu hook. Shows a modal dialog with a list of options. Define options via :items and handle selection via :on-result in options."
           :code $ quote $ defn use-modal-menu (states options)
             let
-                cursor $ read-field-or states :cursor ([])
+                cursor $ read-field-or states :cursor $ []
                 state $ as-state-map $ read-field-or states :data
                   {} $ :show? false
                 node $ comp-modal-menu options
@@ -1761,7 +1764,7 @@
           :code $ quote $ defplugin use-prompt (states options)
             let
                 options $ as-options-map options
-                cursor $ read-field-or states :cursor ([])
+                cursor $ read-field-or states :cursor $ []
                 state $ as-state-map $ read-field-or states :data
                   {} $ :show? false
                 node $ comp-prompt-modal (>> states :modal) options
@@ -1988,8 +1991,11 @@
               {} $ :class-name style-trigger-container
               , el $ div $ {}
                 :class-name $ if show? (str-spaced style-trigger style-trigger-active) style-trigger
-                :style $ merge-optional-styles (read-field-or options :trigger-style ({}))
-                  if show? (read-field-or options :trigger-active-style ({})) nil
+                :style $ merge-optional-styles
+                  read-field-or options :trigger-style $ {}
+                  if show?
+                    read-field-or options :trigger-active-style $ {}
+                    , nil
           :examples $ [] $ quote
             comp-trigger show?
               button
@@ -2123,8 +2129,9 @@
                   get (&struct:to-map value) field
                   if (map? value) (get value field) (Option :none)
               match found
-                (:some v) $ if (nil? v) (Option :none) (Option :some v)
-                (:none) $ Option :none
+                (:some v)
+                  if (nil? v) (Option :none) (Option :some v)
+                (:none) (Option :none)
           :examples $ []
           :schema $ quote $ Fn T Tag
             -> $ Option Dynamic
@@ -2138,8 +2145,14 @@
             %{} 'TestEntry (:name |handles-absent-options)
               :code $ quote $ do
                 assert= (Option :none) (read-field nil :trigger-style)
-                assert= (Option :none) $ read-field ({} (:style nil)) :style
-                assert= (Option :some false) $ read-field ({} (:show? false)) :show?
+                assert= (Option :none)
+                  read-field
+                    {} $ :style nil
+                    , :style
+                assert= (Option :some false)
+                  read-field
+                    {} $ :show? false
+                    , :show?
         'read-field-list $ %{} 'CodeEntry
           :doc "|The field as a list of zero or one value, for spreading into `str-spaced`."
           :code $ quote $ defn read-field-list (value field)
@@ -2152,8 +2165,14 @@
             :generics T
           :tests $ [] $ %{} 'TestEntry (:name |lists-present-values)
             :code $ quote $ do
-              assert= ([] |a) $ read-field-list ({} (:class |a)) :class
-              assert= ([]) $ read-field-list ({} (:class nil)) :class
+              assert= ([] |a)
+                read-field-list
+                  {} $ :class |a
+                  , :class
+              assert= ([])
+                read-field-list
+                  {} $ :class nil
+                  , :class
               assert= |x $ str-spaced |x & $ read-field-list ({}) :class
         'read-field-or $ %{} 'CodeEntry
           :doc "|The field, or `fallback` when it is missing or nil."
@@ -2166,8 +2185,12 @@
           :tests $ [] $ %{} 'TestEntry (:name |falls-back-on-absence)
             :code $ quote $ do
               assert= 0 $ read-field-or ({}) :n 0
-              assert= 0 $ read-field-or ({} (:n nil)) :n 0
-              assert= false $ read-field-or ({} (:n false)) :n 0
+              assert= 0 $ read-field-or
+                {} $ :n nil
+                , :n 0
+              assert= false $ read-field-or
+                {} $ :n false
+                , :n 0
         'select-element! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn select-element! (query)
             match (browser/query-selector query)
