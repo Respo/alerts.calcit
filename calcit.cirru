@@ -264,7 +264,10 @@
                 :plugin node cursor state
                 , node
             .show $ fn (self d! text)
-              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn (Option String) (-> Unit)
+              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
+                Fn *dispatch-op $ -> Unit
+                Option String
+                -> Unit
               match self $
                 :plugin node cursor state
                 match text
@@ -277,7 +280,9 @@
                       d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
                       , &unit
             .close $ fn (self d!)
-              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
+                Fn *dispatch-op $ -> Unit
+                -> Unit
               match self $
                 :plugin node cursor state
                 do
@@ -407,14 +412,18 @@
                 :plugin node cursor state
                 , node
             .show $ fn (self d!)
-              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
+                Fn *dispatch-op $ -> Unit
+                -> Unit
               match self $
                 :plugin node cursor state
                 do
                   d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
                   , &unit
             .close $ fn (self d!)
-              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
+                Fn *dispatch-op $ -> Unit
+                -> Unit
               match self $
                 :plugin node cursor state
                 do
@@ -484,14 +493,18 @@
                 :plugin node cursor state
                 , node
             .show $ fn (self d!)
-              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
+                Fn *dispatch-op $ -> Unit
+                -> Unit
               match self $
                 :plugin node cursor state
                 do
                   d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
                   , &unit
             .close $ fn (self d!)
-              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+              hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
+                Fn *dispatch-op $ -> Unit
+                -> Unit
               match self $
                 :plugin node cursor state
                 do
@@ -559,8 +572,13 @@
         'AlertActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait AlertActions
             .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
-            .show $ Fn respo-alerts.core/PluginNodeCursorState AnyFn (Option String) (-> Unit)
-            .close $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+            .show $ Fn respo-alerts.core/PluginNodeCursorState
+              Fn *dispatch-op $ -> Unit
+              Option String
+              -> Unit
+            .close $ Fn respo-alerts.core/PluginNodeCursorState
+              Fn *dispatch-op $ -> Unit
+              -> Unit
             .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
           :examples $ []
           :schema $ quote Trait
@@ -586,8 +604,12 @@
         'DrawerActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait DrawerActions
             .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
-            .show $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
-            .close $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+            .show $ Fn respo-alerts.core/PluginNodeCursorState
+              Fn *dispatch-op $ -> Unit
+              -> Unit
+            .close $ Fn respo-alerts.core/PluginNodeCursorState
+              Fn *dispatch-op $ -> Unit
+              -> Unit
             .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
           :examples $ []
           :schema $ quote Trait
@@ -608,8 +630,12 @@
         'ModalMenuActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ModalMenuActions
             .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
-            .show $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
-            .close $ Fn respo-alerts.core/PluginNodeCursorState AnyFn $ -> Unit
+            .show $ Fn respo-alerts.core/PluginNodeCursorState
+              Fn *dispatch-op $ -> Unit
+              -> Unit
+            .close $ Fn respo-alerts.core/PluginNodeCursorState
+              Fn *dispatch-op $ -> Unit
+              -> Unit
             .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
           :examples $ []
           :schema $ quote Trait

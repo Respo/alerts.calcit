@@ -2,9 +2,9 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
-### 0.14.0 候选：Prompt 回调类型
+### 0.14.0 候选：输入和分发回调
 
-Prompt 的 `.show` 要求输入回调接收一个 String，结果仍会被丢弃。分发回调接收项目的 `dispatch-op` 类型并返回 Unit。没有参数注解且无法推断的回调，需要补上准确的 `hint-fn`。Modal、Confirm 与 Prompt 的状态操作和回调顺序保持。
+Prompt 的 `.show` 要求输入回调接收一个 String，结果仍会被丢弃。Alert、Drawer、Modal Menu 和 Prompt 的分发函数接收项目的 `dispatch-op` 类型并返回 Unit。参数类型无法推断时，请用 `hint-fn` 标注实际签名。各弹层的状态更新和回调顺序沿用原行为。
 
 ### 历史 0.13.1：使用者影响
 
