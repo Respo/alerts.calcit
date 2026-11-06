@@ -76,7 +76,7 @@
                   button $ {} (:inner-text "|show modal") (:class-name css/button)
                     :on-click $ fn (e d!)
                       hint-fn $ Fn respo.schema/RespoEvent
-                        Fn AnyEnum $ -> Unit
+                        Fn *dispatch-op $ -> Unit
                         -> Unit
                       .show demo-modal d!
                   space-x 8
@@ -159,7 +159,7 @@
                   button $ {} (:inner-text "|show confirm") (:class-name css/button)
                     :on-click $ fn (e d!)
                       hint-fn $ Fn respo.schema/RespoEvent
-                        Fn AnyEnum $ -> Unit
+                        Fn *dispatch-op $ -> Unit
                         -> Unit
                       .show confirm-plugin d! $ fn () $ println "|after confirmed"
                       , &unit
@@ -167,7 +167,7 @@
                   button $ {} (:inner-text "|show confirm with text") (:class-name css/button)
                     :on-click $ fn (e d!)
                       hint-fn $ Fn respo.schema/RespoEvent
-                        Fn AnyEnum $ -> Unit
+                        Fn *dispatch-op $ -> Unit
                         -> Unit
                       .show confirm-prompt-plugin d! $ fn (text)
                         hint-fn $ Fn String $ -> Unit
@@ -302,9 +302,9 @@
                   respo.schema/Component :name :alert-contract :effects ([]) :listeners ([]) :tree $ Option :none
                   , cursor $ {}
                 calls $ ref $ assert-type ([])
-                  quote $ List AnyEnum
+                  quote $ List *dispatch-op
                 dispatch! $ fn (op)
-                  hint-fn $ Fn AnyEnum $ -> Unit
+                  hint-fn $ Fn *dispatch-op $ -> Unit
                   reset! calls $ .append @calls op
                   , &unit
               .show plugin dispatch! $ Option :some |hello
@@ -333,7 +333,7 @@
                 , node
             .show $ fn (self d! next-task)
               hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
-                Fn AnyEnum $ -> Unit
+                Fn *dispatch-op $ -> Unit
                 Fn $ -> Unit
                 -> Unit
               match self $
@@ -345,7 +345,7 @@
                   d! $ :: :states cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text |)
             .show-with-text $ fn (self d! text next-task)
               hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
-                Fn AnyEnum $ -> Unit
+                Fn *dispatch-op $ -> Unit
                 , String
                   Fn $ -> Unit
                   -> Unit
@@ -358,7 +358,7 @@
                   d! $ :: :states cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text text)
             .close $ fn (self d!)
               hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
-                Fn AnyEnum $ -> Unit
+                Fn *dispatch-op $ -> Unit
                 -> Unit
               match self $
                 :plugin node cursor state
@@ -378,7 +378,7 @@
                 plugin $ confirm-actions-plugin :plugin node cursor $ {}
               .show plugin
                 fn (op)
-                  hint-fn $ Fn AnyEnum $ -> Unit
+                  hint-fn $ Fn *dispatch-op $ -> Unit
                   assert=
                     :: :states cursor $ {} (:show? true) (:text |)
                     , op
@@ -390,14 +390,14 @@
               assert= (Option :none) (take-prompt-task! cursor)
               .show-with-text plugin
                 fn (op)
-                  hint-fn $ Fn AnyEnum $ -> Unit
+                  hint-fn $ Fn *dispatch-op $ -> Unit
                   assert=
                     :: :states cursor $ {} (:show? true) (:text |override)
                     , op
                   , &unit
                 , |override $ fn () &unit
               .close plugin $ fn (op)
-                hint-fn $ Fn AnyEnum $ -> Unit
+                hint-fn $ Fn *dispatch-op $ -> Unit
                 assert=
                   :: :states cursor $ {} $ :show? false
                   , op
@@ -459,13 +459,13 @@
                   respo.schema/Component :name :modal-contract :effects ([]) :listeners ([]) :tree $ Option :none
                   , cursor $ {}
                 calls $ ref $ assert-type ([])
-                  quote $ List AnyEnum
+                  quote $ List *dispatch-op
                 dispatch! $ fn (op)
-                  hint-fn $ Fn AnyEnum $ -> Number
+                  hint-fn $ Fn *dispatch-op $ -> Number
                   reset! calls $ .append @calls op
                   , 42
                 unit-dispatch! $ fn (op)
-                  hint-fn $ Fn AnyEnum $ -> Unit
+                  hint-fn $ Fn *dispatch-op $ -> Unit
                   , &unit
               assert= 42 $ .show plugin dispatch!
               assert= 42 $ .close plugin dispatch!
@@ -587,16 +587,16 @@
           :code $ quote $ deftrait ConfirmActions
             .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
             .show $ Fn respo-alerts.core/PluginNodeCursorState
-              Fn AnyEnum $ -> Unit
+              Fn *dispatch-op $ -> Unit
               Fn $ -> Unit
               -> Unit
             .show-with-text $ Fn respo-alerts.core/PluginNodeCursorState
-              Fn AnyEnum $ -> Unit
+              Fn *dispatch-op $ -> Unit
               , String
                 Fn $ -> Unit
                 -> Unit
             .close $ Fn respo-alerts.core/PluginNodeCursorState
-              Fn AnyEnum $ -> Unit
+              Fn *dispatch-op $ -> Unit
               -> Unit
             .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
           :examples $ []
@@ -617,11 +617,11 @@
           :code $ quote $ deftrait ModalActions
             .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
             .show $ Fn respo-alerts.core/PluginNodeCursorState
-              Fn AnyEnum $ -> R
+              Fn *dispatch-op $ -> R
               -> R
               :generics R
             .close $ Fn respo-alerts.core/PluginNodeCursorState
-              Fn AnyEnum $ -> R
+              Fn *dispatch-op $ -> R
               -> R
               :generics R
             .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
@@ -717,7 +717,7 @@
         'close-modal! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn close-modal! (self d!)
             hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
-              Fn AnyEnum $ -> R
+              Fn *dispatch-op $ -> R
               -> R
               :generics R
             match self $
@@ -725,7 +725,7 @@
               d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
           :examples $ []
           :schema $ quote $ Fn respo-alerts.core/PluginNodeCursorState
-            Fn AnyEnum $ -> R
+            Fn *dispatch-op $ -> R
             -> R
             :generics R
         'comp-alert-modal $ %{} 'CodeEntry
@@ -1518,7 +1518,7 @@
         'show-modal! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn show-modal! (self d!)
             hint-fn $ Fn respo-alerts.core/PluginNodeCursorState
-              Fn AnyEnum $ -> R
+              Fn *dispatch-op $ -> R
               -> R
               :generics R
             match self $
@@ -1526,7 +1526,7 @@
               d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
           :examples $ []
           :schema $ quote $ Fn respo-alerts.core/PluginNodeCursorState
-            Fn AnyEnum $ -> R
+            Fn *dispatch-op $ -> R
             -> R
             :generics R
         'store-prompt-task! $ %{} 'CodeEntry (:doc |)
