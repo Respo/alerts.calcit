@@ -990,7 +990,9 @@
                           (:none) ([])
                         [] $ [] 1 $ list-> ({})
                           ->
-                            menu-items $ read-field-or options :items $ []
+                            match (read-field options :items)
+                              (:some items) (menu-items items)
+                              (:none) (raise "|Menu items must be List")
                             map $ fn (info)
                               let
                                   item $ cond
@@ -2153,6 +2155,12 @@
                   read-field
                     {} $ :show? false
                     , :show?
+            %{} 'TestEntry (:name |reads-struct-fields)
+              :code $ quote $ let
+                  Probe $ defstruct Probe $ :value Number
+                  probe $ %{} Probe $ :value 1
+                assert= (Option :some 1) (read-field probe :value)
+                assert= (Option :none) (read-field probe :missing)
         'read-field-list $ %{} 'CodeEntry
           :doc "|The field as a list of zero or one value, for spreading into `str-spaced`."
           :code $ quote $ defn read-field-list (value field)
