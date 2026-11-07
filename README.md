@@ -2,9 +2,13 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
+### 0.14.2 候选
+
+消费者需要统一 Calcit CLI 和 `@calcit/procs` 到 **0.37.0**，并配对 Reel **0.10.0**、UI **0.15.2**、Respo **0.19.5** 和 JS-FFI **0.2.13** 后重新生成 JS。Demo 仍接收现有插件和 Reel 工具的操作，进入 Demo 历史的应用操作现在使用 `respo-alerts.schema/Op`。未知操作会记录警告，且不再写入 Demo 历史。
+
 ### 0.14.0 候选：输入和分发回调
 
-Prompt 的 `.show` 要求输入回调接收一个 String，结果仍会被丢弃。Alert、Drawer、Modal Menu 和 Prompt 的分发函数接收项目的 `dispatch-op` 类型并返回 Unit。参数类型无法推断时，请用 `hint-fn` 标注实际签名。Modal 的 `.show` / `.close` 与库内组件的 `d!` 回调同样写成 `*dispatch-op`，不再用 `AnyEnum`；Demo 自己的 `dispatch!` 要等 Reel 0.10.0 发布、改用 `listen-devtools-toggle!` 后再收紧。各弹层的状态更新和回调顺序沿用原行为。
+Prompt 的 `.show` 要求输入回调接收一个 String，结果仍会被丢弃。Alert、Drawer、Modal Menu 和 Prompt 的分发函数接收项目的 `dispatch-op` 类型并返回 Unit。参数类型无法推断时，请用 `hint-fn` 标注实际签名。Modal 的 `.show` / `.close` 与库内组件的 `d!` 回调同样写成 `*dispatch-op`。各弹层的状态更新和回调顺序沿用原行为。
 
 ### 历史 0.13.1：使用者影响
 
