@@ -6,7 +6,7 @@
     {} (:description |) (:init-fn 'respo-alerts.main/main!) (:mode :js) (:reload-fn 'respo-alerts.main/reload!) (:target :browser)
       :feature-policy $ {}
       :modules $ [] |respo.calcit/ |respo-ui.calcit/ |reel.calcit/ |js-ffi/
-      :type-slots $ {} $ :dispatch-op |respo-alerts.schema/Op
+      :type-slots $ {} $ :dispatch-op 'respo-alerts.schema/Op
   :files $ {}
     'respo-alerts.comp.container $ %{} 'FileEntry
       :defs $ {}
@@ -300,8 +300,7 @@
                 plugin $ alert-actions-plugin :plugin
                   respo.schema/Component :name :alert-contract :effects ([]) :listeners ([]) :tree $ Option :none
                   , cursor $ {}
-                calls $ ref $ assert-type ([])
-                  quote $ List *dispatch-op
+                calls $ ref $ assert-type ([]) (List *dispatch-op)
                 dispatch! $ fn (op)
                   hint-fn $ Fn *dispatch-op $ -> Unit
                   reset! calls $ .append @calls op
@@ -457,8 +456,7 @@
                 plugin $ modal-actions-plugin :plugin
                   respo.schema/Component :name :modal-contract :effects ([]) :listeners ([]) :tree $ Option :none
                   , cursor $ {}
-                calls $ ref $ assert-type ([])
-                  quote $ List *dispatch-op
+                calls $ ref $ assert-type ([]) (List *dispatch-op)
                 dispatch! $ fn (op)
                   hint-fn $ Fn *dispatch-op $ -> Number
                   reset! calls $ .append @calls op
@@ -1870,7 +1868,7 @@
               option:unwrap $ get config/site :storage-key
               format-cirru-edn $ :store @*reel
           :examples $ []
-          :schema $ quote $ Fn & Dynamic (-> Unit)
+          :schema $ quote $ Fn (& Dynamic) (-> Unit)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
             if (nil? build-errors)
