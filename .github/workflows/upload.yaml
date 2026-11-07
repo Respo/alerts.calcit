@@ -83,7 +83,7 @@ jobs:
       with:
         repository: worktools/qrcode-shelf
         # Shelf 0.36.0 migration: Op instead of bare Enum, no Option erased to nil (worktools/qrcode-shelf#39).
-        ref: 1673387ea0d04696e9735e73f8bf7892601ed74b
+        ref: 8d493ec13119795510b21a7ac0a99c4751b399eb
         path: .calcit/consumer
         persist-credentials: false
 
