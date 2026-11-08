@@ -4,7 +4,7 @@
 
 ### 0.14.2 候选
 
-消费者需要统一 Calcit CLI 和 `@calcit/procs` 到 **0.37.0**，并配对 Reel **0.10.0**、UI **0.15.2**、Respo **0.19.5** 和 JS-FFI **0.2.13** 后重新生成 JS。Demo 仍接收现有插件和 Reel 工具的操作，进入 Demo 历史的应用操作现在使用 `respo-alerts.schema/Op`。未知操作会记录警告，且不再写入 Demo 历史。
+消费者需要统一 Calcit CLI 和 `@calcit/procs` 到 **0.38.0**，并配对 Reel **0.10.0**、UI **0.15.2**、Respo **0.19.5** 和 JS-FFI **0.2.13** 后重新生成 JS。Demo 仍接收现有插件和 Reel 工具的操作，Demo 在分派入口解析插件与调试工具发来的操作，内部以 `respo-alerts.schema/Op | reel.typed/Control` 区分历史记录与调试控制。未知操作会记录警告，且不再写入 Demo 历史。
 
 ### 0.14.0 候选：输入和分发回调
 

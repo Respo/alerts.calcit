@@ -1823,7 +1823,21 @@
                 (:states ignored-cursor ignored-state) false
                 _ true
               shared/console-log! $ str |Dispatch: op
-            reset! *reel $ next-reel op
+            reset! *reel $ match (typed/decode-control op)
+              (:some control) (next-reel control)
+              (:none)
+                match op
+                  (:states cursor value)
+                    next-reel $ schema/Op :states
+                      decode-map-as cursor $ List Dynamic
+                      , value
+                  (:content value)
+                    next-reel $ schema/Op :content value
+                  (:hydrate-storage value)
+                    next-reel $ schema/Op :hydrate-storage value
+                  _ $ do
+                    shared/console-warn! $ str "|Unknown op:" op
+                    , @*reel
             , &unit
           :examples $ []
           :schema $ quote $ Fn AnyEnum (-> Unit) (:features :js-ffi)
@@ -1850,29 +1864,12 @@
           :schema $ quote $ Fn (-> js-ffi.browser/DomElementHost) (:features :js-ffi)
         'next-reel $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn next-reel (op)
-            let
-                reel $ assert-type @*reel $ reel.typed/State respo-alerts.schema/Op (Map Dynamic Dynamic)
-                record $ fn (operation)
-                  hint-fn $ Fn respo-alerts.schema/Op $ ->
-                    reel.typed/State respo-alerts.schema/Op $ Map Dynamic Dynamic
-                  typed/record-op updater reel operation (generate-id!) (shared/now-ms)
-              match (typed/decode-control op)
-                (:some control) (typed/apply-control updater reel control)
-                (:none)
-                  match op
-                    (:states cursor value)
-                      record $ schema/Op :states
-                        decode-map-as cursor $ List Dynamic
-                        , value
-                    (:content value)
-                      record $ schema/Op :content value
-                    (:hydrate-storage value)
-                      record $ schema/Op :hydrate-storage value
-                    _ $ do
-                      shared/console-warn! $ str "|Unknown op:" op
-                      , reel
+            match op
+              (reel.typed/Control control) (typed/apply-control updater @*reel control)
+              (respo-alerts.schema/Op action)
+                typed/record-op updater @*reel action (generate-id!) (shared/now-ms)
           :examples $ []
-          :schema $ quote $ Fn AnyEnum
+          :schema $ quote $ Fn respo-alerts.schema/ResolvedOp
             -> $ reel.typed/State respo-alerts.schema/Op $ Map Dynamic Dynamic
             :features :js-ffi
         'persist-storage! $ %{} 'CodeEntry (:doc |)
@@ -1942,6 +1939,10 @@
             :reel/remove Number
           :examples $ []
           :schema $ quote EnumDef
+        'ResolvedOp $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defunion ResolvedOp Op reel.typed/Control
+          :examples $ []
+          :schema $ quote UnionDef
         'confirm-button-name $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def confirm-button-name |respo-confirm-button
           :examples $ []
