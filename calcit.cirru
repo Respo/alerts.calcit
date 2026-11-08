@@ -39,7 +39,7 @@
                   Option :none
           :examples $ []
           :schema $ quote $ Fn
-            reel.typed/State AnyEnum $ Map Dynamic Dynamic
+            reel.typed/State respo-alerts.schema/Op $ Map Dynamic Dynamic
             -> respo.schema/Component
         'comp-controlled-modals $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-controlled-modals (states)
@@ -1815,7 +1815,7 @@
           :code $ quote $ defref *reel (typed/new-reel schema/store)
           :examples $ []
           :schema $ quote $ Ref
-            reel.typed/State AnyEnum $ Map Dynamic Dynamic
+            reel.typed/State respo-alerts.schema/Op $ Map Dynamic Dynamic
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (op)
             when
@@ -1851,16 +1851,29 @@
         'next-reel $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn next-reel (op)
             let
-                reel $ assert-type @*reel $ reel.typed/State AnyEnum (Map Dynamic Dynamic)
-              if (enum? op)
-                match (typed/decode-control op)
-                  (:some control) (typed/apply-control updater reel control)
-                  (:none)
-                    typed/record-op updater reel op (generate-id!) (shared/now-ms)
-                raise "|alert operation must be an Enum"
+                reel $ assert-type @*reel $ reel.typed/State respo-alerts.schema/Op (Map Dynamic Dynamic)
+                record $ fn (operation)
+                  hint-fn $ Fn respo-alerts.schema/Op $ ->
+                    reel.typed/State respo-alerts.schema/Op $ Map Dynamic Dynamic
+                  typed/record-op updater reel operation (generate-id!) (shared/now-ms)
+              match (typed/decode-control op)
+                (:some control) (typed/apply-control updater reel control)
+                (:none)
+                  match op
+                    (:states cursor value)
+                      record $ schema/Op :states
+                        decode-map-as cursor $ List Dynamic
+                        , value
+                    (:content value)
+                      record $ schema/Op :content value
+                    (:hydrate-storage value)
+                      record $ schema/Op :hydrate-storage value
+                    _ $ do
+                      shared/console-warn! $ str "|Unknown op:" op
+                      , reel
           :examples $ []
-          :schema $ quote $ Fn Dynamic
-            -> $ reel.typed/State AnyEnum $ Map Dynamic Dynamic
+          :schema $ quote $ Fn AnyEnum
+            -> $ reel.typed/State respo-alerts.schema/Op $ Map Dynamic Dynamic
             :features :js-ffi
         'persist-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-storage! (& _args)
@@ -1883,11 +1896,11 @@
         'reloaded-reel $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reloaded-reel ()
             typed/refresh updater
-              assert-type @*reel $ reel.typed/State AnyEnum $ Map Dynamic Dynamic
+              assert-type @*reel $ reel.typed/State respo-alerts.schema/Op $ Map Dynamic Dynamic
               assert-type schema/store $ Map Dynamic Dynamic
           :examples $ []
           :schema $ quote $ Fn
-            -> $ reel.typed/State AnyEnum $ Map Dynamic Dynamic
+            -> $ reel.typed/State respo-alerts.schema/Op $ Map Dynamic Dynamic
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
             render-with!
@@ -2043,7 +2056,7 @@
                 shared/console-warn! $ str "|Unknown op:" op
                 , store
           :examples $ []
-          :schema $ quote $ Fn (Map Dynamic Dynamic) AnyEnum String Number
+          :schema $ quote $ Fn (Map Dynamic Dynamic) respo-alerts.schema/Op String Number
             -> $ Map Dynamic Dynamic
             :features :js-ffi
       :ns $ %{} 'NsEntry (:doc |)
