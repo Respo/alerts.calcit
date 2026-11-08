@@ -10,7 +10,7 @@ const { with_memo_frame } = await import('../js-out/respo.memo.mjs');
 
 test('the demo renders typed Reel state with devtools open', () => {
   const reel = toggle_display(new_reel(store));
-  const html = with_memo_frame(() => make_string(comp_container(reel)));
+  const html = with_memo_frame(() => make_string(comp_container(reel, () => {})));
   assert.match(html, /show alert/);
   assert.match(html, /show modal/);
   assert.match(html, /Merge/);

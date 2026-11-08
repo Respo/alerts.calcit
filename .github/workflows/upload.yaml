@@ -87,23 +87,12 @@ jobs:
         path: .calcit/consumer
         persist-credentials: false
 
-    - name: Check out published Feather dependency
-      uses: actions/checkout@v7.0.1
-      with:
-        repository: Respo/respo-feather.calcit
-        ref: 0.6.3
-        path: .calcit/consumer/.calcit/modules/respo-feather.calcit
-        persist-credentials: false
-
-    - name: Validate real consumer with local candidates
+    - name: Validate existing Shelf release with candidate Alerts
       run: |
         set -euo pipefail
         consumer="$GITHUB_WORKSPACE/.calcit/consumer"
-        cp -RL .calcit/modules/. "$consumer/.calcit/modules/"
-        mkdir -p "$consumer/.calcit/modules/alerts.calcit"
-        cp calcit.cirru deps.cirru "$consumer/.calcit/modules/alerts.calcit/"
-        # Explicit local candidate graph, NOT a Caps-resolved release install.
-        # Use the exact consumer source; only official type formatting may normalize it.
+        # Shelf's checked-in source uses Reel 0.10.0. Resolve its original
+        # fixture graph first, then replace only the Alerts module under test.
         cat > "$consumer/deps.cirru" <<'EOF'
         {} (:calcit-version |0.38.0) (:version |0.1.0)
           :dependencies $ {} (|Respo/reel.calcit |0.10.0)
@@ -114,6 +103,12 @@ jobs:
             |calcit-lang/js-ffi |0.2.13
         EOF
         cd "$consumer"
+        caps --strict --ci
+        alerts_module=".calcit/modules/alerts.calcit"
+        test -L "$alerts_module"
+        unlink "$alerts_module"
+        mkdir "$alerts_module"
+        cp "$GITHUB_WORKSPACE"/{calcit,deps}.cirru "$alerts_module/"
         yarn add --exact @calcit/procs@0.38.0
         yarn install --immutable
         calcit calcit.cirru edit format
