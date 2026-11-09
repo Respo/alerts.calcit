@@ -11,7 +11,7 @@
     'respo-alerts.comp.container $ %{} 'FileEntry
       :defs $ {}
         'comp-container $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defcomp comp-container (reel)
+          :code $ quote $ defcomp comp-container (reel on-control)
             let
                 store $ :store reel
                 states $ read-field-or store :states $ {}
@@ -35,11 +35,12 @@
                   Option :some $ comp-inspect |states states $ {} (:bottom 0)
                   Option :none
                 if dev?
-                  Option :some $ comp-typed-reel (>> states :reel) reel $ {}
+                  Option :some $ comp-typed-reel (>> states :reel) reel ({}) on-control
                   Option :none
           :examples $ []
           :schema $ quote $ Fn
             reel.typed/State respo-alerts.schema/Op $ Map Dynamic Dynamic
+            Fn reel.typed/Control $ -> Unit
             -> respo.schema/Component
         'comp-controlled-modals $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-controlled-modals (states)
@@ -1823,21 +1824,16 @@
                 (:states ignored-cursor ignored-state) false
                 _ true
               shared/console-log! $ str |Dispatch: op
-            reset! *reel $ match (typed/decode-control op)
-              (:some control) (next-reel control)
-              (:none)
-                match op
-                  (:states cursor value)
-                    next-reel $ schema/Op :states
-                      decode-map-as cursor $ List Dynamic
-                      , value
-                  (:content value)
-                    next-reel $ schema/Op :content value
-                  (:hydrate-storage value)
-                    next-reel $ schema/Op :hydrate-storage value
-                  _ $ do
-                    shared/console-warn! $ str "|Unknown op:" op
-                    , @*reel
+            match op
+              (:states cursor value)
+                record-op! $ schema/Op :states
+                  decode-map-as cursor $ List Dynamic
+                  , value
+              (:content value)
+                record-op! $ schema/Op :content value
+              (:hydrate-storage value)
+                record-op! $ schema/Op :hydrate-storage value
+              _ $ shared/console-warn! $ str "|Unknown op:" op
             , &unit
           :examples $ []
           :schema $ quote $ Fn AnyEnum (-> Unit) (:features :js-ffi)
@@ -1847,7 +1843,7 @@
             if config/dev? $ load-console-formatter!
             render-app!
             add-watch! *reel :changes $ fn (reel prev) (render-app!)
-            listen-devtools! |a dispatch!
+            listen-devtools! |a on-control!
             ; js/window.addEventListener |beforeunload $ fn (event) (persist-storage!)
             ; js/setInterval persist-storage! 60000
             ; let
@@ -1862,16 +1858,12 @@
             option:unwrap $ browser/query-selector |.app
           :examples $ []
           :schema $ quote $ Fn (-> js-ffi.browser/DomElementHost) (:features :js-ffi)
-        'next-reel $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn next-reel (op)
-            match op
-              (reel.typed/Control control) (typed/apply-control updater @*reel control)
-              (respo-alerts.schema/Op action)
-                typed/record-op updater @*reel action (generate-id!) (shared/now-ms)
+        'on-control! $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn on-control! (control)
+            reset! *reel $ typed/apply-control updater @*reel control
+            , &unit
           :examples $ []
-          :schema $ quote $ Fn respo-alerts.schema/ResolvedOp
-            -> $ reel.typed/State respo-alerts.schema/Op $ Map Dynamic Dynamic
-            :features :js-ffi
+          :schema $ quote $ Fn reel.typed/Control (-> Unit)
         'persist-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-storage! (& _args)
             browser/storage-set!
@@ -1879,6 +1871,12 @@
               format-cirru-edn $ :store @*reel
           :examples $ []
           :schema $ quote $ Fn (& Dynamic) (-> Unit)
+        'record-op! $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn record-op! (action)
+            reset! *reel $ typed/record-op updater @*reel action (generate-id!) (shared/now-ms)
+            , &unit
+          :examples $ []
+          :schema $ quote $ Fn respo-alerts.schema/Op (-> Unit) (:features :js-ffi)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
             if (nil? build-errors)
@@ -1902,7 +1900,7 @@
           :code $ quote $ defn render-app! ()
             render-with!
               narrow-element $ mount-target
-              fn () $ comp-container @*reel
+              fn () $ comp-container @*reel on-control!
               fn (op)
                 if (enum? op) (dispatch! op) (raise "|alert renderer operation must be an Enum")
           :examples $ []
@@ -1930,19 +1928,8 @@
             :states (List Dynamic) Dynamic
             :content Dynamic
             :hydrate-storage Dynamic
-            :reel/toggle
-            :reel/recall Number
-            :reel/run
-            :reel/step
-            :reel/merge
-            :reel/reset
-            :reel/remove Number
           :examples $ []
           :schema $ quote EnumDef
-        'ResolvedOp $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defunion ResolvedOp Op reel.typed/Control
-          :examples $ []
-          :schema $ quote UnionDef
         'confirm-button-name $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def confirm-button-name |respo-confirm-button
           :examples $ []

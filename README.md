@@ -2,9 +2,9 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
-### 0.14.2 候选
+### 0.14.3 候选
 
-消费者需要统一 Calcit CLI 和 `@calcit/procs` 到 **0.38.0**，并配对 Reel **0.10.0**、UI **0.15.2**、Respo **0.19.5** 和 JS-FFI **0.2.13** 后重新生成 JS。Demo 仍接收现有插件和 Reel 工具的操作，Demo 在分派入口解析插件与调试工具发来的操作，内部以 `respo-alerts.schema/Op | reel.typed/Control` 区分历史记录与调试控制。未知操作会记录警告，且不再写入 Demo 历史。
+消费者需要统一 Calcit CLI 和 `@calcit/procs` 到 **0.38.0**，并配对 UI **0.15.2**、Respo **0.19.5** 和 JS-FFI **0.2.13** 后重新生成 JS。Reel **0.11.0** 只由 Alerts Demo 使用，移入开发依赖。应用自行升级 Reel 到 0.11 时，需要给面板与快捷键传入 `Control` 回调。Alerts 的弹层接口和状态事件沿用原合同。Demo 将弹层事件解码为具名 `Op`，开发面板通过单独回调接收 `reel.typed/Control`，未知插件事件仍会记录警告。
 
 ### 0.14.0 候选：输入和分发回调
 
