@@ -1827,12 +1827,10 @@
             match op
               (:states cursor value)
                 record-op! $ schema/Op :states
-                  decode-map-as cursor $ List Dynamic
+                  decode-map-as cursor $ List respo.schema/CoordKey
                   , value
-              (:content value)
-                record-op! $ schema/Op :content value
               (:hydrate-storage value)
-                record-op! $ schema/Op :hydrate-storage value
+                record-op! $ schema/Op :hydrate-storage $ if (map? value) value (raise "|hydrated store must be a Map")
               _ $ shared/console-warn! $ str "|Unknown op:" op
             , &unit
           :examples $ []
@@ -1925,9 +1923,8 @@
         'Op $ %{} 'CodeEntry
           :doc "|Ops the demo app dispatches. Bound to Respo's :dispatch-op slot, so d! in handlers is checked against it; :states carries component state written by alerts' plugins."
           :code $ quote $ defenum Op
-            :states (List Dynamic) Dynamic
-            :content Dynamic
-            :hydrate-storage Dynamic
+            :states (List respo.schema/CoordKey) Dynamic
+            :hydrate-storage $ Map Dynamic Dynamic
           :examples $ []
           :schema $ quote EnumDef
         'confirm-button-name $ %{} 'CodeEntry (:doc |)
@@ -2035,11 +2032,8 @@
         %{} 'CodeEntry (:doc |)
           :code $ quote $ defn updater (store op op-id op-time)
             as-state-map $ match op
-              (:states cursor s)
-                if (list? cursor) (update-states store cursor s) (raise "|state operation expected a cursor List")
-              (:content c) (&map:assoc store :content c)
-              (:hydrate-storage d)
-                if (map? d) d $ raise "|hydrated store must be a Map"
+              (:states cursor s) (update-states store cursor s)
+              (:hydrate-storage d) d
               _ $ do
                 shared/console-warn! $ str "|Unknown op:" op
                 , store
@@ -2047,6 +2041,20 @@
           :schema $ quote $ Fn (Map Dynamic Dynamic) respo-alerts.schema/Op String Number
             -> $ Map Dynamic Dynamic
             :features :js-ffi
+          :tests $ [] $ %{} 'TestEntry (:name |typed-demo-state-operations)
+            :code $ quote $ let
+                restored $ {}
+                  :states $ {}
+                  |legacy-field 0
+                updated $ updater restored
+                  respo-alerts.schema/Op :states ([] :panel |prompt 7)
+                    {} $ :open? false
+                  , |event 1
+              assert= restored $ updater respo-alerts.schema/store (respo-alerts.schema/Op :hydrate-storage restored) |restore 0
+              assert= (Option :some 0) (get updated |legacy-field)
+              assert= (Result :ok false)
+                get-in updated $ [] :states :panel |prompt 7 :data :open?
+            :tags $ #{} :unit
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns respo-alerts.updater
           :require
