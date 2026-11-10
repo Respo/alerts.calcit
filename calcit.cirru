@@ -1863,12 +1863,12 @@
           :examples $ []
           :schema $ quote $ Fn reel.typed/Control (-> Unit)
         'persist-storage! $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn persist-storage! (& _args)
+          :code $ quote $ defn persist-storage! ()
             browser/storage-set!
               option:unwrap $ get config/site :storage-key
               format-cirru-edn $ :store @*reel
           :examples $ []
-          :schema $ quote $ Fn (& Dynamic) (-> Unit)
+          :schema $ quote $ Fn (-> Unit)
         'record-op! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn record-op! (action)
             reset! *reel $ typed/record-op updater @*reel action (generate-id!) (shared/now-ms)
