@@ -1470,23 +1470,19 @@
         'read-style $ %{} 'CodeEntry
           :doc "|读取样式选项，nil 视为空 Map。沿原 guard 校验 Tag 键，每个值受检解码为 respo-ui.schema/InlineStyleValue（标量或 Option）；单属性 nil 应改为 Option :none。"
           :code $ quote $ defn read-style (options k)
-            &let
-              v $ read-field-or options k $ {}
-              if (nil? v) ({})
-                if (map? v)
-                  foldl v ({})
-                    defn %read-style-entry (acc pair)
-                      hint-fn $ Fn (Map Tag respo-ui.schema/InlineStyleValue) (List Dynamic)
-                        -> $ Map Tag respo-ui.schema/InlineStyleValue
-                      &let
-                        style-key $ &list:nth pair 0
-                        if (tag? style-key)
-                          &map:assoc acc style-key $ decode-map-as (&list:nth pair 1) respo-ui.schema/InlineStyleValue
-                          raise $ str "|respo-alerts expected style keys as tags, got: " style-key
-                  raise $ str "|respo-alerts expected a style map at " k "|, got: " $ type-of v
+            let
+                value $ read-field-or options k $ {}
+              if (nil? value) ({})
+                if (map? value)
+                  filter-map-kv value $ fn (style-key style-value)
+                    if (tag? style-key)
+                      MapEntryDecision :keep style-key $ decode-map-as style-value respo-ui.schema/InlineStyleValue
+                      raise $ str "|respo-alerts expected style keys as tags, got: " style-key
+                  raise $ str "|respo-alerts expected a style map at " k "|, got: " $ type-of value
           :examples $ []
-          :schema $ quote $ Fn Dynamic Tag
+          :schema $ quote $ Fn T Tag
             -> $ Map Tag respo-ui.schema/InlineStyleValue
+            :generics T
           :tests $ [] $ %{} 'TestEntry (:name |checked-inline-style-values)
             :code $ quote $ let
                 style $ {} (:color |red) (:padding 8) (:display :flex)
@@ -1523,7 +1519,7 @@
               if (nil? v) default-text $ if (string? v) v $ raise
                 str "|respo-alerts expected text at " k "|, got: " $ type-of v
           :examples $ []
-          :schema $ quote $ Fn Dynamic Tag String (-> String)
+          :schema $ quote $ Fn T Tag String (-> String) (:generics T)
         'read-text-value $ %{} 'CodeEntry (:doc "|把可选的显示值转成文本，nil 为空字符串。")
           :code $ quote $ defn read-text-value (value)
             if (string? value) value $ if (nil? value) | $ str value
