@@ -5,12 +5,23 @@ import { copyFile, mkdir, mkdtemp, readFile, rm, symlink } from 'node:fs/promise
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import * as c from '../js-out/calcit.core.mjs';
-import { comp_prompt_modal, comp_modal_menu, comp_confirm_modal, comp_modal, comp_drawer, comp_alert_modal } from '../js-out/respo-alerts.core.mjs';
+import { comp_prompt_modal, comp_modal_menu, comp_confirm_modal, comp_modal, comp_drawer, comp_alert_modal, read_state_cursor } from '../js-out/respo-alerts.core.mjs';
 import { comp_trigger } from '../js-out/respo-alerts.trigger.mjs';
 import { make_string } from '../js-out/respo.render.html.mjs';
 import { RespoEvent } from '../js-out/respo.schema.mjs';
 
 const states = c.parse_cirru_edn('{} (:cursor $ [])');
+
+test('overlay cursor decoding preserves mixed coordinates and checks custom state', () => {
+  const cursor = c.parse_cirru_edn('[] :editor |prompt 2');
+  const cursorKey = c.newTag('cursor');
+  const withCursor = (value) => c._$n__$M_(cursorKey, value);
+  assert.ok(c._$e_(read_state_cursor(withCursor(cursor)), cursor));
+  assert.equal(read_state_cursor(c._$n__$M_()).toArray().length, 0);
+  assert.equal(read_state_cursor(withCursor(null)).toArray().length, 0);
+  assert.throws(() => read_state_cursor(withCursor(c._$L_(true))));
+});
+
 const respoEvent = (source, nativeEvent) => {
   const fields = c.parse_cirru_edn(source);
   return c._$n__PCT__$M_(RespoEvent, ...RespoEvent.fields.flatMap(tag => {
