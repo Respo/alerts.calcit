@@ -94,7 +94,7 @@ jobs:
         # Shelf's checked-in source uses Reel 0.10.0. Resolve its original
         # fixture graph first, then replace only the Alerts module under test.
         cat > "$consumer/deps.cirru" <<'EOF'
-        {} (:calcit-version |0.40.0) (:version |0.1.0)
+        {} (:calcit-version |0.41.0) (:version |0.1.0)
           :dependencies $ {} (|Respo/reel.calcit |0.10.0)
             |Respo/respo-ui.calcit |0.15.2
             |Respo/respo.calcit |0.19.5
@@ -109,7 +109,7 @@ jobs:
         unlink "$alerts_module"
         mkdir "$alerts_module"
         cp "$GITHUB_WORKSPACE"/{calcit,deps}.cirru "$alerts_module/"
-        yarn add --exact @calcit/procs@0.40.0
+        yarn add --exact @calcit/procs@0.41.0
         yarn install --immutable
         calcit calcit.cirru edit format
         git add -- calcit.cirru
