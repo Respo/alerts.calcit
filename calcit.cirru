@@ -681,20 +681,24 @@
           :code $ quote $ defn as-options-map (value)
             if (nil? value) ({})
               if (map? value)
-                foldl value ({})
-                  defn %as-options-entry (acc pair)
-                    hint-fn $ Fn (Map Tag Dynamic) (List Dynamic)
-                      -> $ Map Tag Dynamic
-                    &let
-                      option-key $ &list:nth pair 0
-                      if (tag? option-key)
-                        &map:assoc acc option-key $ &list:nth pair 1
-                        raise $ str "|respo-alerts expected option keys as tags, got: " option-key
+                filter-map-kv value $ fn (option-key option-value)
+                  if (tag? option-key) (MapEntryDecision :keep option-key option-value)
+                    raise $ str "|respo-alerts expected option keys as tags, got: " option-key
                 raise $ str "|respo-alerts expected options as a map, got: " $ type-of value
           :examples $ []
           :schema $ quote $ Fn T
             -> $ Map Tag Dynamic
             :generics T
+          :tests $ [] $ %{} 'TestEntry (:name |rejects-non-tag-option-key)
+            :code $ quote $ assert= true
+              try
+                do
+                  as-options-map $ {} $ |text |hello
+                  , false
+                fn (message)
+                  hint-fn $ Fn String $ -> Bool
+                  starts-with? message "|respo-alerts expected option keys as tags"
+            :tags $ #{} :unit
         'as-prompt-task $ %{} 'CodeEntry (:doc "|把调用方提供的开放回调适配为接收文本的提示任务。")
           :code $ quote $ defn as-prompt-task (f)
             fn (text)
