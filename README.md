@@ -2,7 +2,11 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
-### 0.14.3 候选
+### 0.14.4 候选
+
+消费者需要统一 Calcit CLI 和 `@calcit/procs` 到 **0.42.0**，其余依赖与 0.14.3 相同。按 0.42.0 效果边界，`use-prompt`、`use-confirm` 和 prompt task 读写函数（`store-prompt-task!`、`take-prompt-task!`、`clear-prompt-task!`）的 `Fn` schema 声明 `:state`；调用它们的组件和处理函数也要声明 `:state`，否则 0.42 会给出 `W_STATE_FEATURE_REQUIRED` 提示（`calcit fix --rule effect-features-v1` 可一次补齐）。CI 的 Shelf 消费者夹具改用 0.42.0 检查。
+
+### 0.14.3
 
 消费者需要统一 Calcit CLI 和 `@calcit/procs` 到 **0.41.1**，并配对 UI **0.15.2**、Respo **0.19.5** 和 JS-FFI **0.2.13** 后重新生成 JS。Reel **0.11.0** 只由 Alerts Demo 使用，移入开发依赖。应用自行升级 Reel 到 0.11 时，需要给面板与快捷键传入 `Control` 回调。Alerts 的弹层接口和状态事件沿用原合同。自建状态 Map 的 `:cursor` 应遵循 Respo 的 `List CoordKey`（元素为 Tag、String 或 Number）；省略或传入 nil 时使用空路径，非法游标会在构建弹层时报告。Demo 将弹层事件解码为具名 `Op`，开发面板通过单独回调接收 `reel.typed/Control`，未知插件事件仍会记录警告。
 
