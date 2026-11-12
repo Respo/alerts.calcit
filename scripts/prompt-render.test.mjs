@@ -102,7 +102,7 @@ test('canonical attached tests replay on native and generated JavaScript', async
     assert.throws(() => invoke(snapshot, '--check-only', '--init-fn', legacyTarget, '--reload-fn', legacyTarget),
       (error) => {
         assert.equal(error.status, 1);
-        assert.match(`${error.stdout}${error.stderr}`, /W_METHOD_ARG_TYPE_MISMATCH/);
+        assert.match(`${error.stdout}${error.stderr}`, /E_METHOD_ARG_TYPE_MISMATCH/);
         return true;
       });
   } finally {

@@ -42,6 +42,7 @@
             reel.typed/State respo-alerts.schema/Op $ Map Dynamic Dynamic
             Fn reel.typed/Control $ -> Unit
             -> respo.schema/Component
+            :features :io :state
         'comp-controlled-modals $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-controlled-modals (states)
             let
@@ -89,7 +90,7 @@
                   .render demo-modal-menu
                   .render demo-drawer
           :examples $ []
-          :schema $ quote $ Fn (Map Tag Dynamic) (-> respo.schema/Component)
+          :schema $ quote $ Fn (Map Tag Dynamic) (-> respo.schema/Component) (:features :io)
         'comp-demo-trigger $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-demo-trigger (states)
             let
@@ -204,7 +205,7 @@
                 .render prompt-validation-plugin
                 .render alert-text-plugin
           :examples $ []
-          :schema $ quote $ Fn (Map Tag Dynamic) (-> respo.schema/Component)
+          :schema $ quote $ Fn (Map Tag Dynamic) (-> respo.schema/Component) (:features :io :state)
         'style-logo $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle style-logo
             {} $ |& $ {} (:width 120)
@@ -721,7 +722,7 @@
             reset! *prompt-tasks $ &map:dissoc @*prompt-tasks cursor
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (List respo.schema/CoordKey) (-> Unit)
+          :schema $ quote $ Fn (List respo.schema/CoordKey) (-> Unit) (:features :state)
         'close-modal! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn close-modal! (self d!)
             hint-fn $ Fn PluginNodeCursorState
@@ -1602,6 +1603,7 @@
           :schema $ quote $ Fn (List respo.schema/CoordKey)
             Fn String $ -> Unit
             -> Unit
+            :features :state
         'style-clear $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle style-clear
             {}
@@ -1660,6 +1662,7 @@
           :examples $ []
           :schema $ quote $ Fn (List respo.schema/CoordKey)
             -> $ Option $ Fn String (-> Unit)
+            :features :state
           :tests $ [] $ %{} 'TestEntry (:name |persists-across-renders)
             :code $ quote $ let
                 cursor $ [] :prompt-test
@@ -1754,7 +1757,7 @@
                   :on-click $ fn (e d!)
                     .show-with-text confirm-plugin d! "|Confirm with dynamic text?" $ fn () $ println |Confirmed!
                 <> "|Show with text"
-          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> respo-alerts.core/confirm-actions-plugin)
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> respo-alerts.core/confirm-actions-plugin) (:features :state)
         'use-drawer $ %{} 'CodeEntry
           :doc "||Drawer hook. Shows a panel sliding from the side. Use :render function in options to customize content. Supports :style for width and other styles."
           :code $ quote $ defn use-drawer (states options)
@@ -1860,7 +1863,7 @@
                 {} $ :on-click $ fn (e d!)
                   .show prompt-plugin d! $ fn (text) (println |got: text)
                 <> |Input
-          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> respo-alerts.core/prompt-actions-plugin)
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> respo-alerts.core/prompt-actions-plugin) (:features :state)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns respo-alerts.core
           :require
@@ -1901,7 +1904,7 @@
               _ $ shared/console-warn! $ str "|Unknown op:" op
             , &unit
           :examples $ []
-          :schema $ quote $ Fn AnyEnum (-> Unit) (:features :js-ffi) (:open :decode)
+          :schema $ quote $ Fn AnyEnum (-> Unit) (:features :js-ffi :state) (:open :decode)
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! ()
             println "|Running mode:" $ if config/dev? |dev |release
@@ -1917,7 +1920,7 @@
                 dispatch! :hydrate-storage $ parse-cirru-edn raw
             println "|App started."
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi :state)
         'mount-target $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn mount-target ()
             (browser/query-selector |.app) .unwrap
@@ -1928,7 +1931,7 @@
             reset! *reel $ typed/apply-control updater @*reel control
             , &unit
           :examples $ []
-          :schema $ quote $ Fn typed/Control (-> Unit)
+          :schema $ quote $ Fn typed/Control (-> Unit) (:features :state)
         'persist-storage! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-storage! ()
             browser/storage-set!
@@ -1936,13 +1939,13 @@
                 , .unwrap
               format-cirru-edn $ :store @*reel
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :state)
         'record-op! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn record-op! (action)
             reset! *reel $ typed/record-op updater @*reel action (generate-id!) (shared/now-ms)
             , &unit
           :examples $ []
-          :schema $ quote $ Fn schema/Op (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn schema/Op (-> Unit) (:features :js-ffi :state)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
             if (nil? build-errors)
@@ -1953,7 +1956,7 @@
               hud! |error build-errors
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi :state)
         'reloaded-reel $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reloaded-reel ()
             typed/refresh updater
@@ -1962,6 +1965,7 @@
           :examples $ []
           :schema $ quote $ Fn
             -> $ typed/State schema/Op $ Map Dynamic Dynamic
+            :features :state
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
             render-with!
@@ -1970,7 +1974,7 @@
               fn (op)
                 if (enum? op) (dispatch! op) (raise "|alert renderer operation must be an Enum")
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :js-ffi)
+          :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi :state)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns respo-alerts.main
           :require
