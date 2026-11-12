@@ -1118,14 +1118,14 @@
                                   Fn *dispatch-op $ -> Unit
                                   -> Unit
                                 d! $ :: :states cursor $ &map:assoc (as-state-map state) :text
-                                  prompt-event-text $ event-fields e
+                                  :text $ read-dom-prompt-event e
                               , :on-keydown
                                 Some $ fn (e d!)
                                   hint-fn $ Fn respo.schema/RespoEvent
                                     Fn *dispatch-op $ -> Unit
                                     -> Unit
                                   let
-                                      event-info $ read-prompt-event $ event-fields e
+                                      event-info $ read-dom-prompt-event e
                                       action $ prompt-key-action event-info $ if (read-field-or options :multiline? false) true false
                                     match action
                                       (:submit)
@@ -1488,6 +1488,32 @@
               :code $ quote $ is
                 = | $ prompt-validation-error nil
               :tags $ #{} :regression :unit
+        'read-dom-prompt-event $ %{} 'CodeEntry
+          :doc "|Read the concrete Respo event without converting it into a heterogeneous map."
+          :code $ quote $ defn read-dom-prompt-event (event)
+            if (struct? event)
+              struct-match event
+                respo.schema/RespoEvent checked $ PromptEvent :text
+                  let
+                      raw $ :value checked
+                    if (string? raw) raw |
+                  , :keycode
+                    .unwrap-or
+                      js-nullish->option $ :key-code checked
+                      .unwrap-or
+                        js-nullish->option $ :keycode checked
+                        , 0
+                    , :meta?
+                      .unwrap-or
+                        js-nullish->option $ :meta? checked
+                        , false
+                      , :ctrl? $ .unwrap-or
+                        js-nullish->option $ :ctrl? checked
+                        , false
+                _ _ $ raise "|Expected RespoEvent at DOM boundary"
+              read-prompt-event $ event-fields event
+          :examples $ []
+          :schema $ quote $ Fn respo.schema/RespoEvent (-> PromptEvent)
         'read-prompt-event $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn read-prompt-event (event)
             let
