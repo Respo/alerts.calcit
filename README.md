@@ -4,7 +4,7 @@
 
 ### 0.14.4 候选
 
-消费者需要统一 Calcit CLI 和 `@calcit/procs` 到 **0.42.0**，其余依赖与 0.14.3 相同。按 0.42.0 效果边界，`use-prompt`、`use-confirm` 和 prompt task 读写函数（`store-prompt-task!`、`take-prompt-task!`、`clear-prompt-task!`）的 `Fn` schema 声明 `:state`；调用它们的组件和处理函数也要声明 `:state`，否则 0.42 会给出 `W_STATE_FEATURE_REQUIRED` 提示（`calcit fix --rule effect-features-v1` 可一次补齐）。CI 的 Shelf 消费者夹具改用 0.42.0 检查。
+消费者需要统一 Calcit CLI 和 `@calcit/procs` 到 **0.42.1**，其余依赖与 0.14.3 相同。按 0.42.1 效果边界，`use-prompt`、`use-confirm` 和 prompt task 读写函数（`store-prompt-task!`、`take-prompt-task!`、`clear-prompt-task!`）的 `Fn` schema 声明 `:state`；调用它们的组件和处理函数也要声明 `:state`，否则 0.42 会给出 `W_STATE_FEATURE_REQUIRED` 提示（`calcit fix --rule effect-features-v1` 可一次补齐）。CI 的 Shelf 消费者夹具改用 0.42.1 检查。
 
 ### 0.14.3
 
