@@ -904,11 +904,12 @@
                 :render $ fn (on-close)
                   div ({}) (<> |Content)
               , show? on-close
-          :schema $ quote $ Fn Dynamic Bool
+          :schema $ quote $ Fn Options Bool
             Fn
               Fn *dispatch-op $ -> Unit
               -> Unit
             -> respo.schema/Component
+            :generics Options
             :features :js-ffi
         'comp-esc-listener $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-esc-listener (show? on-close!)
@@ -983,11 +984,12 @@
                 :render $ fn (on-close)
                   div ({}) (<> |Content)
               , show? on-close
-          :schema $ quote $ Fn Dynamic Bool
+          :schema $ quote $ Fn Options Bool
             Fn
               Fn *dispatch-op $ -> Unit
               -> Unit
             -> respo.schema/Component
+            :generics Options
             :features :js-ffi
         'comp-modal-menu $ %{} 'CodeEntry
           :doc "||Modal menu component. Shows a modal dialog with a list of selectable items. Define items via :items in options."
