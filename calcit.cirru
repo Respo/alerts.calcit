@@ -1027,7 +1027,11 @@
                               span $ {}
                               <> $ read-text-value title
                               span $ {} (:inner-text |Clear) (:class-name style-clear)
-                                :on-click $ fn (e d!) (on-select! nil d!)
+                                :on-click $ fn (e d!)
+                                  hint-fn $ Fn respo.schema/RespoEvent
+                                    Fn *dispatch-op $ -> Unit
+                                    -> Unit
+                                  on-select! nil d!
                           (:none) ([])
                         [] $ [] 1 $ list-> ({})
                           ->
@@ -1046,7 +1050,11 @@
                                   :item v l
                                   [] v $ div
                                     {} (:class-name style-menu-item)
-                                      :on-click $ fn (e d!) (on-select! item d!)
+                                      :on-click $ fn (e d!)
+                                        hint-fn $ Fn respo.schema/RespoEvent
+                                          Fn *dispatch-op $ -> Unit
+                                          -> Unit
+                                        on-select! item d!
                                     if (string? l) (<> l) l
                     comp-esc-listener show? on-close!
                   []
@@ -1055,11 +1063,17 @@
               {} (:title |Choose)
                 :items $ [] (:: :item |a |A) (:: :item |b |B)
               , show? on-close! on-select!
-          :schema $ quote $ Fn Dynamic Bool
+          :schema $ quote $ Fn Options Bool
             Fn
               Fn *dispatch-op $ -> Unit
               -> Unit
-            , Dynamic (-> respo.schema/Component) (:features :js-ffi)
+            Fn (JsNullish AnyEnum)
+              Fn *dispatch-op $ -> Unit
+              -> Unit
+            -> respo.schema/Component
+            :generics Options
+            :features :js-ffi
+            :open :decode
         'comp-prompt-modal $ %{} 'CodeEntry
           :doc "||Prompt modal component. Shows a dialog with text input field and validation. Used internally by use-prompt hook."
           :code $ quote $ defcomp comp-prompt-modal (states options show? on-finish! on-close!)
