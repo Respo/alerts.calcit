@@ -1921,22 +1921,25 @@
             typed/State schema/Op $ Map Dynamic Dynamic
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (op)
-            when
-              and config/dev? $ match op
-                (:states ignored-cursor ignored-state) false
-                _ true
-              shared/console-log! $ str |Dispatch: op
-            match op
-              (:states cursor value)
-                record-op! $ schema/Op :states
-                  decode-map-as cursor $ List respo.schema/CoordKey
-                  , value
-              (:hydrate-storage value)
-                record-op! $ schema/Op :hydrate-storage $ if (map? value) value (raise "|hydrated store must be a Map")
-              _ $ shared/console-warn! $ str "|Unknown op:" op
-            , &unit
+            if (enum? op)
+              do
+                when
+                  and config/dev? $ match op
+                    (:states ignored-cursor ignored-state) false
+                    _ true
+                  shared/console-log! $ str |Dispatch: op
+                match op
+                  (:states cursor value)
+                    record-op! $ schema/Op :states
+                      decode-map-as cursor $ List respo.schema/CoordKey
+                      , value
+                  (:hydrate-storage value)
+                    record-op! $ schema/Op :hydrate-storage $ if (map? value) value (raise "|hydrated store must be a Map")
+                  _ $ shared/console-warn! $ str "|Unknown op:" op
+                , &unit
+              raise "|alert renderer operation must be an Enum"
           :examples $ []
-          :schema $ quote $ Fn AnyEnum (-> Unit) (:features :js-ffi :state) (:open :decode)
+          :schema $ quote $ Fn Input (-> Unit) (:generics Input) (:features :js-ffi :state) (:open :decode)
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! ()
             println "|Running mode:" $ if config/dev? |dev |release
@@ -2003,8 +2006,7 @@
             render-with!
               narrow-element $ mount-target
               fn () $ comp-container @*reel on-control!
-              fn (op)
-                if (enum? op) (dispatch! op) (raise "|alert renderer operation must be an Enum")
+              , dispatch!
           :examples $ []
           :schema $ quote $ Fn (-> Unit) (:features :io :js-ffi :state)
       :ns $ %{} 'NsEntry (:doc |)
