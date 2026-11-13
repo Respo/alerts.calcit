@@ -1353,8 +1353,9 @@
                 _ _ $ raise "|Expected RespoEvent at DOM boundary"
               decode-map-as event $ Map Tag Dynamic
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Event
             -> $ Map Tag Dynamic
+            :generics Event
           :tags $ #{} :internal
         'menu-items $ %{} 'CodeEntry
           :doc "|Validate the required list container without guessing the heterogeneous item payload or replacing invalid input with an empty list."
