@@ -1081,7 +1081,9 @@
                     if
                       not $ blank? result
                       d! $ :: :states cursor $ &map:assoc (as-state-map state) :failure result
-                      do (on-finish! text d!) (on-close! d!)
+                      do
+                        on-finish! (decode-map-as text 'String) d!
+                        on-close! d!
                         d! $ :: :states cursor $ {}
               []
                 effect-select (str |. schema/input-box-name) show?
@@ -1182,11 +1184,15 @@
             comp-prompt-modal states
               {} (:text "|Enter name") (:placeholder |name)
               , show? on-finish! on-close!
-          :schema $ quote $ Fn Dynamic Dynamic Bool Dynamic
+          :schema $ quote $ Fn Dynamic Dynamic Bool
+            Fn String
+              Fn *dispatch-op $ -> Unit
+              -> R
             Fn
               Fn *dispatch-op $ -> Unit
               -> Unit
             -> respo.schema/Component
+            :generics R
             :features :js-ffi
         'confirm-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def confirm-actions-plugin (impl-traits PluginNodeCursorState %confirm-actions)
