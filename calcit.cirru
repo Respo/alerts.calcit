@@ -1067,13 +1067,12 @@
             Fn
               Fn *dispatch-op $ -> Unit
               -> Unit
-            Fn (JsNullish AnyEnum)
+            Fn Dynamic
               Fn *dispatch-op $ -> Unit
               -> Unit
             -> respo.schema/Component
             :generics Options
             :features :js-ffi
-            :open :decode
         'comp-prompt-modal $ %{} 'CodeEntry
           :doc "||Prompt modal component. Shows a dialog with text input field and validation. Used internally by use-prompt hook."
           :code $ quote $ defcomp comp-prompt-modal (states options show? on-finish! on-close!)
