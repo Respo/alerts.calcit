@@ -2297,7 +2297,7 @@
               (:some v) v
               (:none) fallback
           :examples $ []
-          :schema $ quote $ Fn T Tag Dynamic (-> Dynamic) (:generics T)
+          :schema $ quote $ Fn T Tag Fallback (-> Dynamic) (:generics T Fallback)
           :tests $ [] $ %{} 'TestEntry (:name |falls-back-on-absence)
             :code $ quote $ do
               assert= 0 $ read-field-or ({}) :n 0
