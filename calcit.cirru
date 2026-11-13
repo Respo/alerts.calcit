@@ -715,8 +715,9 @@
           :code $ quote $ defn as-state-map (value)
             if (map? value) value $ raise $ str "|respo-alerts expected component state as a map, got: " (type-of value)
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Input
             -> $ Map Dynamic Dynamic
+            :generics Input
         'clear-prompt-task! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn clear-prompt-task! (cursor)
             reset! *prompt-tasks $ &map:dissoc @*prompt-tasks cursor
