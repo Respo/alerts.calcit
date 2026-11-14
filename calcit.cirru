@@ -715,8 +715,9 @@
           :code $ quote $ defn as-state-map (value)
             if (map? value) value $ raise $ str "|respo-alerts expected component state as a map, got: " (type-of value)
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn State
             -> $ Map Dynamic Dynamic
+            :generics State
         'clear-prompt-task! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn clear-prompt-task! (cursor)
             reset! *prompt-tasks $ &map:dissoc @*prompt-tasks cursor
@@ -904,11 +905,12 @@
                 :render $ fn (on-close)
                   div ({}) (<> |Content)
               , show? on-close
-          :schema $ quote $ Fn Dynamic Bool
+          :schema $ quote $ Fn Options Bool
             Fn
               Fn *dispatch-op $ -> Unit
               -> Unit
             -> respo.schema/Component
+            :generics Options
             :features :js-ffi
         'comp-esc-listener $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-esc-listener (show? on-close!)
@@ -983,11 +985,12 @@
                 :render $ fn (on-close)
                   div ({}) (<> |Content)
               , show? on-close
-          :schema $ quote $ Fn Dynamic Bool
+          :schema $ quote $ Fn Options Bool
             Fn
               Fn *dispatch-op $ -> Unit
               -> Unit
             -> respo.schema/Component
+            :generics Options
             :features :js-ffi
         'comp-modal-menu $ %{} 'CodeEntry
           :doc "||Modal menu component. Shows a modal dialog with a list of selectable items. Define items via :items in options."
@@ -1027,7 +1030,11 @@
                               span $ {}
                               <> $ read-text-value title
                               span $ {} (:inner-text |Clear) (:class-name style-clear)
-                                :on-click $ fn (e d!) (on-select! nil d!)
+                                :on-click $ fn (e d!)
+                                  hint-fn $ Fn respo.schema/RespoEvent
+                                    Fn *dispatch-op $ -> Unit
+                                    -> Unit
+                                  on-select! nil d!
                           (:none) ([])
                         [] $ [] 1 $ list-> ({})
                           ->
@@ -1046,7 +1053,11 @@
                                   :item v l
                                   [] v $ div
                                     {} (:class-name style-menu-item)
-                                      :on-click $ fn (e d!) (on-select! item d!)
+                                      :on-click $ fn (e d!)
+                                        hint-fn $ Fn respo.schema/RespoEvent
+                                          Fn *dispatch-op $ -> Unit
+                                          -> Unit
+                                        on-select! item d!
                                     if (string? l) (<> l) l
                     comp-esc-listener show? on-close!
                   []
@@ -1055,11 +1066,16 @@
               {} (:title |Choose)
                 :items $ [] (:: :item |a |A) (:: :item |b |B)
               , show? on-close! on-select!
-          :schema $ quote $ Fn Dynamic Bool
+          :schema $ quote $ Fn Options Bool
             Fn
               Fn *dispatch-op $ -> Unit
               -> Unit
-            , Dynamic (-> respo.schema/Component) (:features :js-ffi)
+            Fn Dynamic
+              Fn *dispatch-op $ -> Unit
+              -> Unit
+            -> respo.schema/Component
+            :generics Options
+            :features :js-ffi
         'comp-prompt-modal $ %{} 'CodeEntry
           :doc "||Prompt modal component. Shows a dialog with text input field and validation. Used internally by use-prompt hook."
           :code $ quote $ defcomp comp-prompt-modal (states options show? on-finish! on-close!)
@@ -1352,8 +1368,9 @@
                 _ _ $ raise "|Expected RespoEvent at DOM boundary"
               decode-map-as event $ Map Tag Dynamic
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Event
             -> $ Map Tag Dynamic
+            :generics Event
           :tags $ #{} :internal
         'menu-items $ %{} 'CodeEntry
           :doc "|Validate the required list container without guessing the heterogeneous item payload or replacing invalid input with an empty list."
@@ -1402,7 +1419,7 @@
                 event-info $ read-prompt-event event
               :text event-info
           :examples $ []
-          :schema $ quote $ Fn (Map Tag Dynamic) (-> String) (:features :js-ffi)
+          :schema $ quote $ Fn (Map Tag Value) (-> String) (:generics Value) (:features :js-ffi)
           :tests $ []
             %{} 'TestEntry (:name |reads-respo-event-map)
               :code $ quote $ is
@@ -1534,7 +1551,7 @@
                 ctrl? $ if (bool? raw-ctrl) raw-ctrl false
               PromptEvent :text text :keycode keycode :meta? meta? :ctrl? ctrl?
           :examples $ []
-          :schema $ quote $ Fn (Map Tag Dynamic) (-> PromptEvent) (:features :js-ffi)
+          :schema $ quote $ Fn (Map Tag Value) (-> PromptEvent) (:generics Value) (:features :js-ffi)
           :tests $ []
             %{} 'TestEntry (:name |reads-key-modifiers)
               :code $ quote $ let
@@ -2297,7 +2314,7 @@
               (:some v) v
               (:none) fallback
           :examples $ []
-          :schema $ quote $ Fn T Tag Dynamic (-> Dynamic) (:generics T)
+          :schema $ quote $ Fn T Tag Fallback (-> Dynamic) (:generics T Fallback)
           :tests $ [] $ %{} 'TestEntry (:name |falls-back-on-absence)
             :code $ quote $ do
               assert= 0 $ read-field-or ({}) :n 0
