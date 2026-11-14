@@ -436,14 +436,24 @@ ns app.main
   :require
     respo-alerts.core :refer $ comp-modal-menu
 
-comp-modal-menu
-  {} (:title "|Demo")
-    :style $ {} (:width 300)
-    :items $ [] (:: :item |a |A) (:: :item |b |B)
-  , show? on-close! on-select!
+let
+    show? true
+    on-close! $ fn (d!)
+      println "|Menu closed"
+      , &unit
+    on-select! $ fn (item d!)
+      if (nil? item)
+        println "|Selection cleared"
+        println "|Selected:" item
+      , &unit
+  comp-modal-menu
+    {} (:title "|Demo")
+      :style $ {} (:width 300)
+      :items $ [] (:: :item |a |A) (:: :item |b |B)
+    , show? on-close! on-select!
 ```
 
-`on-close!` 接收派发函数。选择菜单项时，`on-select!` 接收菜单项和派发函数。点击 Clear 时，第一项参数是 `nil`。已有枚举菜单项保留原值，Map 菜单项会转换成 `:: :item value display`。
+示例固定显示菜单并在控制台展示回调结果；实际应用应通过传入的派发函数更新 `show?` 和选择状态。`on-close!` 接收派发函数；选择菜单项时，`on-select!` 接收菜单项和派发函数。只有提供 `:title` 才显示 Clear，点击时 `on-select!` 的第一项参数为 `nil`。已有枚举菜单项保留原值，Map 菜单项会转换成 `:: :item value display`。
 
 ### Workflow
 
