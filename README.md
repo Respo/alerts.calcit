@@ -436,25 +436,14 @@ ns app.main
   :require
     respo-alerts.core :refer $ comp-modal-menu
 
-let
-    state $ {} (:show-modal-menu? true)
-    cursor nil
-  comp-modal-menu (:show-modal-menu? state)
-    {} (:title "|Demo")
-      :style $ {} (:width 300)
-      :backdrop-style $ {}
-      :card-class "|style-card"
-      :backdrop-class "|style-backdrop"
-      :confirm-class "|style-confirm"
-    []
-      :: :item |a |A
-      :: :item |b |B
-    fn (dispatch!)
-      dispatch! cursor (assoc state :show-modal-menu? false)
-    fn (result dispatch!)
-      println "|result" result
-      dispatch! cursor (assoc state :show-modal-menu? false)
+comp-modal-menu
+  {} (:title "|Demo")
+    :style $ {} (:width 300)
+    :items $ [] (:: :item |a |A) (:: :item |b |B)
+  , show? on-close! on-select!
 ```
+
+`on-close!` 接收派发函数。选择菜单项时，`on-select!` 接收菜单项和派发函数。点击 Clear 时，第一项参数是 `nil`。已有枚举菜单项保留原值，Map 菜单项会转换成 `:: :item value display`。
 
 ### Workflow
 
