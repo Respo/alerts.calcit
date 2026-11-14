@@ -1419,7 +1419,7 @@
                 event-info $ read-prompt-event event
               :text event-info
           :examples $ []
-          :schema $ quote $ Fn (Map Tag Dynamic) (-> String) (:features :js-ffi)
+          :schema $ quote $ Fn (Map Tag Value) (-> String) (:generics Value) (:features :js-ffi)
           :tests $ []
             %{} 'TestEntry (:name |reads-respo-event-map)
               :code $ quote $ is
@@ -1551,7 +1551,7 @@
                 ctrl? $ if (bool? raw-ctrl) raw-ctrl false
               PromptEvent :text text :keycode keycode :meta? meta? :ctrl? ctrl?
           :examples $ []
-          :schema $ quote $ Fn (Map Tag Dynamic) (-> PromptEvent) (:features :js-ffi)
+          :schema $ quote $ Fn (Map Tag Value) (-> PromptEvent) (:generics Value) (:features :js-ffi)
           :tests $ []
             %{} 'TestEntry (:name |reads-key-modifiers)
               :code $ quote $ let
