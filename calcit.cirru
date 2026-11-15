@@ -794,11 +794,12 @@
             comp-alert-modal
               {} $ :text "|Hello World"
               , show? on-read! on-close!
-          :schema $ quote $ Fn Dynamic Bool Dynamic
+          :schema $ quote $ Fn Options Bool Dynamic
             Fn
               Fn *dispatch-op $ -> Unit
               -> Unit
             -> respo.schema/Component
+            :generics Options
             :features :js-ffi
         'comp-confirm-modal $ %{} 'CodeEntry
           :doc "||Confirm modal component. Shows a dialog with confirm and cancel buttons. Used internally by use-confirm hook."
@@ -1200,7 +1201,7 @@
             comp-prompt-modal states
               {} (:text "|Enter name") (:placeholder |name)
               , show? on-finish! on-close!
-          :schema $ quote $ Fn Dynamic Dynamic Bool
+          :schema $ quote $ Fn State Options Bool
             Fn String
               Fn *dispatch-op $ -> Unit
               -> R
@@ -1208,7 +1209,7 @@
               Fn *dispatch-op $ -> Unit
               -> Unit
             -> respo.schema/Component
-            :generics R
+            :generics State Options R
             :features :js-ffi
         'confirm-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def confirm-actions-plugin (impl-traits PluginNodeCursorState %confirm-actions)
@@ -2125,7 +2126,7 @@
               {}
                 :trigger-style $ {} $ :color |blue
                 :trigger-active-style $ {} $ :color |red
-          :schema $ quote $ Fn Bool respo.schema/Element Dynamic (-> respo.schema/Component)
+          :schema $ quote $ Fn Bool respo.schema/Element Options (-> respo.schema/Component) (:generics Options)
         'style-trigger $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstyle style-trigger
             {} $ |& $ {} (:border-radius |50%) (:position :absolute) (:transform "|translate(-50%,-50%)") (:top |50%) (:left |50%) (:width 0) (:height 0) (:transition-duration |300ms) (:transition-delay |100ms) (:pointer-events :none) (:z-index |900) (:opacity 1)
