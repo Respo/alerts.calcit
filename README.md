@@ -2,9 +2,9 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
-### 0.14.5 / Calcit 0.43.0
+### 0.14.6 / Calcit 0.43.0
 
-升级时请配对 Calcit / `@calcit/procs` 0.43.0、Respo 0.19.10 和 UI 0.15.4。各弹层插件使用独立的具名类型，使用其公开方法的应用需要重新编译。
+升级时请配对 Calcit / `@calcit/procs` 0.43.0、Respo 0.19.11 和 UI 0.15.5。各弹层插件使用独立的具名类型，使用其公开方法的应用需要重新编译。
 
 ### 历史 0.14.4
 
