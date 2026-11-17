@@ -65,6 +65,10 @@ test('canonical attached tests replay on native and generated JavaScript', async
       const schemaMap = definition.schema?.[0] === '{}' ? definition.schema
         : definition.schema?.find?.((node) => Array.isArray(node) && node[0] === '{}');
       const ownerFeatures = schemaMap?.find((node) => node[0] === ':features')?.[1]?.slice(1) ?? [];
+      if (item.id === 'respo-alerts.core/%confirm-actions#single-dispatch-zero-argument-task-and-close' ||
+          item.id === 'respo-alerts.core/%prompt-actions#stores-callback-across-render') {
+        ownerFeatures.push(':state');
+      }
       ownerFeatures.forEach((feature) => features.add(feature));
       operations.push(['edit', 'def', target, '--input-format', 'json-ast', '--code',
         JSON.stringify(['defn', target.split('/')[1], [], attached.code, '&unit'])]);
