@@ -76,40 +76,28 @@ jobs:
         yarn vite build --base="$VITE_BASE_URL"
 
     - name: Render prompt and typed Reel regression tests
-      run: node --test scripts/prompt-render.test.mjs scripts/typed-reel-render.test.mjs
+      run: |
+        calcit --reload-fn respo.render.html/make-string js
+        node --test scripts/prompt-render.test.mjs scripts/typed-reel-render.test.mjs
 
     - name: Check out real Shelf consumer
       uses: actions/checkout@v7.0.1
       with:
         repository: worktools/qrcode-shelf
-        # Shelf 0.36.0 migration: Op instead of bare Enum, no Option erased to nil (worktools/qrcode-shelf#39).
-        ref: 8d493ec13119795510b21a7ac0a99c4751b399eb
+        # Calcit 0.43 Shelf candidate, pending its migration PR.
+        ref: 5d2b4c820d888f4ad83d2037ca0ce545b2d87ecb
         path: .calcit/consumer
         persist-credentials: false
 
-    - name: Validate existing Shelf release with candidate Alerts
+    - name: Validate Shelf candidate with candidate Alerts
       run: |
         set -euo pipefail
         consumer="$GITHUB_WORKSPACE/.calcit/consumer"
-        # Shelf's checked-in source uses Reel 0.10.0. Resolve its original
-        # fixture graph first, then replace only the Alerts module under test.
-        cat > "$consumer/deps.cirru" <<'EOF'
-        {} (:calcit-version |0.42.1) (:version |0.1.0)
-          :dependencies $ {} (|Respo/reel.calcit |0.10.0)
-            |Respo/respo-ui.calcit |0.15.2
-            |Respo/respo.calcit |0.19.5
-            |Respo/respo-feather.calcit |0.6.3
-            |Respo/alerts.calcit |0.14.2
-            |calcit-lang/js-ffi |0.2.13
-        EOF
+        # Resolve the consumer graph using released dependencies, then link this Alerts candidate.
         cd "$consumer"
+        sed -i '/|Respo\/alerts.calcit/d' deps.cirru
         caps --strict --ci
-        alerts_module=".calcit/modules/alerts.calcit"
-        test -L "$alerts_module"
-        unlink "$alerts_module"
-        mkdir "$alerts_module"
-        cp "$GITHUB_WORKSPACE"/{calcit,deps}.cirru "$alerts_module/"
-        yarn add --exact @calcit/procs@0.42.1
+        ln -s "$GITHUB_WORKSPACE" .calcit/modules/alerts.calcit
         yarn install --immutable
         calcit calcit.cirru edit format
         git add -- calcit.cirru
@@ -117,6 +105,7 @@ jobs:
         calcit calcit.cirru fix --workflow strict --verify --format json > "$RUNNER_TEMP/shelf-strict.json"
         jq -e '.data.workflow.status == "passed" and (.diagnostics | length == 0)' "$RUNNER_TEMP/shelf-strict.json"
         VITE_BASE_URL=./ yarn build
+        calcit --reload-fn respo.render.html/make-string js
         node --test scripts/qrcode-regression.test.mjs
         git diff --quiet -- . ':!deps.cirru' ':!package.json' ':!yarn.lock'
 

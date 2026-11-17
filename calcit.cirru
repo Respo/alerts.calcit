@@ -40,7 +40,7 @@
           :examples $ []
           :schema $ quote $ Fn
             reel.typed/State respo-alerts.schema/Op $ Map Dynamic Dynamic
-            Fn reel.typed/Control $ -> Unit
+            Fn reel.typed/Control (-> Unit) (:features :state)
             -> respo.schema/Component
             :features :io :state
         'comp-controlled-modals $ %{} 'CodeEntry (:doc |)
@@ -259,14 +259,14 @@
     'respo-alerts.core $ %{} 'FileEntry
       :defs $ {}
         '%alert-actions $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defimpl %alert-actions AlertActions
+          :code $ quote $ defimpl AlertPluginState AlertActions
             .render $ fn (self)
-              hint-fn $ Fn PluginNodeCursorState $ -> respo.schema/Component
+              hint-fn $ Fn AlertPluginState $ -> respo.schema/Component
               match self $
                 :plugin node cursor state
                 , node
             .show $ fn (self d! text)
-              hint-fn $ Fn PluginNodeCursorState
+              hint-fn $ Fn AlertPluginState
                 Fn *dispatch-op $ -> Unit
                 Option String
                 -> Unit
@@ -282,7 +282,7 @@
                       d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
                       , &unit
             .close $ fn (self d!)
-              hint-fn $ Fn PluginNodeCursorState
+              hint-fn $ Fn AlertPluginState
                 Fn *dispatch-op $ -> Unit
                 -> Unit
               match self $
@@ -291,7 +291,7 @@
                   d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
                   , &unit
             .show? $ fn (self)
-              hint-fn $ Fn PluginNodeCursorState $ -> Bool
+              hint-fn $ Fn AlertPluginState $ -> Bool
               match self $
                 :plugin node cursor state
                 = true $ read-field-or state :show? false
@@ -326,14 +326,14 @@
                 _ $ assert= true false
             :tags $ #{} :regression :unit
         '%confirm-actions $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defimpl %confirm-actions ConfirmActions
+          :code $ quote $ defimpl ConfirmPluginState ConfirmActions
             .render $ fn (self)
-              hint-fn $ Fn PluginNodeCursorState $ -> respo.schema/Component
+              hint-fn $ Fn ConfirmPluginState $ -> respo.schema/Component
               match self $
                 :plugin node cursor state
                 , node
             .show $ fn (self d! next-task)
-              hint-fn $ Fn PluginNodeCursorState
+              hint-fn $ Fn ConfirmPluginState
                 Fn *dispatch-op $ -> Unit
                 Fn $ -> Unit
                 -> Unit
@@ -345,7 +345,7 @@
                     next-task
                   d! $ :: :states cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text |)
             .show-with-text $ fn (self d! text next-task)
-              hint-fn $ Fn PluginNodeCursorState
+              hint-fn $ Fn ConfirmPluginState
                 Fn *dispatch-op $ -> Unit
                 , String
                   Fn $ -> Unit
@@ -358,7 +358,7 @@
                     next-task
                   d! $ :: :states cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text text)
             .close $ fn (self d!)
-              hint-fn $ Fn PluginNodeCursorState
+              hint-fn $ Fn ConfirmPluginState
                 Fn *dispatch-op $ -> Unit
                 -> Unit
               match self $
@@ -366,7 +366,7 @@
                 do (clear-prompt-task! cursor)
                   d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
             .show? $ fn (self)
-              hint-fn $ Fn PluginNodeCursorState $ -> Bool
+              hint-fn $ Fn ConfirmPluginState $ -> Bool
               match self $
                 :plugin node cursor state
                 = true $ read-field-or state :show? false
@@ -406,14 +406,14 @@
               assert= None $ take-prompt-task! cursor
             :tags $ #{} :regression :unit
         '%drawer-actions $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defimpl %drawer-actions DrawerActions
+          :code $ quote $ defimpl DrawerPluginState DrawerActions
             .render $ fn (self)
-              hint-fn $ Fn PluginNodeCursorState $ -> respo.schema/Component
+              hint-fn $ Fn DrawerPluginState $ -> respo.schema/Component
               match self $
                 :plugin node cursor state
                 , node
             .show $ fn (self d!)
-              hint-fn $ Fn PluginNodeCursorState
+              hint-fn $ Fn DrawerPluginState
                 Fn *dispatch-op $ -> Unit
                 -> Unit
               match self $
@@ -422,7 +422,7 @@
                   d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
                   , &unit
             .close $ fn (self d!)
-              hint-fn $ Fn PluginNodeCursorState
+              hint-fn $ Fn DrawerPluginState
                 Fn *dispatch-op $ -> Unit
                 -> Unit
               match self $
@@ -431,23 +431,23 @@
                   d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
                   , &unit
             .show? $ fn (self)
-              hint-fn $ Fn PluginNodeCursorState $ -> Bool
+              hint-fn $ Fn DrawerPluginState $ -> Bool
               match self $
                 :plugin node cursor state
                 = true $ read-field-or state :show? false
           :examples $ []
           :schema $ quote Impl
         '%modal-actions $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defimpl %modal-actions ModalActions
+          :code $ quote $ defimpl ModalPluginState ModalActions
             .render $ fn (self)
-              hint-fn $ Fn PluginNodeCursorState $ -> respo.schema/Component
+              hint-fn $ Fn ModalPluginState $ -> respo.schema/Component
               match self $
                 :plugin node cursor state
                 , node
             .show show-modal!
             .close close-modal!
             .show? $ fn (self)
-              hint-fn $ Fn PluginNodeCursorState $ -> Bool
+              hint-fn $ Fn ModalPluginState $ -> Bool
               match self $
                 :plugin node cursor state
                 = true $ read-field-or state :show? false
@@ -486,14 +486,14 @@
               assert= &unit $ .close plugin unit-dispatch!
             :tags $ #{} :regression :unit
         '%modal-menu-actions $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defimpl %modal-menu-actions ModalMenuActions
+          :code $ quote $ defimpl ModalMenuPluginState ModalMenuActions
             .render $ fn (self)
-              hint-fn $ Fn PluginNodeCursorState $ -> respo.schema/Component
+              hint-fn $ Fn ModalMenuPluginState $ -> respo.schema/Component
               match self $
                 :plugin node cursor state
                 , node
             .show $ fn (self d!)
-              hint-fn $ Fn PluginNodeCursorState
+              hint-fn $ Fn ModalMenuPluginState
                 Fn *dispatch-op $ -> Unit
                 -> Unit
               match self $
@@ -502,7 +502,7 @@
                   d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
                   , &unit
             .close $ fn (self d!)
-              hint-fn $ Fn PluginNodeCursorState
+              hint-fn $ Fn ModalMenuPluginState
                 Fn *dispatch-op $ -> Unit
                 -> Unit
               match self $
@@ -511,14 +511,14 @@
                   d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
                   , &unit
             .show? $ fn (self)
-              hint-fn $ Fn PluginNodeCursorState $ -> Bool
+              hint-fn $ Fn ModalMenuPluginState $ -> Bool
               match self $
                 :plugin node cursor state
                 = true $ read-field-or state :show? false
           :examples $ []
           :schema $ quote Impl
         '%prompt-actions $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defimpl %prompt-actions PromptActions
+          :code $ quote $ defimpl PromptPluginNodeCursorState PromptActions
             .render $ fn (self)
               hint-fn $ Fn PromptPluginNodeCursorState $ -> respo.schema/Component
               match self $
@@ -555,7 +555,7 @@
           :tests $ [] $ %{} 'TestEntry (:name |stores-callback-across-render)
             :code $ quote $ let
                 cursor $ [] :action-test
-                plugin $ %:: prompt-actions-plugin :plugin
+                plugin $ PromptPluginNodeCursorState :plugin
                   respo.schema/Component :name :test :effects ([]) :listeners ([]) :tree None
                   , cursor $ {}
                 next-task $ fn (text) &unit
@@ -574,74 +574,104 @@
               Fn String $ -> Unit
         'AlertActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait AlertActions
-            .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
-            .show $ Fn respo-alerts.core/PluginNodeCursorState
+            .render $ Fn Self $ -> respo.schema/Component
+            .show $ Fn Self
               Fn *dispatch-op $ -> Unit
               Option String
               -> Unit
-            .close $ Fn respo-alerts.core/PluginNodeCursorState
+            .close $ Fn Self
               Fn *dispatch-op $ -> Unit
               -> Unit
-            .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
+            .show? $ Fn Self $ -> Bool
           :examples $ []
           :schema $ quote Trait
+        'AlertPluginState $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defenum AlertPluginState
+            :plugin respo.schema/Component (List respo.schema/CoordKey) Dynamic
+            :impls AlertActions
+          :examples $ []
+          :schema $ quote EnumDef
         'ConfirmActions $ %{} 'CodeEntry
           :doc "|Confirm plugin: .show(plugin, dispatch!, next-task) and .show-with-text(plugin, dispatch!, text, next-task). dispatch! receives one Enum operation, including (:: :states cursor data), and returns Unit; next-task receives no arguments and returns Unit. Do not pass the retired (cursor,data) state callback. .close clears the pending task before dispatching closed state."
           :code $ quote $ deftrait ConfirmActions
-            .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
-            .show $ Fn respo-alerts.core/PluginNodeCursorState
+            .render $ Fn Self $ -> respo.schema/Component
+            .show $ Fn Self
               Fn *dispatch-op $ -> Unit
               Fn $ -> Unit
               -> Unit
-            .show-with-text $ Fn respo-alerts.core/PluginNodeCursorState
+            .show-with-text $ Fn Self
               Fn *dispatch-op $ -> Unit
               , String
                 Fn $ -> Unit
                 -> Unit
-            .close $ Fn respo-alerts.core/PluginNodeCursorState
+            .close $ Fn Self
               Fn *dispatch-op $ -> Unit
               -> Unit
-            .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
+            .show? $ Fn Self $ -> Bool
           :examples $ []
           :schema $ quote Trait
+        'ConfirmPluginState $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defenum ConfirmPluginState
+            :plugin respo.schema/Component (List respo.schema/CoordKey) Dynamic
+            :impls ConfirmActions
+          :examples $ []
+          :schema $ quote EnumDef
         'DrawerActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait DrawerActions
-            .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
-            .show $ Fn respo-alerts.core/PluginNodeCursorState
+            .render $ Fn Self $ -> respo.schema/Component
+            .show $ Fn Self
               Fn *dispatch-op $ -> Unit
               -> Unit
-            .close $ Fn respo-alerts.core/PluginNodeCursorState
+            .close $ Fn Self
               Fn *dispatch-op $ -> Unit
               -> Unit
-            .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
+            .show? $ Fn Self $ -> Bool
           :examples $ []
           :schema $ quote Trait
+        'DrawerPluginState $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defenum DrawerPluginState
+            :plugin respo.schema/Component (List respo.schema/CoordKey) Dynamic
+            :impls DrawerActions
+          :examples $ []
+          :schema $ quote EnumDef
         'ModalActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ModalActions
-            .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
-            .show $ Fn respo-alerts.core/PluginNodeCursorState
+            .render $ Fn Self $ -> respo.schema/Component
+            .show $ Fn Self
               Fn *dispatch-op $ -> R
               -> R
               :generics R
-            .close $ Fn respo-alerts.core/PluginNodeCursorState
+            .close $ Fn Self
               Fn *dispatch-op $ -> R
               -> R
               :generics R
-            .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
+            .show? $ Fn Self $ -> Bool
           :examples $ []
           :schema $ quote Trait
         'ModalMenuActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait ModalMenuActions
-            .render $ Fn respo-alerts.core/PluginNodeCursorState $ -> respo.schema/Component
-            .show $ Fn respo-alerts.core/PluginNodeCursorState
+            .render $ Fn Self $ -> respo.schema/Component
+            .show $ Fn Self
               Fn *dispatch-op $ -> Unit
               -> Unit
-            .close $ Fn respo-alerts.core/PluginNodeCursorState
+            .close $ Fn Self
               Fn *dispatch-op $ -> Unit
               -> Unit
-            .show? $ Fn respo-alerts.core/PluginNodeCursorState $ -> Bool
+            .show? $ Fn Self $ -> Bool
           :examples $ []
           :schema $ quote Trait
+        'ModalMenuPluginState $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defenum ModalMenuPluginState
+            :plugin respo.schema/Component (List respo.schema/CoordKey) Dynamic
+            :impls ModalMenuActions
+          :examples $ []
+          :schema $ quote EnumDef
+        'ModalPluginState $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defenum ModalPluginState
+            :plugin respo.schema/Component (List respo.schema/CoordKey) Dynamic
+            :impls ModalActions
+          :examples $ []
+          :schema $ quote EnumDef
         'PluginNodeCursorState $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defenum PluginNodeCursorState
             :plugin respo.schema/Component (List respo.schema/CoordKey) Dynamic
@@ -649,16 +679,16 @@
           :schema $ quote EnumDef
         'PromptActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait PromptActions
-            .render $ Fn respo-alerts.core/PromptPluginNodeCursorState $ -> respo.schema/Component
-            .show $ Fn respo-alerts.core/PromptPluginNodeCursorState
+            .render $ Fn Self $ -> respo.schema/Component
+            .show $ Fn Self
               Fn *dispatch-op $ -> Unit
               Fn String $ -> R
               -> Unit
               :generics R
-            .close $ Fn respo-alerts.core/PromptPluginNodeCursorState
+            .close $ Fn Self
               Fn *dispatch-op $ -> Unit
               -> Unit
-            .show? $ Fn respo-alerts.core/PromptPluginNodeCursorState $ -> Bool
+            .show? $ Fn Self $ -> Bool
           :examples $ []
           :schema $ quote Trait
         'PromptEvent $ %{} 'CodeEntry (:doc |)
@@ -672,10 +702,11 @@
         'PromptPluginNodeCursorState $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defenum PromptPluginNodeCursorState
             :plugin respo.schema/Component (List respo.schema/CoordKey) Dynamic
+            :impls PromptActions
           :examples $ []
           :schema $ quote EnumDef
         'alert-actions-plugin $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ def alert-actions-plugin (impl-traits PluginNodeCursorState %alert-actions)
+          :code $ quote $ def alert-actions-plugin AlertPluginState
           :examples $ []
           :schema $ quote EnumDef
         'as-options-map $ %{} 'CodeEntry (:doc "|在选项开放边界校验为 Tag 键 map，nil 视为空。")
@@ -726,7 +757,7 @@
           :schema $ quote $ Fn (List respo.schema/CoordKey) (-> Unit) (:features :state)
         'close-modal! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn close-modal! (self d!)
-            hint-fn $ Fn PluginNodeCursorState
+            hint-fn $ Fn ModalPluginState
               Fn *dispatch-op $ -> R
               -> R
               :generics R
@@ -734,7 +765,7 @@
               :plugin node cursor state
               d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
           :examples $ []
-          :schema $ quote $ Fn PluginNodeCursorState
+          :schema $ quote $ Fn ModalPluginState
             Fn *dispatch-op $ -> R
             -> R
             :generics R
@@ -1088,7 +1119,7 @@
                 text $ read-field-or state :text initial-text
                 check-submit! $ fn (d!)
                   hint-fn $ Fn
-                    Fn *dispatch-op $ -> Unit
+                    Fn *dispatch-op (-> Unit) (:features :io :state)
                     -> Unit
                   let
                       validator $ read-field-or options :validator false
@@ -1118,7 +1149,7 @@
                           read-style options :backdrop-style
                         :on-click $ fn (e d!)
                           hint-fn $ Fn respo.schema/RespoEvent
-                            Fn *dispatch-op $ -> Unit
+                            Fn *dispatch-op (-> Unit) (:features :io :state)
                             -> Unit
                           on-close! d!
                           d! $ :: :states cursor $ {}
@@ -1134,14 +1165,14 @@
                             props $ DomProps :value (Some text) :on-input
                               Some $ fn (e d!)
                                 hint-fn $ Fn respo.schema/RespoEvent
-                                  Fn *dispatch-op $ -> Unit
+                                  Fn *dispatch-op (-> Unit) (:features :io :state)
                                   -> Unit
                                 d! $ :: :states cursor $ &map:assoc (as-state-map state) :text
                                   :text $ read-dom-prompt-event e
                               , :on-keydown
                                 Some $ fn (e d!)
                                   hint-fn $ Fn respo.schema/RespoEvent
-                                    Fn *dispatch-op $ -> Unit
+                                    Fn *dispatch-op (-> Unit) (:features :io :state)
                                     -> Unit
                                   let
                                       event-info $ read-dom-prompt-event e
@@ -1191,7 +1222,7 @@
                               :class-name $ str-spaced css/button & $ read-field-list options :confirm-class
                               :on-click $ fn (e d!)
                                 hint-fn $ Fn respo.schema/RespoEvent
-                                  Fn *dispatch-op $ -> Unit
+                                  Fn *dispatch-op (-> Unit) (:features :io :state)
                                   -> Unit
                                 check-submit! d!
                             <> $ read-text options :button-text |Finish
@@ -1203,20 +1234,20 @@
               , show? on-finish! on-close!
           :schema $ quote $ Fn State Options Bool
             Fn String
-              Fn *dispatch-op $ -> Unit
+              Fn *dispatch-op (-> Unit) (:features :io :state)
               -> R
             Fn
-              Fn *dispatch-op $ -> Unit
+              Fn *dispatch-op (-> Unit) (:features :io :state)
               -> Unit
             -> respo.schema/Component
             :generics State Options R
-            :features :js-ffi
+            :features :io :js-ffi :state
         'confirm-actions-plugin $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ def confirm-actions-plugin (impl-traits PluginNodeCursorState %confirm-actions)
+          :code $ quote $ def confirm-actions-plugin ConfirmPluginState
           :examples $ []
           :schema $ quote EnumDef
         'drawer-actions-plugin $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ def drawer-actions-plugin (impl-traits PluginNodeCursorState %drawer-actions)
+          :code $ quote $ def drawer-actions-plugin DrawerPluginState
           :examples $ []
           :schema $ quote EnumDef
         'effect-fade $ %{} 'CodeEntry (:doc |)
@@ -1403,15 +1434,15 @@
                       = message "|Menu items must be List"
               :tags $ #{} :unit
         'modal-actions-plugin $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ def modal-actions-plugin (impl-traits PluginNodeCursorState %modal-actions)
+          :code $ quote $ def modal-actions-plugin ModalPluginState
           :examples $ []
           :schema $ quote EnumDef
         'modal-menu-actions-plugin $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ def modal-menu-actions-plugin (impl-traits PluginNodeCursorState %modal-menu-actions)
+          :code $ quote $ def modal-menu-actions-plugin ModalMenuPluginState
           :examples $ []
           :schema $ quote EnumDef
         'prompt-actions-plugin $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ def prompt-actions-plugin (impl-traits PromptPluginNodeCursorState %prompt-actions)
+          :code $ quote $ def prompt-actions-plugin PromptPluginNodeCursorState
           :examples $ []
           :schema $ quote EnumDef
         'prompt-event-text $ %{} 'CodeEntry (:doc |)
@@ -1633,7 +1664,7 @@
           :schema $ quote $ Fn T (-> String) (:generics T)
         'show-modal! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn show-modal! (self d!)
-            hint-fn $ Fn PluginNodeCursorState
+            hint-fn $ Fn ModalPluginState
               Fn *dispatch-op $ -> R
               -> R
               :generics R
@@ -1641,7 +1672,7 @@
               :plugin node cursor state
               d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
           :examples $ []
-          :schema $ quote $ Fn PluginNodeCursorState
+          :schema $ quote $ Fn ModalPluginState
             Fn *dispatch-op $ -> R
             -> R
             :generics R
@@ -1755,7 +1786,7 @@
                   = true $ read-field-or state :show? false
                   , on-read $ fn (d!)
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
-              %:: alert-actions-plugin :plugin node cursor state
+              AlertPluginState :plugin node cursor state
           :examples $ [] $ quote
             let
                 alert-plugin $ use-alert (>> states :alert)
@@ -1763,7 +1794,7 @@
               button
                 {} $ :on-click $ fn (e d!) (.show alert-plugin d! None)
                 <> |Show
-          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> respo-alerts.core/alert-actions-plugin)
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> AlertPluginState)
         'use-confirm $ %{} 'CodeEntry
           :doc "|Build a Confirm plugin from Respo states and options. Call (.show plugin dispatch! (fn () ...)) with the ordinary single-Enum dispatcher; the success task is zero-argument. Rendering does not invoke the success task. Closing clears it. The old two-argument cursor/data dispatcher is not supported."
           :code $ quote $ defplugin use-confirm (states options)
@@ -1790,7 +1821,7 @@
                   dispatch-fn (d!) (clear-prompt-task! cursor)
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
                     , &unit
-              %:: confirm-actions-plugin :plugin node cursor state
+              ConfirmPluginState :plugin node cursor state
           :examples $ []
             quote $ let
                 confirm-plugin $ use-confirm (>> states :confirm)
@@ -1807,7 +1838,7 @@
                   :on-click $ fn (e d!)
                     .show-with-text confirm-plugin d! "|Confirm with dynamic text?" $ fn () $ println |Confirmed!
                 <> "|Show with text"
-          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> respo-alerts.core/confirm-actions-plugin) (:features :state)
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> ConfirmPluginState) (:features :state)
         'use-drawer $ %{} 'CodeEntry
           :doc "||Drawer hook. Shows a panel sliding from the side. Use :render function in options to customize content. Supports :style for width and other styles."
           :code $ quote $ defn use-drawer (states options)
@@ -1819,7 +1850,7 @@
                   = true $ read-field-or state :show? false
                   fn (d!)
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
-              %:: drawer-actions-plugin :plugin node cursor state
+              DrawerPluginState :plugin node cursor state
           :examples $ [] $ quote
             let
                 drawer-plugin $ use-drawer (>> states :drawer)
@@ -1830,7 +1861,7 @@
               button
                 {} $ :on-click $ fn (e d!) (.show drawer-plugin d!)
                 <> "|Open Drawer"
-          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> respo-alerts.core/drawer-actions-plugin)
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> DrawerPluginState)
         'use-modal $ %{} 'CodeEntry
           :doc "||Modal dialog hook. Shows a modal with custom content. Use :render function in options to customize content. Returns a plugin object."
           :code $ quote $ defn use-modal (states options)
@@ -1842,7 +1873,7 @@
                   = true $ read-field-or state :show? false
                   fn (d!)
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
-              %:: modal-actions-plugin :plugin node cursor state
+              ModalPluginState :plugin node cursor state
           :examples $ [] $ quote
             let
                 modal-plugin $ use-modal (>> states :modal)
@@ -1852,7 +1883,7 @@
               button
                 {} $ :on-click $ fn (e d!) (.show modal-plugin d!)
                 <> |Open
-          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> respo-alerts.core/modal-actions-plugin)
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> ModalPluginState)
         'use-modal-menu $ %{} 'CodeEntry
           :doc "||Modal menu hook. Shows a modal dialog with a list of options. Define options via :items and handle selection via :on-result in options."
           :code $ quote $ defn use-modal-menu (states options)
@@ -1869,7 +1900,7 @@
                         on-result $ read-field-or options :on-result false
                       if (fn? on-result) (on-result result d!) (raise "|modal menu expects :on-result to be a function")
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
-              %:: modal-menu-actions-plugin :plugin node cursor state
+              ModalMenuPluginState :plugin node cursor state
           :examples $ [] $ quote
             let
                 menu-plugin $ use-modal-menu (>> states :menu)
@@ -1879,7 +1910,7 @@
               button
                 {} $ :on-click $ fn (e d!) (.show menu-plugin d!)
                 <> |Menu
-          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> respo-alerts.core/modal-menu-actions-plugin)
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> ModalMenuPluginState)
         'use-prompt $ %{} 'CodeEntry
           :doc "||Prompt dialog hook. Shows a dialog with text input. Returns a plugin object, call .show with a callback function to receive user input text."
           :code $ quote $ defplugin use-prompt (states options)
@@ -1892,7 +1923,7 @@
                   = true $ read-field-or state :show? false
                   fn (text d!)
                     hint-fn $ Fn String
-                      Fn *dispatch-op $ -> Unit
+                      Fn *dispatch-op (-> Unit) (:features :io :state)
                       -> Unit
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
                     (take-prompt-task! cursor) .fold
@@ -1902,9 +1933,13 @@
                           Fn String $ -> Unit
                           -> Unit
                         task text
-                  dispatch-fn (d!) (clear-prompt-task! cursor)
+                  fn (d!)
+                    hint-fn $ Fn
+                      Fn *dispatch-op (-> Unit) (:features :io :state)
+                      -> Unit
+                    clear-prompt-task! cursor
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
-              %:: prompt-actions-plugin :plugin node cursor state
+              PromptPluginNodeCursorState :plugin node cursor state
           :examples $ [] $ quote
             let
                 prompt-plugin $ use-prompt (>> states :prompt)
@@ -1913,7 +1948,7 @@
                 {} $ :on-click $ fn (e d!)
                   .show prompt-plugin d! $ fn (text) (println |got: text)
                 <> |Input
-          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> respo-alerts.core/prompt-actions-plugin) (:features :state)
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> PromptPluginNodeCursorState) (:features :io :state)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns respo-alerts.core
           :require

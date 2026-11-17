@@ -2,7 +2,11 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
-### 0.14.4 候选
+### 0.14.5 / Calcit 0.43.0
+
+升级时请配对 Calcit / `@calcit/procs` 0.43.0、Respo 0.19.10 和 UI 0.15.4。各弹层插件使用独立的具名类型，使用其公开方法的应用需要重新编译。
+
+### 历史 0.14.4
 
 消费者需要统一 Calcit CLI 和 `@calcit/procs` 到 **0.42.1**，其余依赖与 0.14.3 相同。按 0.42.1 效果边界，`use-prompt`、`use-confirm` 和 prompt task 读写函数（`store-prompt-task!`、`take-prompt-task!`、`clear-prompt-task!`）的 `Fn` schema 声明 `:state`；调用它们的组件和处理函数也要声明 `:state`，否则 0.42 会给出 `W_STATE_FEATURE_REQUIRED` 提示（`calcit fix --rule effect-features-v1` 可一次补齐）。CI 的 Shelf 消费者夹具改用 0.42.1 检查。
 
