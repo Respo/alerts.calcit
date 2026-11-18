@@ -334,9 +334,10 @@
                 , node
             .show $ fn (self d! next-task)
               hint-fn $ Fn ConfirmPluginState
-                Fn *dispatch-op $ -> Unit
+                Fn *dispatch-op (-> Unit) (:features :io :state)
                 Fn $ -> Unit
                 -> Unit
+                :features :io :state
               match self $
                 :plugin node cursor state
                 do
@@ -346,10 +347,11 @@
                   d! $ :: :states cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text |)
             .show-with-text $ fn (self d! text next-task)
               hint-fn $ Fn ConfirmPluginState
-                Fn *dispatch-op $ -> Unit
+                Fn *dispatch-op (-> Unit) (:features :io :state)
                 , String
                   Fn $ -> Unit
                   -> Unit
+                  :features :io :state
               match self $
                 :plugin node cursor state
                 do
@@ -359,8 +361,9 @@
                   d! $ :: :states cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text text)
             .close $ fn (self d!)
               hint-fn $ Fn ConfirmPluginState
-                Fn *dispatch-op $ -> Unit
+                Fn *dispatch-op (-> Unit) (:features :io :state)
                 -> Unit
+                :features :io :state
               match self $
                 :plugin node cursor state
                 do (clear-prompt-task! cursor)
@@ -596,17 +599,20 @@
           :code $ quote $ deftrait ConfirmActions
             .render $ Fn Self $ -> respo.schema/Component
             .show $ Fn Self
-              Fn *dispatch-op $ -> Unit
+              Fn *dispatch-op (-> Unit) (:features :io :state)
               Fn $ -> Unit
               -> Unit
+              :features :io :state
             .show-with-text $ Fn Self
-              Fn *dispatch-op $ -> Unit
+              Fn *dispatch-op (-> Unit) (:features :io :state)
               , String
                 Fn $ -> Unit
                 -> Unit
+                :features :io :state
             .close $ Fn Self
-              Fn *dispatch-op $ -> Unit
+              Fn *dispatch-op (-> Unit) (:features :io :state)
               -> Unit
+              :features :io :state
             .show? $ Fn Self $ -> Bool
           :examples $ []
           :schema $ quote Trait
