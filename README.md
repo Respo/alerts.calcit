@@ -2,6 +2,10 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
+### 0.14.8 / 正式依赖对齐
+
+配对 Calcit 0.44.0、Respo 0.19.13、UI 0.15.7 与 JS-FFI 0.2.19；重新安装并生成 JS，弹层接口和行为不变。
+
 ### 0.14.7 / Calcit 0.44.0
 
 升级时请配对 Calcit / `@calcit/procs` 0.44.0、Respo 0.19.12 和 UI 0.15.6。各弹层插件使用独立的具名类型，使用其公开方法的应用需要重新编译。Confirm 分发回调声明其实际的 `:io` / `:state` 效果；使用这些回调的调用方应同步声明所需效果，运行行为不变。
