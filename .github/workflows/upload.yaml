@@ -84,8 +84,8 @@ jobs:
       uses: actions/checkout@v7.0.1
       with:
         repository: worktools/qrcode-shelf
-        # Calcit 0.43 Shelf source from the merged migration.
-        ref: 5d2b4c820d888f4ad83d2037ca0ce545b2d87ecb
+        # Fixed Shelf snapshot already migrated to Calcit 0.44.
+        ref: 3b71365eaec35bad3b3f7286fdbd4a7b009c2226
         path: .calcit/consumer
         persist-credentials: false
 
@@ -95,20 +95,17 @@ jobs:
         consumer="$GITHUB_WORKSPACE/.calcit/consumer"
         # Resolve the consumer graph using released dependencies, then link this Alerts candidate.
         cd "$consumer"
-        sed -i '/|Respo\/alerts.calcit/d; s/0.43.0/0.44.0/; s/0.11.2/0.11.5/; s/0.15.4/0.15.7/; s/0.19.10/0.19.13/; s/0.6.6/0.6.9/; s/0.2.18/0.2.19/' deps.cirru
         caps --strict --ci
-        ln -s "$GITHUB_WORKSPACE" .calcit/modules/alerts.calcit
-        yarn up @calcit/procs@0.44.0
+        ln -sfn "$GITHUB_WORKSPACE" .calcit/modules/alerts.calcit
         yarn install --immutable
         calcit calcit.cirru edit format
-        git add -- calcit.cirru
         calcit calcit.cirru --check-only --all-defs
         calcit calcit.cirru fix --workflow strict --verify --format json > "$RUNNER_TEMP/shelf-strict.json"
         jq -e '.data.workflow.status == "passed" and (.diagnostics | length == 0)' "$RUNNER_TEMP/shelf-strict.json"
         VITE_BASE_URL=./ yarn build
         calcit --reload-fn respo.render.html/make-string js
         node --test scripts/qrcode-regression.test.mjs
-        git diff --quiet -- . ':!deps.cirru' ':!package.json' ':!yarn.lock'
+        git diff --quiet -- .
 
     - name: Preserve PR consumer for interaction acceptance
       if: github.event_name == 'pull_request'
