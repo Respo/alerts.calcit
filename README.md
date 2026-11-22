@@ -6,7 +6,7 @@
 
 配对 Calcit 0.44.0、Respo 0.19.13、UI 0.15.7 与 JS-FFI 0.2.19；重新安装并生成 JS，弹层接口和行为不变。
 
-Prompt、Modal Menu 与 Drawer 的 `.show` / `.close` 允许派发器执行 `:state` 和 `:io`，调用方法的函数应声明相应效果。Prompt 保存的文本回调也允许这些效果；Confirm 使用同一任务存储，因此 `use-confirm` 的合同包含 `:io`。旧的无副作用回调仍可使用。
+0.14.9 中 Prompt、Modal Menu 与 Drawer 的 `.show` / `.close` 允许派发器执行 `:state` 和 `:io`，调用方法的函数应声明相应效果。Prompt 保存的文本回调也允许这些效果；Confirm 使用同一任务存储，因此 `use-confirm` 的合同包含 `:io`。旧的无副作用回调仍可使用。
 
 ### 0.14.7 / Calcit 0.44.0
 
