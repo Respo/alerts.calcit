@@ -417,8 +417,9 @@
                 , node
             .show $ fn (self d!)
               hint-fn $ Fn DrawerPluginState
-                Fn *dispatch-op $ -> Unit
+                Fn *dispatch-op (-> Unit) (:features :io :state)
                 -> Unit
+                :features :io :state
               match self $
                 :plugin node cursor state
                 do
@@ -426,8 +427,9 @@
                   , &unit
             .close $ fn (self d!)
               hint-fn $ Fn DrawerPluginState
-                Fn *dispatch-op $ -> Unit
+                Fn *dispatch-op (-> Unit) (:features :io :state)
                 -> Unit
+                :features :io :state
               match self $
                 :plugin node cursor state
                 do
@@ -497,8 +499,9 @@
                 , node
             .show $ fn (self d!)
               hint-fn $ Fn ModalMenuPluginState
-                Fn *dispatch-op $ -> Unit
+                Fn *dispatch-op (-> Unit) (:features :io :state)
                 -> Unit
+                :features :io :state
               match self $
                 :plugin node cursor state
                 do
@@ -506,8 +509,9 @@
                   , &unit
             .close $ fn (self d!)
               hint-fn $ Fn ModalMenuPluginState
-                Fn *dispatch-op $ -> Unit
+                Fn *dispatch-op (-> Unit) (:features :io :state)
                 -> Unit
+                :features :io :state
               match self $
                 :plugin node cursor state
                 do
@@ -529,10 +533,11 @@
                 , node
             .show $ fn (self d! next-task)
               hint-fn $ Fn PromptPluginNodeCursorState
-                Fn *dispatch-op $ -> Unit
-                Fn String $ -> R
+                Fn *dispatch-op (-> Unit) (:features :io :state)
+                Fn String (-> R) (:features :io :state)
                 -> Unit
                 :generics R
+                :features :io :state
               match self $
                 :plugin node cursor state
                 do
@@ -541,8 +546,9 @@
                   , &unit
             .close $ fn (self d!)
               hint-fn $ Fn PromptPluginNodeCursorState
-                Fn *dispatch-op $ -> Unit
+                Fn *dispatch-op (-> Unit) (:features :io :state)
                 -> Unit
+                :features :io :state
               match self $
                 :plugin node cursor state
                 do (clear-prompt-task! cursor)
@@ -555,26 +561,47 @@
                 = true $ read-field-or state :show? false
           :examples $ []
           :schema $ quote Impl
-          :tests $ [] $ %{} 'TestEntry (:name |stores-callback-across-render)
-            :code $ quote $ let
-                cursor $ [] :action-test
-                plugin $ PromptPluginNodeCursorState :plugin
-                  respo.schema/Component :name :test :effects ([]) :listeners ([]) :tree None
-                  , cursor $ {}
-                next-task $ fn (text) &unit
-                d! $ fn (op) &unit
-              do (.show plugin d! next-task)
-                is $
-                  get @*prompt-tasks cursor
-                  , .some?
-                clear-prompt-task! cursor
-            :tags $ #{} :regression :unit
+          :tests $ []
+            %{} 'TestEntry (:name |stores-callback-across-render)
+              :code $ quote $ let
+                  cursor $ [] :action-test
+                  plugin $ PromptPluginNodeCursorState :plugin
+                    respo.schema/Component :name :test :effects ([]) :listeners ([]) :tree None
+                    , cursor $ {}
+                  next-task $ fn (text) &unit
+                  d! $ fn (op) &unit
+                do (.show plugin d! next-task)
+                  is $
+                    get @*prompt-tasks cursor
+                    , .some?
+                  clear-prompt-task! cursor
+              :tags $ #{} :regression :unit
+            %{} 'TestEntry (:name |stateful-dispatch-for-plugins)
+              :code $ quote $ let
+                  cursor $ [] :effect-contract
+                  node $ respo.schema/Component :name :effect-contract :effects ([]) :listeners ([]) :tree None
+                  prompt $ PromptPluginNodeCursorState :plugin node cursor $ {}
+                  menu $ ModalMenuPluginState :plugin node cursor $ {}
+                  drawer $ DrawerPluginState :plugin node cursor $ {}
+                  calls $ ref $ assert-type ([]) (List *dispatch-op)
+                  dispatch! $ fn (op)
+                    hint-fn $ Fn *dispatch-op (-> Unit) (:features :state)
+                    reset! calls $ .append @calls op
+                    , &unit
+                .show prompt dispatch! $ fn (text) &unit
+                .close prompt dispatch!
+                .show menu dispatch!
+                .close menu dispatch!
+                .show drawer dispatch!
+                .close drawer dispatch!
+                assert= 6 $ .len @calls
+              :tags $ #{} :regression :unit
         '*prompt-tasks $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defref *prompt-tasks ({})
           :examples $ []
           :schema $ quote $ Ref
             Map (List respo.schema/CoordKey)
-              Fn String $ -> Unit
+              Fn String (-> Unit) (:features :io :state)
         'AlertActions $ %{} 'CodeEntry (:doc |)
           :code $ quote $ deftrait AlertActions
             .render $ Fn Self $ -> respo.schema/Component
@@ -626,11 +653,13 @@
           :code $ quote $ deftrait DrawerActions
             .render $ Fn Self $ -> respo.schema/Component
             .show $ Fn Self
-              Fn *dispatch-op $ -> Unit
+              Fn *dispatch-op (-> Unit) (:features :io :state)
               -> Unit
+              :features :io :state
             .close $ Fn Self
-              Fn *dispatch-op $ -> Unit
+              Fn *dispatch-op (-> Unit) (:features :io :state)
               -> Unit
+              :features :io :state
             .show? $ Fn Self $ -> Bool
           :examples $ []
           :schema $ quote Trait
@@ -658,11 +687,13 @@
           :code $ quote $ deftrait ModalMenuActions
             .render $ Fn Self $ -> respo.schema/Component
             .show $ Fn Self
-              Fn *dispatch-op $ -> Unit
+              Fn *dispatch-op (-> Unit) (:features :io :state)
               -> Unit
+              :features :io :state
             .close $ Fn Self
-              Fn *dispatch-op $ -> Unit
+              Fn *dispatch-op (-> Unit) (:features :io :state)
               -> Unit
+              :features :io :state
             .show? $ Fn Self $ -> Bool
           :examples $ []
           :schema $ quote Trait
@@ -687,13 +718,15 @@
           :code $ quote $ deftrait PromptActions
             .render $ Fn Self $ -> respo.schema/Component
             .show $ Fn Self
-              Fn *dispatch-op $ -> Unit
-              Fn String $ -> R
+              Fn *dispatch-op (-> Unit) (:features :io :state)
+              Fn String (-> R) (:features :io :state)
               -> Unit
               :generics R
+              :features :io :state
             .close $ Fn Self
-              Fn *dispatch-op $ -> Unit
+              Fn *dispatch-op (-> Unit) (:features :io :state)
               -> Unit
+              :features :io :state
             .show? $ Fn Self $ -> Bool
           :examples $ []
           :schema $ quote Trait
@@ -740,13 +773,13 @@
         'as-prompt-task $ %{} 'CodeEntry (:doc "|把调用方提供的开放回调适配为接收文本的提示任务。")
           :code $ quote $ defn as-prompt-task (f)
             fn (text)
-              hint-fn $ Fn String $ -> Unit
+              hint-fn $ Fn String (-> Unit) (:features :io :state)
               f text
               , &unit
           :examples $ []
           :schema $ quote $ Fn
-            Fn String $ -> R
-            -> $ Fn String $ -> Unit
+            Fn String (-> R) (:features :io :state)
+            -> $ Fn String (-> Unit) (:features :io :state)
             :generics R
         'as-state-map $ %{} 'CodeEntry (:doc "|在组件状态的开放边界确认其为 map。")
           :code $ quote $ defn as-state-map (value)
@@ -1688,7 +1721,7 @@
             , &unit
           :examples $ []
           :schema $ quote $ Fn (List respo.schema/CoordKey)
-            Fn String $ -> Unit
+            Fn String (-> Unit) (:features :io :state)
             -> Unit
             :features :state
         'style-clear $ %{} 'CodeEntry (:doc |)
@@ -1748,14 +1781,14 @@
               , task
           :examples $ []
           :schema $ quote $ Fn (List respo.schema/CoordKey)
-            -> $ Option $ Fn String (-> Unit)
+            -> $ Option $ Fn String (-> Unit) (:features :io :state)
             :features :state
           :tests $ [] $ %{} 'TestEntry (:name |persists-across-renders)
             :code $ quote $ let
                 cursor $ [] :prompt-test
                 *called $ ref |
                 callback $ fn (text)
-                  hint-fn $ Fn String $ -> Unit
+                  hint-fn $ Fn String (-> Unit) (:features :state)
                   reset! *called text
                   , &unit
               store-prompt-task! cursor callback
@@ -1763,7 +1796,7 @@
                 fn () &unit
                 fn (task)
                   hint-fn $ Fn
-                    Fn String $ -> Unit
+                    Fn String (-> Unit) (:features :io :state)
                     -> Unit
                   task |hello
               is $ = |hello @*called
@@ -1820,7 +1853,7 @@
                       fn () &unit
                       fn (task)
                         hint-fn $ Fn
-                          Fn String $ -> Unit
+                          Fn String (-> Unit) (:features :io :state)
                           -> Unit
                         task |
                     , &unit
@@ -1844,7 +1877,7 @@
                   :on-click $ fn (e d!)
                     .show-with-text confirm-plugin d! "|Confirm with dynamic text?" $ fn () $ println |Confirmed!
                 <> "|Show with text"
-          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> ConfirmPluginState) (:features :state)
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> ConfirmPluginState) (:features :io :state)
         'use-drawer $ %{} 'CodeEntry
           :doc "||Drawer hook. Shows a panel sliding from the side. Use :render function in options to customize content. Supports :style for width and other styles."
           :code $ quote $ defn use-drawer (states options)
@@ -1936,7 +1969,7 @@
                       fn () &unit
                       fn (task)
                         hint-fn $ Fn
-                          Fn String $ -> Unit
+                          Fn String (-> Unit) (:features :io :state)
                           -> Unit
                         task text
                   fn (d!)

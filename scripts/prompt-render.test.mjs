@@ -69,6 +69,10 @@ test('canonical attached tests replay on native and generated JavaScript', async
           item.id === 'respo-alerts.core/%prompt-actions#stores-callback-across-render') {
         ownerFeatures.push(':state');
       }
+      if (item.id === 'respo-alerts.core/%confirm-actions#single-dispatch-zero-argument-task-and-close' ||
+          item.id === 'respo-alerts.core/take-prompt-task!#persists-across-renders') {
+        ownerFeatures.push(':io');
+      }
       ownerFeatures.forEach((feature) => features.add(feature));
       operations.push(['edit', 'def', target, '--input-format', 'json-ast', '--code',
         JSON.stringify(['defn', target.split('/')[1], [], attached.code, '&unit'])]);
