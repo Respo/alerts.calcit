@@ -2,9 +2,9 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
-### 0.14.10 / 正式依赖对齐
+### 0.14.11 / 正式依赖对齐
 
-配对 Calcit 0.44.0、Respo 0.19.15、UI 0.16.2、Reel 0.11.6 与 JS-FFI 0.2.22；重新安装并生成 JS，弹层接口和行为不变。正式 tag 发布前为候选。
+配对 Calcit 0.44.0、Respo 0.19.16、UI 0.16.3、Reel 0.11.7 与 JS-FFI 0.2.23；重新安装并生成 JS，弹层接口和行为不变。正式 tag 发布前为候选。
 
 ### 0.14.8 / 正式依赖对齐
 
