@@ -90,7 +90,7 @@
                   .render demo-modal-menu
                   .render demo-drawer
           :examples $ []
-          :schema $ quote $ Fn (Map Tag Dynamic) (-> respo.schema/Component) (:features :io)
+          :schema $ quote $ Fn (Map Tag Dynamic) (-> respo.schema/Component) (:features :io :state)
         'comp-demo-trigger $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defcomp comp-demo-trigger (states)
             let
@@ -105,7 +105,9 @@
                     button $ {} (:inner-text |Toggle) (:class-name css/button)
                       :on-click $ fn (e d!)
                         d! $ :: :states cursor $ &map:assoc state :visible?
-                          not $ read-field-or state :visible? false
+                          let
+                              value $ read-field-or state :visible? false
+                            not $ respo-alerts.core/legacy-truthy? value
                     , nil
           :examples $ []
           :schema $ quote $ Fn (Map Tag Dynamic) (-> respo.schema/Component)
@@ -1215,7 +1217,11 @@
                                     -> Unit
                                   let
                                       event-info $ read-dom-prompt-event e
-                                      action $ prompt-key-action event-info $ if (read-field-or options :multiline? false) true false
+                                      action $ prompt-key-action event-info $ if
+                                        let
+                                            value $ read-field-or options :multiline? false
+                                          respo-alerts.core/legacy-truthy? value
+                                        , true false
                                     match action
                                       (:submit)
                                         do
@@ -1230,7 +1236,10 @@
                                   (:some placeholder)
                                     js-nullish->option $ prompt-placeholder placeholder
                                   (:none) None
-                          if (read-field-or options :multiline? false)
+                          if
+                            let
+                                value $ read-field-or options :multiline? false
+                              respo-alerts.core/legacy-truthy? value
                             textarea $ struct-with props
                               :class-name $ Some $ str-spaced schema/input-box-name css/textarea & (read-field-list options :input-class)
                               :style $ Some $ &merge
@@ -1292,7 +1301,7 @@
         'effect-fade $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-fade (show?) (action el at-place?)
             match action
-              :before-update $ if show?
+              :before-update $ if (respo-alerts.core/legacy-truthy? show?)
                 match
                   browser/element-first-child $ browser/element-host el
                   (:none) &unit
@@ -1314,7 +1323,7 @@
                         , 240
                       , &unit
                 , &unit
-              :update $ if show?
+              :update $ if (respo-alerts.core/legacy-truthy? show?)
                 match
                   browser/element-first-child $ browser/element-host el
                   (:none) &unit
@@ -1384,7 +1393,7 @@
         'effect-slide $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-slide (show?) (action el at-place?)
             match action
-              :before-update $ if show?
+              :before-update $ if (respo-alerts.core/legacy-truthy? show?)
                 match
                   browser/element-first-child $ browser/element-host el
                   (:none) &unit
@@ -1406,7 +1415,7 @@
                         , 240
                       , &unit
                 , &unit
-              :update $ if show?
+              :update $ if (respo-alerts.core/legacy-truthy? show?)
                 match
                   browser/element-first-child $ browser/element-host el
                   (:none) &unit
@@ -1443,6 +1452,21 @@
             -> $ Map Tag Dynamic
             :generics Event
           :tags $ #{} :internal
+        'legacy-truthy? $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn legacy-truthy? (value)
+            if (bool? value) value $ not $ or (nil? value)
+              = (type-of value) :unit
+          :examples $ []
+          :schema $ quote $ Fn V (-> Bool) (:generics V)
+          :tests $ [] $ %{} 'TestEntry (:name |legacy-conditions)
+            :code $ quote $ do
+              assert= false $ legacy-truthy? nil
+              assert= false $ legacy-truthy? &unit
+              assert= false $ legacy-truthy? false
+              assert= true $ legacy-truthy? true
+              assert= true $ legacy-truthy? 0
+              assert= true $ legacy-truthy? |
+            :tags $ #{} :unit
         'menu-items $ %{} 'CodeEntry
           :doc "|Validate the required list container without guessing the heterogeneous item payload or replacing invalid input with an empty list."
           :code $ quote $ defn menu-items (value)
@@ -1611,10 +1635,10 @@
         'read-prompt-event $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn read-prompt-event (event)
             let
-                raw-text $ or (read-field-or event :value false) |
+                raw-text $ read-field-or event :value false
                 text $ if (string? raw-text) raw-text |
-                raw-key $ or (read-field-or event :key-code false)
-                  or (read-field-or event :keycode false) 0
+                canonical-key $ read-field-or event :key-code false
+                raw-key $ if (respo-alerts.core/legacy-truthy? canonical-key) canonical-key $ read-field-or event :keycode false
                 keycode $ if (number? raw-key) raw-key 0
                 raw-meta $ read-field-or event :meta? false
                 meta? $ if (bool? raw-meta) raw-meta false

@@ -2,6 +2,12 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
+### 0.14.12 / Calcit 0.45.1 迁移候选
+
+使用者需要同步 Calcit / `@calcit/procs` 0.45.1 及正式 Respo 0.19.18、UI 0.16.5、Reel 0.11.9 和 JS-FFI 0.2.24。弹层接口及旧输入的真假值行为保持：`nil`、`Unit`、`false` 为假，数字 0 与空字符串为真。
+
+该版本仍是 Draft：QRCode Shelf 消费者的递归状态 union 与插件分发边界仍被严格检查阻塞，见 [Calcit #2936](https://github.com/calcit-lang/calcit/issues/2936)。不能把库自身检查通过当作 Shelf 已验收；不会放宽消费者门禁。
+
 ### 0.14.11 / 正式依赖对齐
 
 配对 Calcit 0.44.0、Respo 0.19.16、UI 0.16.3、Reel 0.11.7 与 JS-FFI 0.2.23；重新安装并生成 JS，弹层接口和行为不变。正式 tag 发布前为候选。

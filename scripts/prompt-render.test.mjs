@@ -5,7 +5,7 @@ import { copyFile, mkdir, mkdtemp, readFile, rm, symlink } from 'node:fs/promise
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import * as c from '../js-out/calcit.core.mjs';
-import { comp_prompt_modal, comp_modal_menu, comp_confirm_modal, comp_modal, comp_drawer, comp_alert_modal, read_state_cursor } from '../js-out/respo-alerts.core.mjs';
+import { comp_prompt_modal, comp_modal_menu, comp_confirm_modal, comp_modal, comp_drawer, comp_alert_modal, read_state_cursor, read_prompt_event, legacy_truthy_$q_ } from '../js-out/respo-alerts.core.mjs';
 import { comp_trigger } from '../js-out/respo-alerts.trigger.mjs';
 import { make_string } from '../js-out/respo.render.html.mjs';
 import { RespoEvent } from '../js-out/respo.schema.mjs';
@@ -20,6 +20,24 @@ test('overlay cursor decoding preserves mixed coordinates and checks custom stat
   assert.equal(read_state_cursor(c._$n__$M_()).toArray().length, 0);
   assert.equal(read_state_cursor(withCursor(null)).toArray().length, 0);
   assert.throws(() => read_state_cursor(withCursor(c._$L_(true))));
+});
+
+test('legacy prompt fields retain falsey fallback and canonical precedence', () => {
+  const field = (event, name) => event.values[event.fields.findIndex((tag) => tag.value === name)];
+  const read = (source) => read_prompt_event(c.parse_cirru_edn(source));
+  for (const value of [null, undefined, false]) assert.equal(legacy_truthy_$q_(value), false);
+  for (const value of [true, 0, '']) assert.equal(legacy_truthy_$q_(value), true);
+  const unitEvent = read_prompt_event(c._$n__$M_(c.newTag('key-code'), undefined, c.newTag('keycode'), 13));
+  assert.equal(field(unitEvent, 'keycode'), 13);
+  for (const raw of ['nil', 'false']) {
+    const event = read(`{} (:value ${raw}) (:key-code ${raw}) (:keycode 13)`);
+    assert.equal(field(event, 'text'), '');
+    assert.equal(field(event, 'keycode'), 13);
+  }
+  const zero = read('{} (:value |) (:key-code 0) (:keycode 13)');
+  assert.equal(field(zero, 'text'), '');
+  assert.equal(field(zero, 'keycode'), 0);
+  assert.equal(field(read('{} (:key-code |invalid) (:keycode 13)'), 'keycode'), 0);
 });
 
 const respoEvent = (source, nativeEvent) => {
@@ -66,11 +84,14 @@ test('canonical attached tests replay on native and generated JavaScript', async
         : definition.schema?.find?.((node) => Array.isArray(node) && node[0] === '{}');
       const ownerFeatures = schemaMap?.find((node) => node[0] === ':features')?.[1]?.slice(1) ?? [];
       if (item.id === 'respo-alerts.core/%confirm-actions#single-dispatch-zero-argument-task-and-close' ||
-          item.id === 'respo-alerts.core/%prompt-actions#stores-callback-across-render') {
+          item.id === 'respo-alerts.core/%prompt-actions#stores-callback-across-render' ||
+          item.id === 'respo-alerts.core/%prompt-actions#stateful-dispatch-for-plugins') {
         ownerFeatures.push(':state');
       }
       if (item.id === 'respo-alerts.core/%confirm-actions#single-dispatch-zero-argument-task-and-close' ||
-          item.id === 'respo-alerts.core/take-prompt-task!#persists-across-renders') {
+          item.id === 'respo-alerts.core/take-prompt-task!#persists-across-renders' ||
+          item.id === 'respo-alerts.core/%prompt-actions#stateful-dispatch-for-plugins' ||
+          item.id === 'respo-alerts.core/%prompt-actions#stores-callback-across-render') {
         ownerFeatures.push(':io');
       }
       ownerFeatures.forEach((feature) => features.add(feature));
