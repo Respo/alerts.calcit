@@ -1419,7 +1419,51 @@
           :schema $ quote EnumDef
         'effect-fade $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-fade (show?) (action el at-place?)
-            match action (:before-update show?) (:update show?) (_ &unit)
+            match action
+              :before-update $ if show?
+                match
+                  browser/element-first-child $ browser/element-host el
+                  (:none) &unit
+                  (:some target)
+                    let
+                        cloned $ browser/element-clone target true
+                        card-option $ browser/element-first-child cloned
+                      browser/document-append-body! cloned
+                      browser/set-timeout!
+                        fn () (browser/element-set-style! cloned |opacity |0)
+                          match card-option
+                            (:none) &unit
+                            (:some card)
+                              do (browser/element-set-style! card |transitionDuration |240ms) (browser/element-set-style! card |transform "|scale(0.94) translate(0px,-20px)")
+                          , &unit
+                        , 10
+                      browser/set-timeout!
+                        fn () $ browser/element-remove! cloned
+                        , 240
+                      , &unit
+                , &unit
+              :update $ if show?
+                match
+                  browser/element-first-child $ browser/element-host el
+                  (:none) &unit
+                  (:some target)
+                    let
+                        card-option $ browser/element-first-child target
+                      browser/element-set-style! target |opacity |0
+                      match card-option
+                        (:none) &unit
+                        (:some card) (browser/element-set-style! card |transform "|scale(0.94) translate(0px,-20px)")
+                      browser/set-timeout!
+                        fn () (browser/element-set-style! target |transitionDuration |240ms) (browser/element-set-style! target |opacity |1)
+                          match card-option
+                            (:none) &unit
+                            (:some card)
+                              do (browser/element-set-style! card |transitionDuration |240ms) (browser/element-set-style! card |transform "|scale(1) translate(0px,0px)")
+                          , &unit
+                        , 10
+                      , &unit
+                , &unit
+              _ &unit
           :examples $ []
           :schema $ quote $ Fn Bool (-> respo.schema/Effect) (:features :js-ffi)
         'effect-focus $ %{} 'CodeEntry (:doc |)
@@ -1463,7 +1507,51 @@
           :schema $ quote $ Fn String Bool (-> respo.schema/Effect) (:features :js-ffi)
         'effect-slide $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-slide (show?) (action el at-place?)
-            match action (:before-update show?) (:update show?) (_ &unit)
+            match action
+              :before-update $ if show?
+                match
+                  browser/element-first-child $ browser/element-host el
+                  (:none) &unit
+                  (:some target)
+                    let
+                        cloned $ browser/element-clone target true
+                        card-option $ browser/element-first-child cloned
+                      browser/document-append-body! cloned
+                      browser/set-timeout!
+                        fn () (browser/element-set-style! cloned |opacity |0)
+                          match card-option
+                            (:none) &unit
+                            (:some card)
+                              do (browser/element-set-style! card |transitionDuration |240ms) (browser/element-set-style! card |transform "|translate(100%,0px)")
+                          , &unit
+                        , 10
+                      browser/set-timeout!
+                        fn () $ browser/element-remove! cloned
+                        , 240
+                      , &unit
+                , &unit
+              :update $ if show?
+                match
+                  browser/element-first-child $ browser/element-host el
+                  (:none) &unit
+                  (:some target)
+                    let
+                        card-option $ browser/element-first-child target
+                      browser/element-set-style! target |opacity |0
+                      match card-option
+                        (:none) &unit
+                        (:some card) (browser/element-set-style! card |transform "|translate(100%,0px)")
+                      browser/set-timeout!
+                        fn () (browser/element-set-style! target |transitionDuration |240ms) (browser/element-set-style! target |opacity |1)
+                          match card-option
+                            (:none) &unit
+                            (:some card)
+                              do (browser/element-set-style! card |transitionDuration |240ms) (browser/element-set-style! card |transform "|translate(0px,0px)")
+                          , &unit
+                        , 10
+                      , &unit
+                , &unit
+              _ &unit
           :examples $ []
           :schema $ quote $ Fn Bool (-> respo.schema/Effect) (:features :js-ffi)
         'event-fields $ %{} 'CodeEntry
