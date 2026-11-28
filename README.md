@@ -2,6 +2,12 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
+### 0.14.13 / Calcit 0.47.1 对齐
+
+使用者需同步 Calcit / `@calcit/procs` 0.47.1、Respo 0.20.1、UI 0.16.7、Reel 0.11.11 与 JS-FFI 0.2.26。公开 hooks、弹层行为及旧输入的真假值合同保持不变。
+
+清理了冗余运行时类型谓词并统一通过 `read-bool`、`data-view` 与 `try-decode-map-as` 进行开放边界检查（`legacy-migration` 由 67 降至 17，不再使用 `bool?` / `nil?` / `map?` / `string?` / `tag?` / `enum?` / `list?` / `number?` / `type-of`）。
+
 ### 0.14.12 / Calcit 0.46.0 迁移候选
 
 使用者需同步 Calcit / `@calcit/procs` 0.46.0、Respo 0.20.0、UI 0.16.6、Reel 0.11.10 和 JS-FFI 0.2.26。原有插件入口及旧输入的真假值行为保持不变：`nil`、`Unit`、`false` 为假，数字 0 与空字符串为真。

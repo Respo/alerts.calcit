@@ -100,16 +100,11 @@
               div ({})
                 div ({}) (<> |Trigger)
                 div ({})
-                  comp-trigger
-                    let
-                        checked-alert-boolean $ read-field-or state :visible? false
-                      if (bool? checked-alert-boolean) checked-alert-boolean false
+                  comp-trigger (read-bool state :visible? false)
                     button $ {} (:inner-text |Toggle) (:class-name css/button)
                       :on-click $ fn (e d!)
                         d! $ :: :states cursor $ &map:assoc state :visible?
-                          let
-                              value $ read-field-or state :visible? false
-                            not $ respo-alerts.core/legacy-truthy? value
+                          not $ read-bool state :visible? false
                     , nil
           :examples $ []
           :schema $ quote $ Fn (Map Tag Dynamic) (-> respo.schema/Component)
@@ -125,9 +120,8 @@
                 confirm-prompt-plugin $ use-prompt (>> states :confirm-prompt)
                   {} (:text "|Input confirm text") (:placeholder "|Confirm text")
                     :validator $ fn (text)
-                      if (string? text)
-                        if (blank? text) "|Please enter text" |
-                        raise "|prompt validator expected String"
+                      hint-fn $ Fn String $ -> String
+                      if (blank? text) "|Please enter text" |
                 prompt-plugin $ use-prompt (>> states :prompt)
                   {} $ :title |demo
                 prompt-multilines-plugin $ use-prompt (>> states :multilines-prompt)
@@ -148,10 +142,7 @@
               div ({})
                 div ({}) (<> |Hooks)
                 div ({})
-                  comp-trigger
-                    let
-                        show? $ .show? alert-plugin
-                      if (bool? show?) show? $ raise "|alert visibility must be Bool"
+                  comp-trigger (.show? alert-plugin)
                     button $ {} (:inner-text "|show alert") (:class-name css/button)
                       :on-click $ dispatch-fn (e d!) (.show alert-plugin d! None)
                     , nil
@@ -191,10 +182,7 @@
                         hint-fn $ Fn String $ -> Unit
                         println "|read from prompt" $ to-lispy-string text
                   space-x 8
-                  comp-trigger
-                    let
-                        show? $ .show? prompt-validation-plugin
-                      if (bool? show?) show? $ raise "|prompt visibility must be Bool"
+                  comp-trigger (.show? prompt-validation-plugin)
                     button $ {} (:inner-text "|show validated prompt") (:class-name css/button)
                       :on-click $ dispatch-fn (e d!)
                         .show prompt-validation-plugin d! $ fn (text)
@@ -243,7 +231,7 @@
             respo-alerts.style :as style
             |@calcit/std :refer $ rand-int
             respo-alerts.trigger :refer $ comp-trigger
-            respo-alerts.util :refer $ read-field read-field-or
+            respo-alerts.util :refer $ read-field read-field-or read-bool
     'respo-alerts.config $ %{} 'FileEntry
       :defs $ {}
         'dev? $ %{} 'CodeEntry (:doc |)
@@ -298,9 +286,7 @@
               hint-fn $ Fn AlertPluginState $ -> Bool
               match self $
                 :plugin node cursor state
-                let
-                    checked-alert-boolean $ read-field-or state :show? false
-                  if (bool? checked-alert-boolean) checked-alert-boolean false
+                modal-visible? state
           :examples $ []
           :schema $ quote Impl
           :tests $ [] $ %{} 'TestEntry (:name |show-takes-optional-text)
@@ -378,9 +364,7 @@
               hint-fn $ Fn ConfirmPluginState $ -> Bool
               match self $
                 :plugin node cursor state
-                let
-                    checked-alert-boolean $ read-field-or state :show? false
-                  if (bool? checked-alert-boolean) checked-alert-boolean false
+                modal-visible? state
           :examples $ []
           :schema $ quote Impl
           :tests $ [] $ %{} 'TestEntry (:name |single-dispatch-zero-argument-task-and-close)
@@ -447,9 +431,7 @@
               hint-fn $ Fn DrawerPluginState $ -> Bool
               match self $
                 :plugin node cursor state
-                let
-                    checked-alert-boolean $ read-field-or state :show? false
-                  if (bool? checked-alert-boolean) checked-alert-boolean false
+                modal-visible? state
           :examples $ []
           :schema $ quote Impl
         '%modal-actions $ %{} 'CodeEntry (:doc |)
@@ -531,9 +513,7 @@
               hint-fn $ Fn ModalMenuPluginState $ -> Bool
               match self $
                 :plugin node cursor state
-                let
-                    checked-alert-boolean $ read-field-or state :show? false
-                  if (bool? checked-alert-boolean) checked-alert-boolean false
+                modal-visible? state
           :examples $ []
           :schema $ quote Impl
         '%prompt-actions $ %{} 'CodeEntry (:doc |)
@@ -570,9 +550,7 @@
               hint-fn $ Fn PromptPluginNodeCursorState $ -> Bool
               match self $
                 :plugin node cursor state
-                let
-                    checked-alert-boolean $ read-field-or state :show? false
-                  if (bool? checked-alert-boolean) checked-alert-boolean false
+                modal-visible? state
           :examples $ []
           :schema $ quote Impl
           :tests $ []
@@ -657,9 +635,7 @@
               hint-fn $ Fn TypedConfirmPluginState $ -> Bool
               match self $
                 :plugin node cursor state state-op
-                let
-                    checked-alert-boolean $ read-field-or state :show? false
-                  if (bool? checked-alert-boolean) checked-alert-boolean false
+                modal-visible? state
           :examples $ []
           :schema $ quote Impl
         '%typed-modal-actions $ %{} 'CodeEntry (:doc |)
@@ -978,12 +954,17 @@
           :schema $ quote EnumDef
         'as-options-map $ %{} 'CodeEntry (:doc "|在选项开放边界校验为 Tag 键 map，nil 视为空。")
           :code $ quote $ defn as-options-map (value)
-            if (nil? value) ({})
-              if (map? value)
-                filter-map-kv value $ fn (option-key option-value)
-                  if (tag? option-key) (MapEntryDecision :keep option-key option-value)
-                    raise $ str "|respo-alerts expected option keys as tags, got: " option-key
-                raise $ str "|respo-alerts expected options as a map, got: " $ type-of value
+            let
+                view $ data-view value
+              match view
+                (:nil) ({})
+                (:map m)
+                  match
+                    try-decode-map-as m $ Map Tag Dynamic
+                    (:ok checked) checked
+                    (:err err)
+                      raise $ str "|respo-alerts expected option keys as tags, got: " err
+                _ $ raise $ str "|respo-alerts expected options as a map, got: " (data-kind view)
           :examples $ []
           :schema $ quote $ Fn T
             -> $ Map Tag Dynamic
@@ -1011,11 +992,28 @@
             :generics R
         'as-state-map $ %{} 'CodeEntry (:doc "|在组件状态的开放边界确认其为 map。")
           :code $ quote $ defn as-state-map (value)
-            if (map? value) value $ raise $ str "|respo-alerts expected component state as a map, got: " (type-of value)
+            match
+              try-decode-map-as value $ Map Dynamic Dynamic
+              (:ok m) m
+              (:err err)
+                raise $ str "|respo-alerts expected component state as a map, got: " err
           :examples $ []
           :schema $ quote $ Fn State
             -> $ Map Dynamic Dynamic
             :generics State
+        'call-modal-menu-result! $ %{} 'CodeEntry
+          :doc "|Invoke the modal menu :on-result callback after verifying it is a function."
+          :code $ quote $ defn call-modal-menu-result! (options result d!)
+            let
+                on-result $ read-field-or options :on-result false
+              if (fn? on-result)
+                do (on-result result d!) &unit
+                raise "|modal menu expects :on-result to be a function"
+          :examples $ []
+          :schema $ quote $ Fn Options Dynamic
+            Fn *dispatch-op $ -> Unit
+            -> Unit
+            :generics Options
         'clear-prompt-task! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn clear-prompt-task! (cursor)
             reset! *prompt-tasks $ &map:dissoc @*prompt-tasks cursor
@@ -1220,8 +1218,7 @@
                   hint-fn $ Fn respo.schema/RespoEvent
                     Fn *dispatch-op $ -> Unit
                     -> Unit
-                  if (fn? on-close!) (on-close! d!)
-                    raise "|comp-esc-listener expects on-close! to be a function"
+                  on-close! d!
           :examples $ []
           :schema $ quote $ Fn Bool
             Fn
@@ -1342,12 +1339,11 @@
                               (:none) (raise "|Menu items must be List")
                             map $ fn (info)
                               let
-                                  item $ cond
-                                      enum? info
-                                      , info
-                                    (map? info)
-                                      :: :item (read-field-or info :value |) (read-field-or info :display |)
-                                    true $ raise "|Unknown menu item"
+                                  item $ match (data-view info)
+                                    (:enum e) e
+                                    (:map item-map)
+                                      :: :item (read-field-or item-map :value |) (read-field-or item-map :display |)
+                                    _ $ raise "|Unknown menu item"
                                 match item $
                                   :item v l
                                   [] v $ div
@@ -1357,7 +1353,9 @@
                                           Fn *dispatch-op $ -> Unit
                                           -> Unit
                                         on-select! item d!
-                                    if (string? l) (<> l) l
+                                    match (data-view l)
+                                      (:string label-text) (<> label-text)
+                                      _ l
                     comp-esc-listener show? on-close!
                   []
           :examples $ [] $ quote
@@ -1421,64 +1419,13 @@
           :schema $ quote EnumDef
         'effect-fade $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-fade (show?) (action el at-place?)
-            match action
-              :before-update $ if (respo-alerts.core/legacy-truthy? show?)
-                match
-                  browser/element-first-child $ browser/element-host el
-                  (:none) &unit
-                  (:some target)
-                    let
-                        cloned $ browser/element-clone target true
-                        card-option $ browser/element-first-child cloned
-                      browser/document-append-body! cloned
-                      browser/set-timeout!
-                        fn () (browser/element-set-style! cloned |opacity |0)
-                          match card-option
-                            (:none) &unit
-                            (:some card)
-                              do (browser/element-set-style! card |transitionDuration |240ms) (browser/element-set-style! card |transform "|scale(0.94) translate(0px,-20px)")
-                          , &unit
-                        , 10
-                      browser/set-timeout!
-                        fn () $ browser/element-remove! cloned
-                        , 240
-                      , &unit
-                , &unit
-              :update $ if (respo-alerts.core/legacy-truthy? show?)
-                match
-                  browser/element-first-child $ browser/element-host el
-                  (:none) &unit
-                  (:some target)
-                    let
-                        card-option $ browser/element-first-child target
-                      browser/element-set-style! target |opacity |0
-                      match card-option
-                        (:none) &unit
-                        (:some card) (browser/element-set-style! card |transform "|scale(0.94) translate(0px,-20px)")
-                      browser/set-timeout!
-                        fn () (browser/element-set-style! target |transitionDuration |240ms) (browser/element-set-style! target |opacity |1)
-                          match card-option
-                            (:none) &unit
-                            (:some card)
-                              do (browser/element-set-style! card |transitionDuration |240ms) (browser/element-set-style! card |transform "|scale(1) translate(0px,0px)")
-                          , &unit
-                        , 10
-                      , &unit
-                , &unit
-              _ &unit
+            match action (:before-update show?) (:update show?) (_ &unit)
           :examples $ []
           :schema $ quote $ Fn Bool (-> respo.schema/Effect) (:features :js-ffi)
         'effect-focus $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-focus (query show?) (action el at-place?)
             match action
-              :update $ if (string? query)
-                if
-                  let
-                      checked-alert-boolean show?
-                    if (bool? checked-alert-boolean) checked-alert-boolean false
-                  focus-element! query
-                  , &unit
-                raise "|effect-focus expected a query string"
+              :update $ if show? (focus-element! query) &unit
               _ &unit
           :examples $ []
           :schema $ quote $ Fn String Bool (-> respo.schema/Effect) (:features :js-ffi)
@@ -1510,64 +1457,13 @@
         'effect-select $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-select (query show?) (action el *local)
             match action
-              :update $ if (string? query)
-                if
-                  let
-                      checked-alert-boolean show?
-                    if (bool? checked-alert-boolean) checked-alert-boolean false
-                  select-element! query
-                  , &unit
-                raise "|effect-select expected a query string"
+              :update $ if show? (select-element! query) &unit
               _ &unit
           :examples $ []
           :schema $ quote $ Fn String Bool (-> respo.schema/Effect) (:features :js-ffi)
         'effect-slide $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defeffect effect-slide (show?) (action el at-place?)
-            match action
-              :before-update $ if (respo-alerts.core/legacy-truthy? show?)
-                match
-                  browser/element-first-child $ browser/element-host el
-                  (:none) &unit
-                  (:some target)
-                    let
-                        cloned $ browser/element-clone target true
-                        card-option $ browser/element-first-child cloned
-                      browser/document-append-body! cloned
-                      browser/set-timeout!
-                        fn () (browser/element-set-style! cloned |opacity |0)
-                          match card-option
-                            (:none) &unit
-                            (:some card)
-                              do (browser/element-set-style! card |transitionDuration |240ms) (browser/element-set-style! card |transform "|translate(100%,0px)")
-                          , &unit
-                        , 10
-                      browser/set-timeout!
-                        fn () $ browser/element-remove! cloned
-                        , 240
-                      , &unit
-                , &unit
-              :update $ if (respo-alerts.core/legacy-truthy? show?)
-                match
-                  browser/element-first-child $ browser/element-host el
-                  (:none) &unit
-                  (:some target)
-                    let
-                        card-option $ browser/element-first-child target
-                      browser/element-set-style! target |opacity |0
-                      match card-option
-                        (:none) &unit
-                        (:some card) (browser/element-set-style! card |transform "|translate(100%,0px)")
-                      browser/set-timeout!
-                        fn () (browser/element-set-style! target |transitionDuration |240ms) (browser/element-set-style! target |opacity |1)
-                          match card-option
-                            (:none) &unit
-                            (:some card)
-                              do (browser/element-set-style! card |transitionDuration |240ms) (browser/element-set-style! card |transform "|translate(0px,0px)")
-                          , &unit
-                        , 10
-                      , &unit
-                , &unit
-              _ &unit
+            match action (:before-update show?) (:update show?) (_ &unit)
           :examples $ []
           :schema $ quote $ Fn Bool (-> respo.schema/Effect) (:features :js-ffi)
         'event-fields $ %{} 'CodeEntry
@@ -1585,10 +1481,11 @@
           :tags $ #{} :internal
         'legacy-truthy? $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn legacy-truthy? (value)
-            if (bool? value) value $ not $ or (nil? value)
-              = (type-of value) :unit
+            if (js-nullish? value) false $ match (data-view value)
+              (:bool b) b
+              _ true
           :examples $ []
-          :schema $ quote $ Fn V (-> Bool) (:generics V)
+          :schema $ quote $ Fn V (-> Bool) (:generics V) (:features :js-ffi)
           :tests $ [] $ %{} 'TestEntry (:name |legacy-conditions)
             :code $ quote $ do
               assert= false $ legacy-truthy? nil
@@ -1601,9 +1498,10 @@
         'menu-items $ %{} 'CodeEntry
           :doc "|Validate the required list container without guessing the heterogeneous item payload or replacing invalid input with an empty list."
           :code $ quote $ defn menu-items (value)
-            if (list? value)
-              assert-type value $ List Dynamic
-              raise "|Menu items must be List"
+            match
+              try-decode-map-as value $ List Dynamic
+              (:ok items) items
+              (:err _) (raise "|Menu items must be List")
           :examples $ []
           :schema $ quote $ Fn T
             -> $ List Dynamic
@@ -1653,10 +1551,7 @@
             -> $ Map Dynamic Dynamic
             :generics T
         'modal-visible? $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn modal-visible? (state)
-            let
-                value $ read-field-or state :show? false
-              if (bool? value) value false
+          :code $ quote $ defn modal-visible? (state) (read-bool state :show? false)
           :examples $ []
           :schema $ quote $ Fn T (-> Bool) (:generics T)
         'prompt-actions-plugin $ %{} 'CodeEntry (:doc |)
@@ -1726,7 +1621,7 @@
                 cursor $ read-state-cursor states
                 state $ as-state-map $ read-field-or states :data
                   {} (:text initial-text) (:failure |)
-                text $ read-field-or state :text initial-text
+                text $ read-text state :text initial-text
                 check-submit! $ fn (d!)
                   hint-fn $ Fn
                     Fn *dispatch-op (-> Unit) (:features :io :state)
@@ -1741,9 +1636,7 @@
                       write-state! cursor
                         &map:assoc (as-state-map state) :failure result
                         , d!
-                      do
-                        on-finish! (decode-map-as text 'String) d!
-                        on-close! d!
+                      do (on-finish! text d!) (on-close! d!)
                         write-state! cursor ({}) d!
               []
                 effect-select (str |. schema/input-box-name) show?
@@ -1866,7 +1759,10 @@
         'prompt-placeholder $ %{} 'CodeEntry
           :doc "|Validate the optional String placeholder before constructing DOM props."
           :code $ quote $ defn prompt-placeholder (value)
-            if (nil? value) nil $ if (string? value) (assert-type value String) (raise "|Prompt placeholder must be String or nil")
+            match (data-view value)
+              (:nil) nil
+              (:string s) s
+              _ $ raise "|Prompt placeholder must be String or nil"
           :examples $ []
           :schema $ quote $ Fn T
             -> $ JsNullish String
@@ -1893,7 +1789,9 @@
               :tags $ #{} :unit
         'prompt-validation-error $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn prompt-validation-error (value)
-            if (string? value) value |
+            match (try-decode-map-as value 'String)
+              (:ok s) s
+              (:err _) |
           :examples $ []
           :schema $ quote $ Fn T (-> String) (:generics T) (:features :js-ffi)
           :tests $ []
@@ -1911,9 +1809,10 @@
             if (struct? event)
               struct-match event
                 respo.schema/RespoEvent checked $ PromptEvent :text
-                  let
-                      raw $ :value checked
-                    if (string? raw) raw |
+                  match
+                    try-decode-map-as (:value checked) 'String
+                    (:ok raw) raw
+                    (:err _) |
                   , :keycode
                     .unwrap-or
                       js-nullish->option $ :key-code checked
@@ -1935,14 +1834,22 @@
           :code $ quote $ defn read-prompt-event (event)
             let
                 raw-text $ read-field-or event :value false
-                text $ if (string? raw-text) raw-text |
+                text $ match (try-decode-map-as raw-text 'String)
+                  (:ok s) s
+                  (:err _) |
                 canonical-key $ read-field-or event :key-code false
                 raw-key $ if (respo-alerts.core/legacy-truthy? canonical-key) canonical-key $ read-field-or event :keycode false
-                keycode $ if (number? raw-key) raw-key 0
+                keycode $ match (try-decode-map-as raw-key 'Number)
+                  (:ok n) n
+                  (:err _) 0
                 raw-meta $ read-field-or event :meta? false
-                meta? $ if (bool? raw-meta) raw-meta false
+                meta? $ match (try-decode-map-as raw-meta 'Bool)
+                  (:ok b) b
+                  (:err _) false
                 raw-ctrl $ read-field-or event :ctrl? false
-                ctrl? $ if (bool? raw-ctrl) raw-ctrl false
+                ctrl? $ match (try-decode-map-as raw-ctrl 'Bool)
+                  (:ok b) b
+                  (:err _) false
               PromptEvent :text text :keycode keycode :meta? meta? :ctrl? ctrl?
           :examples $ []
           :schema $ quote $ Fn (Map Tag Value) (-> PromptEvent) (:generics Value) (:features :js-ffi)
@@ -1971,13 +1878,12 @@
           :code $ quote $ defn read-style (options k)
             let
                 value $ read-field-or options k $ {}
-              if (nil? value) ({})
-                if (map? value)
-                  filter-map-kv value $ fn (style-key style-value)
-                    if (tag? style-key)
-                      MapEntryDecision :keep style-key $ decode-map-as style-value respo-ui.schema/InlineStyleValue
-                      raise $ str "|respo-alerts expected style keys as tags, got: " style-key
-                  raise $ str "|respo-alerts expected a style map at " k "|, got: " $ type-of value
+                view $ data-view value
+              match view
+                (:nil) ({})
+                (:map m)
+                  decode-map-as m $ Map Tag respo-ui.schema/InlineStyleValue
+                _ $ raise $ str "|respo-alerts expected a style map at " k "|, got: " (data-kind view)
           :examples $ []
           :schema $ quote $ Fn T Tag
             -> $ Map Tag respo-ui.schema/InlineStyleValue
@@ -2013,15 +1919,21 @@
             :tags $ #{} :unit
         'read-text $ %{} 'CodeEntry (:doc "|读取文本选项并校验为字符串，nil 时使用默认文本。")
           :code $ quote $ defn read-text (options k default-text)
-            &let
-              v $ read-field-or options k default-text
-              if (nil? v) default-text $ if (string? v) v $ raise
-                str "|respo-alerts expected text at " k "|, got: " $ type-of v
+            let
+                v $ read-field-or options k default-text
+                view $ data-view v
+              match view
+                (:nil) default-text
+                (:string s) s
+                _ $ raise $ str "|respo-alerts expected text at " k "|, got: " (data-kind view)
           :examples $ []
           :schema $ quote $ Fn T Tag String (-> String) (:generics T)
         'read-text-value $ %{} 'CodeEntry (:doc "|把可选的显示值转成文本，nil 为空字符串。")
           :code $ quote $ defn read-text-value (value)
-            if (string? value) value $ if (nil? value) | $ str value
+            match (data-view value)
+              (:string s) s
+              (:nil) |
+              _ $ str value
           :examples $ []
           :schema $ quote $ Fn T (-> String) (:generics T)
         'show-modal! $ %{} 'CodeEntry (:doc |)
@@ -2145,9 +2057,7 @@
                   match (read-field state :text)
                     (:some text) (&map:assoc options :text text)
                     (:none) (&map:dissoc options :text)
-                  let
-                      checked-alert-boolean $ read-field-or state :show? false
-                    if (bool? checked-alert-boolean) checked-alert-boolean false
+                  modal-visible? state
                   , on-read $ fn (d!)
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
               AlertPluginState :plugin node cursor state
@@ -2171,9 +2081,7 @@
                   if
                     blank? $ read-text state :text |
                     , options $ &map:assoc options :text $ read-text state :text |
-                  let
-                      checked-alert-boolean $ read-field-or state :show? false
-                    if (bool? checked-alert-boolean) checked-alert-boolean false
+                  modal-visible? state
                   dispatch-fn (e d!)
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
                     (take-prompt-task! cursor) .fold
@@ -2216,9 +2124,7 @@
                   if
                     blank? $ read-text state :text |
                     , options $ &map:assoc options :text $ read-text state :text |
-                  let
-                      checked-alert-boolean $ read-field-or state :show? false
-                    if (bool? checked-alert-boolean) checked-alert-boolean false
+                  modal-visible? state
                   dispatch-fn (e d!)
                     d! $ state-op cursor $ &map:assoc (as-state-map state) :show? false
                     (take-prompt-task! cursor) .fold
@@ -2245,10 +2151,7 @@
                 cursor $ read-state-cursor states
                 state $ as-state-map $ read-field-or states :data
                   {} $ :show? false
-                node $ comp-drawer options
-                  let
-                      checked-alert-boolean $ read-field-or state :show? false
-                    if (bool? checked-alert-boolean) checked-alert-boolean false
+                node $ comp-drawer options (modal-visible? state)
                   fn (d!)
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
               DrawerPluginState :plugin node cursor state
@@ -2290,16 +2193,10 @@
                 cursor $ read-state-cursor states
                 state $ as-state-map $ read-field-or states :data
                   {} $ :show? false
-                node $ comp-modal-menu options
-                  let
-                      checked-alert-boolean $ read-field-or state :show? false
-                    if (bool? checked-alert-boolean) checked-alert-boolean false
+                node $ comp-modal-menu options (modal-visible? state)
                   dispatch-fn (d!)
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
-                  dispatch-fn (result d!)
-                    let
-                        on-result $ read-field-or options :on-result false
-                      if (fn? on-result) (on-result result d!) (raise "|modal menu expects :on-result to be a function")
+                  dispatch-fn (result d!) (call-modal-menu-result! options result d!)
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
               ModalMenuPluginState :plugin node cursor state
           :examples $ [] $ quote
@@ -2321,10 +2218,7 @@
                 node $ comp-modal-menu options (modal-visible? state)
                   dispatch-fn (d!)
                     d! $ state-op cursor $ modal-updated-state state false
-                  dispatch-fn (result d!)
-                    let
-                        on-result $ read-field-or options :on-result false
-                      if (fn? on-result) (on-result result d!) (raise "|modal menu expects :on-result to be a function")
+                  dispatch-fn (result d!) (call-modal-menu-result! options result d!)
                     d! $ state-op cursor $ modal-updated-state state false
               TypedModalMenuState :plugin node cursor state state-op
           :examples $ []
@@ -2352,10 +2246,7 @@
                 cursor $ read-state-cursor states
                 state $ as-state-map $ read-field-or states :data
                   {} $ :show? false
-                node $ comp-prompt-modal (>> states :modal) options
-                  let
-                      checked-alert-boolean $ read-field-or state :show? false
-                    if (bool? checked-alert-boolean) checked-alert-boolean false
+                node $ comp-prompt-modal (>> states :modal) options (modal-visible? state)
                   fn (text d!)
                     hint-fn $ Fn String
                       Fn *dispatch-op (-> Unit) (:features :io :state)
@@ -2432,7 +2323,7 @@
             respo-alerts.style :as style
             respo-alerts.schema :as schema
             calcit.test :refer $ is
-            respo-alerts.util :refer $ focus-element! select-element! read-field read-field-or read-field-list merge-optional-styles
+            respo-alerts.util :refer $ focus-element! select-element! read-field read-field-or read-field-list merge-optional-styles read-bool data-kind
             js-ffi.browser :as browser
     'respo-alerts.main $ %{} 'FileEntry
       :defs $ {}
@@ -2443,23 +2334,27 @@
             typed/State schema/Op $ Map Dynamic Dynamic
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (op)
-            if (enum? op)
-              do
-                when
-                  and config/dev? $ match op
-                    (:states ignored-cursor ignored-state) false
-                    _ true
-                  shared/console-log! $ str |Dispatch: op
-                match op
-                  (:states cursor value)
-                    record-op! $ schema/Op :states
-                      decode-map-as cursor $ List respo.schema/CoordKey
-                      , value
-                  (:hydrate-storage value)
-                    record-op! $ schema/Op :hydrate-storage $ if (map? value) value (raise "|hydrated store must be a Map")
-                  _ $ shared/console-warn! $ str "|Unknown op:" op
-                , &unit
-              raise "|alert renderer operation must be an Enum"
+            match (data-view op)
+              (:enum checked-op)
+                do
+                  when
+                    and config/dev? $ match checked-op
+                      (:states ignored-cursor ignored-state) false
+                      _ true
+                    shared/console-log! $ str |Dispatch: checked-op
+                  match checked-op
+                    (:states cursor value)
+                      record-op! $ schema/Op :states
+                        decode-map-as cursor $ List respo.schema/CoordKey
+                        , value
+                    (:hydrate-storage value)
+                      record-op! $ schema/Op :hydrate-storage $ match
+                        try-decode-map-as value $ Map Dynamic Dynamic
+                        (:ok m) m
+                        (:err _) (raise "|hydrated store must be a Map")
+                    _ $ shared/console-warn! $ str "|Unknown op:" checked-op
+                  , &unit
+              _ $ raise "|alert renderer operation must be an Enum"
           :examples $ []
           :schema $ quote $ Fn Input (-> Unit) (:generics Input) (:features :js-ffi :state) (:open :decode)
         'main! $ %{} 'CodeEntry (:doc |)
@@ -2505,7 +2400,7 @@
           :schema $ quote $ Fn schema/Op (-> Unit) (:features :js-ffi :state)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! ()
-            if (nil? build-errors)
+            if (js-nullish? build-errors)
               do (remove-watch! *reel :changes) (clear-cache!)
                 add-watch! *reel :changes $ fn (reel prev) (render-app!)
                 reset! *reel $ reloaded-reel
@@ -2692,6 +2587,26 @@
             respo-alerts.core :refer $ as-state-map
     'respo-alerts.util $ %{} 'FileEntry
       :defs $ {}
+        'data-kind $ %{} 'CodeEntry
+          :doc "|Map a calcit.core/Data view to its category tag."
+          :code $ quote $ defn data-kind (view)
+            match view
+              (:nil) :nil
+              (:bool _) :bool
+              (:number _) :number
+              (:string _) :string
+              (:tag _) :tag
+              (:symbol _) :symbol
+              (:list _) :list
+              (:map _) :map
+              (:set _) :set
+              (:fn _) :fn
+              (:enum _) :enum
+              (:struct _) :struct
+              (:ref _) :ref
+              (:other _) :other
+          :examples $ []
+          :schema $ quote $ Fn Data (-> Tag)
         'focus-element! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn focus-element! (query)
             match (browser/query-selector query)
@@ -2703,12 +2618,15 @@
           :doc "|Validate optional style containers, preserving nil and right-hand overrides. CSS key/value validation remains owned by Respo."
           :code $ quote $ defn merge-optional-styles (base active)
             let
-                checked-base $ if (nil? base) None $ if (map? base)
-                  Some $ decode-map-as base $ Map Dynamic Dynamic
-                  raise "|Style must be Map or nil"
-                checked-active $ if (nil? active) None $ if (map? active)
-                  Some $ decode-map-as active $ Map Dynamic Dynamic
-                  raise "|Style must be Map or nil"
+                read-style-opt $ fn (value)
+                  hint-fn $ Fn Dynamic $ ->
+                    Option $ Map Dynamic Dynamic
+                  match (data-view value)
+                    (:nil) None
+                    (:map m) (Some m)
+                    _ $ raise "|Style must be Map or nil"
+                checked-base $ read-style-opt base
+                checked-active $ read-style-opt active
               match checked-base
                 (:none)
                   match checked-active
@@ -2756,16 +2674,47 @@
                       hint-fn $ Fn String $ -> Bool
                       = message "|Style must be Map or nil"
               :tags $ #{} :unit
+        'read-bool $ %{} 'CodeEntry
+          :doc "|Reads an optional Bool field from a Struct or Map, falling back to default-value when missing, nil, or non-Bool."
+          :code $ quote $ defn read-bool (value field default-value)
+            match (read-field value field)
+              (:some v)
+                match (try-decode-map-as v 'Bool)
+                  (:ok b) b
+                  (:err _) default-value
+              (:none) default-value
+          :examples $ []
+          :schema $ quote $ Fn T Tag Bool (-> Bool) (:generics T)
+          :tests $ [] $ %{} 'TestEntry (:name |reads-bool-fields)
+            :code $ quote $ do
+              assert= true $ read-bool
+                {} $ :show? true
+                , :show? false
+              assert= false $ read-bool
+                {} $ :show? false
+                , :show? true
+              assert= false $ read-bool ({}) :show? false
+              assert= true $ read-bool
+                {} $ :show? nil
+                , :show? true
+              assert= false $ read-bool
+                {} $ :show? |yes
+                , :show? false
+            :tags $ #{} :unit
         'read-field $ %{} 'CodeEntry
           :doc "|Reads an optional field from a Struct or Map. A missing field, a nil value, or a value that is neither container reads as None."
           :code $ quote $ defn read-field (value field)
             let
                 found $ if (struct? value)
                   get (&struct:to-map value) field
-                  if (map? value) (get value field) None
+                  match (data-view value)
+                    (:map m) (get m field)
+                    _ None
               match found
                 (:some v)
-                  if (nil? v) None $ Some v
+                  match (data-view v)
+                    (:nil) None
+                    _ $ Some v
                 (:none) None
           :examples $ []
           :schema $ quote $ Fn T Tag
