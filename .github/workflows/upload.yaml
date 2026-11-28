@@ -84,8 +84,8 @@ jobs:
       uses: actions/checkout@v7.0.1
       with:
         repository: worktools/qrcode-shelf
-        # Fixed Shelf snapshot already migrated to Calcit 0.44.
-        ref: 3b71365eaec35bad3b3f7286fdbd4a7b009c2226
+        # Calcit 0.46 Shelf candidate with typed plugin adapters.
+        ref: 9ebd145ff2bce4a1a46afb904636c307fa84b03d
         path: .calcit/consumer
         persist-credentials: false
 
@@ -93,11 +93,15 @@ jobs:
       run: |
         set -euo pipefail
         consumer="$GITHUB_WORKSPACE/.calcit/consumer"
-        # Resolve the consumer graph using released dependencies, then link this Alerts candidate.
+        # Resolve released dependencies separately; Alerts 0.14.12 is this untagged candidate.
         cd "$consumer"
+        cp deps.cirru "$RUNNER_TEMP/shelf-deps.cirru"
+        python3 -c 'from pathlib import Path; p = Path("deps.cirru"); s = p.read_text(); line = "    |Respo/alerts.calcit |0.14.12\n"; assert s.count(line) == 1; p.write_text(s.replace(line, ""))'
         caps --strict --ci
-        ln -sfn "$GITHUB_WORKSPACE" .calcit/modules/alerts.calcit
         yarn install --immutable
+        caps verify --toolchain
+        cp "$RUNNER_TEMP/shelf-deps.cirru" deps.cirru
+        ln -sfn "$GITHUB_WORKSPACE" .calcit/modules/alerts.calcit
         calcit calcit.cirru edit format
         calcit calcit.cirru --check-only --all-defs
         calcit calcit.cirru fix --workflow strict --verify --format json > "$RUNNER_TEMP/shelf-strict.json"

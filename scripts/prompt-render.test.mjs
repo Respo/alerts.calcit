@@ -5,7 +5,7 @@ import { copyFile, mkdir, mkdtemp, readFile, rm, symlink } from 'node:fs/promise
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import * as c from '../js-out/calcit.core.mjs';
-import { comp_prompt_modal, comp_modal_menu, comp_confirm_modal, comp_modal, comp_drawer, comp_alert_modal, read_state_cursor, read_prompt_event, legacy_truthy_$q_ } from '../js-out/respo-alerts.core.mjs';
+import { comp_prompt_modal, comp_prompt_modal_with, comp_modal_menu, comp_confirm_modal, comp_modal, comp_drawer, comp_alert_modal, use_modal_with, read_state_cursor, read_prompt_event, legacy_truthy_$q_ } from '../js-out/respo-alerts.core.mjs';
 import { comp_trigger } from '../js-out/respo-alerts.trigger.mjs';
 import { make_string } from '../js-out/respo.render.html.mjs';
 import { RespoEvent } from '../js-out/respo.schema.mjs';
@@ -94,6 +94,7 @@ test('canonical attached tests replay on native and generated JavaScript', async
           item.id === 'respo-alerts.core/%prompt-actions#stores-callback-across-render') {
         ownerFeatures.push(':io');
       }
+      if (item.id === 'respo-alerts.core/%typed-modal-actions#preserves-return-and-extra-state') ownerFeatures.push(':state');
       ownerFeatures.forEach((feature) => features.add(feature));
       operations.push(['edit', 'def', target, '--input-format', 'json-ast', '--code',
         JSON.stringify(['defn', target.split('/')[1], [], attached.code, '&unit'])]);
@@ -411,4 +412,45 @@ test('trigger active class is explicit in both branches', () => {
   assert.match(idle, /<div class="style-trigger__respo-alerts_trigger"><\/div><\/div>$/);
   assert.doesNotMatch(idle, /style-trigger-active/);
   assert.match(active, /<div class="style-trigger__respo-alerts_trigger style-trigger-active__respo-alerts_trigger"><\/div><\/div>$/);
+});
+
+
+test('typed modal forwards close dispatch and preserves extra state', () => {
+  const initial = c.parse_cirru_edn('{} (:cursor $ [] :quick |mixed 2) (:data $ {} (:show? true) (:legacy |keep))');
+  let onClose;
+  const opts = c._$n__$M_(c.newTag('render'), (close) => { onClose = close; return comp_modal(c._$n__$M_(), false, () => {}); });
+  const ops = [];
+  const plugin = use_modal_with(initial, opts, (cursor, payload) => ({ cursor, payload }));
+  assert.match(make_string(plugin.extra[0]), /style-modal-card/);
+  assert.equal(typeof onClose, 'function');
+  onClose((op) => { ops.push(op); });
+  assert.equal(ops.length, 1);
+  assert.ok(c._$e_(ops[0].cursor, c.parse_cirru_edn('[] :quick |mixed 2')));
+  assert.equal(ops[0].payload.get(c.newTag('show?')), false);
+  assert.equal(ops[0].payload.get(c.newTag('legacy')), 'keep');
+});
+
+
+test('typed prompt preserves input, validation and submit dispatch', () => {
+  const calls = [];
+  const updates = [];
+  const initial = c.parse_cirru_edn('{} (:cursor $ [] :modal |field 2) (:data $ {} (:text |old) (:legacy |keep))');
+  const options = c._$n__$M_(c.newTag('validator'), (value) => value === 'ok' ? '' : 'invalid');
+  const dispatch = (op) => updates.push(op);
+  const write = (cursor, payload, d) => d({ cursor, payload });
+  const render = (state) => comp_prompt_modal_with(state, options, true,
+    (value, d) => calls.push(['finish', value, d]), (d) => calls.push(['close', d]), write);
+  let control = findElement(render(initial), 'input');
+  eventHandler(control, 'input')(c.parse_cirru_edn('{} (:type :input) (:value |ok)'), dispatch);
+  assert.equal(updates.at(-1).payload.get(c.newTag('text')), 'ok');
+  assert.equal(updates.at(-1).payload.get(c.newTag('legacy')), 'keep');
+  assert.ok(c._$e_(updates.at(-1).cursor, c.parse_cirru_edn('[] :modal |field 2')));
+  const invalid = render(initial);
+  eventHandler(findElement(invalid, 'button'))({}, dispatch);
+  assert.equal(updates.at(-1).payload.get(c.newTag('failure')), 'invalid');
+  assert.deepEqual(calls, []);
+  const updated = c.assoc(initial, c.newTag('data'), c.parse_cirru_edn('{} (:text |ok) (:legacy |keep)'));
+  eventHandler(findElement(render(updated), 'button'))({}, dispatch);
+  assert.deepEqual(calls, [['finish', 'ok', dispatch], ['close', dispatch]]);
+  assert.equal(updates.at(-1).payload.chunk.length, 0);
 });

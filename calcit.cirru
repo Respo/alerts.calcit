@@ -101,7 +101,9 @@
                 div ({}) (<> |Trigger)
                 div ({})
                   comp-trigger
-                    = true $ read-field-or state :visible? false
+                    let
+                        checked-alert-boolean $ read-field-or state :visible? false
+                      if (bool? checked-alert-boolean) checked-alert-boolean false
                     button $ {} (:inner-text |Toggle) (:class-name css/button)
                       :on-click $ fn (e d!)
                         d! $ :: :states cursor $ &map:assoc state :visible?
@@ -296,7 +298,9 @@
               hint-fn $ Fn AlertPluginState $ -> Bool
               match self $
                 :plugin node cursor state
-                = true $ read-field-or state :show? false
+                let
+                    checked-alert-boolean $ read-field-or state :show? false
+                  if (bool? checked-alert-boolean) checked-alert-boolean false
           :examples $ []
           :schema $ quote Impl
           :tests $ [] $ %{} 'TestEntry (:name |show-takes-optional-text)
@@ -374,7 +378,9 @@
               hint-fn $ Fn ConfirmPluginState $ -> Bool
               match self $
                 :plugin node cursor state
-                = true $ read-field-or state :show? false
+                let
+                    checked-alert-boolean $ read-field-or state :show? false
+                  if (bool? checked-alert-boolean) checked-alert-boolean false
           :examples $ []
           :schema $ quote Impl
           :tests $ [] $ %{} 'TestEntry (:name |single-dispatch-zero-argument-task-and-close)
@@ -441,7 +447,9 @@
               hint-fn $ Fn DrawerPluginState $ -> Bool
               match self $
                 :plugin node cursor state
-                = true $ read-field-or state :show? false
+                let
+                    checked-alert-boolean $ read-field-or state :show? false
+                  if (bool? checked-alert-boolean) checked-alert-boolean false
           :examples $ []
           :schema $ quote Impl
         '%modal-actions $ %{} 'CodeEntry (:doc |)
@@ -457,7 +465,7 @@
               hint-fn $ Fn ModalPluginState $ -> Bool
               match self $
                 :plugin node cursor state
-                = true $ read-field-or state :show? false
+                modal-visible? state
           :examples $ []
           :schema $ quote Impl
           :tests $ [] $ %{} 'TestEntry (:name |preserves-dispatch-return-and-visibility)
@@ -523,7 +531,9 @@
               hint-fn $ Fn ModalMenuPluginState $ -> Bool
               match self $
                 :plugin node cursor state
-                = true $ read-field-or state :show? false
+                let
+                    checked-alert-boolean $ read-field-or state :show? false
+                  if (bool? checked-alert-boolean) checked-alert-boolean false
           :examples $ []
           :schema $ quote Impl
         '%prompt-actions $ %{} 'CodeEntry (:doc |)
@@ -560,7 +570,9 @@
               hint-fn $ Fn PromptPluginNodeCursorState $ -> Bool
               match self $
                 :plugin node cursor state
-                = true $ read-field-or state :show? false
+                let
+                    checked-alert-boolean $ read-field-or state :show? false
+                  if (bool? checked-alert-boolean) checked-alert-boolean false
           :examples $ []
           :schema $ quote Impl
           :tests $ []
@@ -598,6 +610,192 @@
                 .close drawer dispatch!
                 assert= 6 $ .len @calls
               :tags $ #{} :regression :unit
+        '%typed-confirm-actions $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defimpl TypedConfirmPluginState ConfirmActions
+            .render $ fn (self)
+              hint-fn $ Fn TypedConfirmPluginState $ -> respo.schema/Component
+              match self $
+                :plugin node cursor state state-op
+                , node
+            .show $ fn (self d! next-task)
+              hint-fn $ Fn TypedConfirmPluginState
+                Fn *dispatch-op (-> Unit) (:features :io :state)
+                Fn $ -> Unit
+                -> Unit
+                :features :io :state
+              match self $
+                :plugin node cursor state state-op
+                do
+                  store-prompt-task! cursor $ as-prompt-task $ fn (ignored)
+                    hint-fn $ Fn String $ -> Unit
+                    next-task
+                  d! $ state-op cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text |)
+            .show-with-text $ fn (self d! text next-task)
+              hint-fn $ Fn TypedConfirmPluginState
+                Fn *dispatch-op (-> Unit) (:features :io :state)
+                , String
+                  Fn $ -> Unit
+                  -> Unit
+                  :features :io :state
+              match self $
+                :plugin node cursor state state-op
+                do
+                  store-prompt-task! cursor $ as-prompt-task $ fn (ignored)
+                    hint-fn $ Fn String $ -> Unit
+                    next-task
+                  d! $ state-op cursor $ -> (as-state-map state) (&map:assoc :show? true) (&map:assoc :text text)
+            .close $ fn (self d!)
+              hint-fn $ Fn TypedConfirmPluginState
+                Fn *dispatch-op (-> Unit) (:features :io :state)
+                -> Unit
+                :features :io :state
+              match self $
+                :plugin node cursor state state-op
+                do (clear-prompt-task! cursor)
+                  d! $ state-op cursor $ &map:assoc (as-state-map state) :show? false
+            .show? $ fn (self)
+              hint-fn $ Fn TypedConfirmPluginState $ -> Bool
+              match self $
+                :plugin node cursor state state-op
+                let
+                    checked-alert-boolean $ read-field-or state :show? false
+                  if (bool? checked-alert-boolean) checked-alert-boolean false
+          :examples $ []
+          :schema $ quote Impl
+        '%typed-modal-actions $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defimpl TypedModalPluginState ModalActions
+            .render $ fn (self)
+              hint-fn $ Fn TypedModalPluginState $ -> respo.schema/Component
+              match self $
+                :plugin node cursor state state-op
+                , node
+            .show $ fn (self d!)
+              hint-fn $ Fn TypedModalPluginState
+                Fn *dispatch-op $ -> R
+                -> R
+                :generics R
+              match self $
+                :plugin node cursor state state-op
+                d! $ state-op cursor $ modal-updated-state state true
+            .close $ fn (self d!)
+              hint-fn $ Fn TypedModalPluginState
+                Fn *dispatch-op $ -> R
+                -> R
+                :generics R
+              match self $
+                :plugin node cursor state state-op
+                d! $ state-op cursor $ modal-updated-state state false
+            .show? $ fn (self)
+              hint-fn $ Fn TypedModalPluginState $ -> Bool
+              match self $
+                :plugin node cursor state state-op
+                modal-visible? state
+          :examples $ []
+          :schema $ quote Impl
+          :tests $ [] $ %{} 'TestEntry (:name |preserves-return-and-extra-state)
+            :code $ quote $ let
+                cursor $ [] :modal-contract
+                state $ {} (:show? false) (:legacy |keep)
+                convert $ fn (path payload)
+                  hint-fn $ Fn (List respo.schema/CoordKey) (Map Dynamic Dynamic) (-> *dispatch-op)
+                  respo-alerts.schema/Op :states path payload
+                plugin $ TypedModalPluginState :plugin
+                  respo.schema/Component :name :modal-contract :effects ([]) :listeners ([]) :tree None
+                  , cursor state convert
+                calls $ ref $ assert-type ([]) (List *dispatch-op)
+                dispatch! $ fn (op)
+                  hint-fn $ Fn *dispatch-op $ -> Number
+                  reset! calls $ .append @calls op
+                  , 42
+              assert= 42 $ .show plugin dispatch!
+              assert= 42 $ .close plugin dispatch!
+              assert= 2 $ .len @calls
+              match
+                .unwrap $ first @calls
+                (:states received-cursor received-state)
+                  do (assert= cursor received-cursor)
+                    assert= (Some true) (get received-state :show?)
+                    assert= (Some |keep) (get received-state :legacy)
+                _ $ assert= true false
+              match
+                .unwrap $ last @calls
+                (:states received-cursor received-state)
+                  do (assert= cursor received-cursor)
+                    assert= (Some false) (get received-state :show?)
+                    assert= (Some |keep) (get received-state :legacy)
+                _ $ assert= true false
+            :tags $ #{} :regression :unit
+        '%typed-modal-menu-actions $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defimpl TypedModalMenuState ModalMenuActions
+            .render $ fn (self)
+              hint-fn $ Fn TypedModalMenuState $ -> respo.schema/Component
+              match self $
+                :plugin node cursor state state-op
+                , node
+            .show $ fn (self d!)
+              hint-fn $ Fn TypedModalMenuState
+                Fn *dispatch-op (-> Unit) (:features :io :state)
+                -> Unit
+                :features :io :state
+              match self $
+                :plugin node cursor state state-op
+                do
+                  d! $ state-op cursor $ modal-updated-state state true
+                  , &unit
+            .close $ fn (self d!)
+              hint-fn $ Fn TypedModalMenuState
+                Fn *dispatch-op (-> Unit) (:features :io :state)
+                -> Unit
+                :features :io :state
+              match self $
+                :plugin node cursor state state-op
+                do
+                  d! $ state-op cursor $ modal-updated-state state false
+                  , &unit
+            .show? $ fn (self)
+              hint-fn $ Fn TypedModalMenuState $ -> Bool
+              match self $
+                :plugin node cursor state state-op
+                modal-visible? state
+          :examples $ []
+          :schema $ quote Impl
+        '%typed-prompt-actions $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defimpl TypedPromptPluginState PromptActions
+            .render $ fn (self)
+              hint-fn $ Fn TypedPromptPluginState $ -> respo.schema/Component
+              match self $
+                :plugin node cursor state state-op
+                , node
+            .show $ fn (self d! next-task)
+              hint-fn $ Fn TypedPromptPluginState
+                Fn *dispatch-op (-> Unit) (:features :io :state)
+                Fn String (-> R) (:features :io :state)
+                -> Unit
+                :generics R
+                :features :io :state
+              match self $
+                :plugin node cursor state state-op
+                do
+                  store-prompt-task! cursor $ as-prompt-task next-task
+                  d! $ state-op cursor $ modal-updated-state state true
+                  , &unit
+            .close $ fn (self d!)
+              hint-fn $ Fn TypedPromptPluginState
+                Fn *dispatch-op (-> Unit) (:features :io :state)
+                -> Unit
+                :features :io :state
+              match self $
+                :plugin node cursor state state-op
+                do (clear-prompt-task! cursor)
+                  d! $ state-op cursor $ modal-updated-state state false
+                  , &unit
+            .show? $ fn (self)
+              hint-fn $ Fn TypedPromptPluginState $ -> Bool
+              match self $
+                :plugin node cursor state state-op
+                modal-visible? state
+          :examples $ []
+          :schema $ quote Impl
         '*prompt-tasks $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defref *prompt-tasks ({})
           :examples $ []
@@ -732,6 +930,10 @@
             .show? $ Fn Self $ -> Bool
           :examples $ []
           :schema $ quote Trait
+        'PromptBodyItem $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defunion PromptBodyItem respo.schema/Effect respo.schema/Element
+          :examples $ []
+          :schema $ quote UnionDef
         'PromptEvent $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defstruct PromptEvent (:text String) (:keycode Number) (:meta? Bool) (:ctrl? Bool)
           :examples $ []
@@ -743,6 +945,30 @@
         'PromptPluginNodeCursorState $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defenum PromptPluginNodeCursorState
             :plugin respo.schema/Component (List respo.schema/CoordKey) Dynamic
+            :impls PromptActions
+          :examples $ []
+          :schema $ quote EnumDef
+        'TypedConfirmPluginState $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defenum TypedConfirmPluginState
+            :plugin respo.schema/Component (List respo.schema/CoordKey) Dynamic $ Fn (List respo.schema/CoordKey) (Map Dynamic Dynamic) (-> *dispatch-op)
+            :impls ConfirmActions
+          :examples $ []
+          :schema $ quote EnumDef
+        'TypedModalMenuState $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defenum TypedModalMenuState
+            :plugin respo.schema/Component (List respo.schema/CoordKey) Dynamic $ Fn (List respo.schema/CoordKey) (Map Dynamic Dynamic) (-> *dispatch-op)
+            :impls ModalMenuActions
+          :examples $ []
+          :schema $ quote EnumDef
+        'TypedModalPluginState $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defenum TypedModalPluginState
+            :plugin respo.schema/Component (List respo.schema/CoordKey) Dynamic $ Fn (List respo.schema/CoordKey) (Map Dynamic Dynamic) (-> *dispatch-op)
+            :impls ModalActions
+          :examples $ []
+          :schema $ quote EnumDef
+        'TypedPromptPluginState $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defenum TypedPromptPluginState
+            :plugin respo.schema/Component (List respo.schema/CoordKey) Dynamic $ Fn (List respo.schema/CoordKey) (Map Dynamic Dynamic) (-> *dispatch-op)
             :impls PromptActions
           :examples $ []
           :schema $ quote EnumDef
@@ -804,7 +1030,7 @@
               :generics R
             match self $
               :plugin node cursor state
-              d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
+              d! $ :: :states cursor $ modal-updated-state state false
           :examples $ []
           :schema $ quote $ Fn ModalPluginState
             Fn *dispatch-op $ -> R
@@ -1152,130 +1378,8 @@
         'comp-prompt-modal $ %{} 'CodeEntry
           :doc "||Prompt modal component. Shows a dialog with text input field and validation. Used internally by use-prompt hook."
           :code $ quote $ defcomp comp-prompt-modal (states options show? on-finish! on-close!)
-            let
-                initial-text $ read-text options :initial |
-                cursor $ read-state-cursor states
-                state $ as-state-map $ read-field-or states :data
-                  {} (:text initial-text) (:failure |)
-                text $ read-field-or state :text initial-text
-                check-submit! $ fn (d!)
-                  hint-fn $ Fn
-                    Fn *dispatch-op (-> Unit) (:features :io :state)
-                    -> Unit
-                  let
-                      validator $ read-field-or options :validator false
-                      result $ if (fn? validator)
-                        prompt-validation-error $ validator text
-                        , |
-                    if
-                      not $ blank? result
-                      d! $ :: :states cursor $ &map:assoc (as-state-map state) :failure result
-                      do
-                        on-finish! (decode-map-as text 'String) d!
-                        on-close! d!
-                        d! $ :: :states cursor $ {}
-              []
-                effect-select (str |. schema/input-box-name) show?
-                effect-fade show?
-                create-list-element :div
-                  {} $ :style $ {} (:position :absolute)
-                  if show?
-                    [] $ [] 0 $ div
-                      {}
-                        :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop & $ read-field-list options :backdrop-class
-                        :style $ &merge
-                          assert-type
-                            {} $ :line-height |32px
-                            Map Tag respo-ui.schema/InlineStyleValue
-                          read-style options :backdrop-style
-                        :on-click $ fn (e d!)
-                          hint-fn $ Fn respo.schema/RespoEvent
-                            Fn *dispatch-op (-> Unit) (:features :io :state)
-                            -> Unit
-                          on-close! d!
-                          d! $ :: :states cursor $ {}
-                      div
-                        {}
-                          :class-name $ str-spaced css/global css/column style-modal-card & $ read-field-list options :card-class
-                          :style $ read-style options :card-style
-                          :on-click $ fn (e d!) &unit
-                        div ({})
-                          <> $ read-text options :text "|Type in text"
-                        space-y 8
-                        let
-                            props $ DomProps :value (Some text) :on-input
-                              Some $ fn (e d!)
-                                hint-fn $ Fn respo.schema/RespoEvent
-                                  Fn *dispatch-op (-> Unit) (:features :io :state)
-                                  -> Unit
-                                d! $ :: :states cursor $ &map:assoc (as-state-map state) :text
-                                  :text $ read-dom-prompt-event e
-                              , :on-keydown
-                                Some $ fn (e d!)
-                                  hint-fn $ Fn respo.schema/RespoEvent
-                                    Fn *dispatch-op (-> Unit) (:features :io :state)
-                                    -> Unit
-                                  let
-                                      event-info $ read-dom-prompt-event e
-                                      action $ prompt-key-action event-info $ if
-                                        let
-                                            value $ read-field-or options :multiline? false
-                                          respo-alerts.core/legacy-truthy? value
-                                        , true false
-                                    match action
-                                      (:submit)
-                                        do
-                                          .prevent-default! $ :event e
-                                          check-submit! d!
-                                      (:close)
-                                        do (on-close! d!)
-                                          d! $ :: :states cursor $ {}
-                                      (:ignore) &unit
-                                    , &unit
-                                , :placeholder $ match (read-field options :placeholder)
-                                  (:some placeholder)
-                                    js-nullish->option $ prompt-placeholder placeholder
-                                  (:none) None
-                          if
-                            let
-                                value $ read-field-or options :multiline? false
-                              respo-alerts.core/legacy-truthy? value
-                            textarea $ struct-with props
-                              :class-name $ Some $ str-spaced schema/input-box-name css/textarea & (read-field-list options :input-class)
-                              :style $ Some $ &merge
-                                assert-type
-                                  {} (:width |100%) (:min-height 120) (:max-height |50vh)
-                                  Map Tag respo-ui.schema/InlineStyleValue
-                                read-style options :input-style
-                            input $ struct-with props
-                              :class-name $ Some $ str-spaced schema/input-box-name css/input & (read-field-list options :input-class)
-                              :style $ Some $ &merge
-                                assert-type
-                                  {} $ :width |100%
-                                  Map Tag respo-ui.schema/InlineStyleValue
-                                read-style options :input-style
-                        space-y 16
-                        div
-                          {} $ :class-name css/row-parted
-                          let
-                              failure $ read-text state :failure |
-                            if
-                              not $ blank? failure
-                              span $ {}
-                                :style $ &merge ui/flex $ {} (:color :red) (:line-height |20px)
-                                :inner-text failure
-                              span $ {}
-                          button
-                            {}
-                              :class-name $ str-spaced css/button & $ read-field-list options :confirm-class
-                              :on-click $ fn (e d!)
-                                hint-fn $ Fn respo.schema/RespoEvent
-                                  Fn *dispatch-op (-> Unit) (:features :io :state)
-                                  -> Unit
-                                check-submit! d!
-                            <> $ read-text options :button-text |Finish
-                      comp-esc-listener show? on-close!
-                    []
+            prompt-modal-body states options show? on-finish! on-close! $ fn (cursor payload d!)
+              d! $ :: :states cursor payload
           :examples $ [] $ quote
             comp-prompt-modal states
               {} (:text "|Enter name") (:placeholder |name)
@@ -1287,6 +1391,23 @@
             Fn
               Fn *dispatch-op (-> Unit) (:features :io :state)
               -> Unit
+            -> respo.schema/Component
+            :generics State Options R
+            :features :io :js-ffi :state
+        'comp-prompt-modal-with $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defcomp comp-prompt-modal-with (states options show? on-finish! on-close! write-state!) (prompt-modal-body states options show? on-finish! on-close! write-state!)
+          :examples $ []
+          :schema $ quote $ Fn State Options Bool
+            Fn String
+              Fn *dispatch-op (-> Unit) (:features :io :state)
+              -> R
+            Fn
+              Fn *dispatch-op (-> Unit) (:features :io :state)
+              -> Unit
+            Fn (List respo.schema/CoordKey) (Map Dynamic Dynamic)
+              Fn *dispatch-op (-> Unit) (:features :io :state)
+              -> Unit
+              :features :io :state
             -> respo.schema/Component
             :generics State Options R
             :features :io :js-ffi :state
@@ -1351,7 +1472,12 @@
           :code $ quote $ defeffect effect-focus (query show?) (action el at-place?)
             match action
               :update $ if (string? query)
-                if (= true show?) (focus-element! query) &unit
+                if
+                  let
+                      checked-alert-boolean show?
+                    if (bool? checked-alert-boolean) checked-alert-boolean false
+                  focus-element! query
+                  , &unit
                 raise "|effect-focus expected a query string"
               _ &unit
           :examples $ []
@@ -1385,7 +1511,12 @@
           :code $ quote $ defeffect effect-select (query show?) (action el *local)
             match action
               :update $ if (string? query)
-                if (= true show?) (select-element! query) &unit
+                if
+                  let
+                      checked-alert-boolean show?
+                    if (bool? checked-alert-boolean) checked-alert-boolean false
+                  select-element! query
+                  , &unit
                 raise "|effect-select expected a query string"
               _ &unit
           :examples $ []
@@ -1504,6 +1635,30 @@
           :code $ quote $ def modal-menu-actions-plugin ModalMenuPluginState
           :examples $ []
           :schema $ quote EnumDef
+        'modal-node $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn modal-node (options state on-close)
+            comp-modal options (modal-visible? state) on-close
+          :examples $ []
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic)
+            Fn
+              Fn *dispatch-op $ -> Unit
+              -> Unit
+            -> respo.schema/Component
+            :features :js-ffi
+        'modal-updated-state $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn modal-updated-state (state show?)
+            &map:assoc (as-state-map state) :show? show?
+          :examples $ []
+          :schema $ quote $ Fn T Bool
+            -> $ Map Dynamic Dynamic
+            :generics T
+        'modal-visible? $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn modal-visible? (state)
+            let
+                value $ read-field-or state :show? false
+              if (bool? value) value false
+          :examples $ []
+          :schema $ quote $ Fn T (-> Bool) (:generics T)
         'prompt-actions-plugin $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def prompt-actions-plugin PromptPluginNodeCursorState
           :examples $ []
@@ -1564,6 +1719,150 @@
               is $ match (prompt-key-action composing false)
                 (:ignore) true
                 _ false
+        'prompt-modal-body $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn prompt-modal-body (states options show? on-finish! on-close! write-state!)
+            let
+                initial-text $ read-text options :initial |
+                cursor $ read-state-cursor states
+                state $ as-state-map $ read-field-or states :data
+                  {} (:text initial-text) (:failure |)
+                text $ read-field-or state :text initial-text
+                check-submit! $ fn (d!)
+                  hint-fn $ Fn
+                    Fn *dispatch-op (-> Unit) (:features :io :state)
+                    -> Unit
+                  let
+                      validator $ read-field-or options :validator false
+                      result $ if (fn? validator)
+                        prompt-validation-error $ validator text
+                        , |
+                    if
+                      not $ blank? result
+                      write-state! cursor
+                        &map:assoc (as-state-map state) :failure result
+                        , d!
+                      do
+                        on-finish! (decode-map-as text 'String) d!
+                        on-close! d!
+                        write-state! cursor ({}) d!
+              []
+                effect-select (str |. schema/input-box-name) show?
+                effect-fade show?
+                create-list-element :div
+                  {} $ :style $ {} (:position :absolute)
+                  if show?
+                    [] $ [] 0 $ div
+                      {}
+                        :class-name $ str-spaced css/fullscreen css/center style-modal-backdrop & $ read-field-list options :backdrop-class
+                        :style $ &merge
+                          assert-type
+                            {} $ :line-height |32px
+                            Map Tag respo-ui.schema/InlineStyleValue
+                          read-style options :backdrop-style
+                        :on-click $ fn (e d!)
+                          hint-fn $ Fn respo.schema/RespoEvent
+                            Fn *dispatch-op (-> Unit) (:features :io :state)
+                            -> Unit
+                          on-close! d!
+                          write-state! cursor ({}) d!
+                      div
+                        {}
+                          :class-name $ str-spaced css/global css/column style-modal-card & $ read-field-list options :card-class
+                          :style $ read-style options :card-style
+                          :on-click $ fn (e d!) &unit
+                        div ({})
+                          <> $ read-text options :text "|Type in text"
+                        space-y 8
+                        let
+                            props $ DomProps :value (Some text) :on-input
+                              Some $ fn (e d!)
+                                hint-fn $ Fn respo.schema/RespoEvent
+                                  Fn *dispatch-op (-> Unit) (:features :io :state)
+                                  -> Unit
+                                write-state! cursor
+                                  &map:assoc (as-state-map state) :text $ :text $ read-dom-prompt-event e
+                                  , d!
+                              , :on-keydown
+                                Some $ fn (e d!)
+                                  hint-fn $ Fn respo.schema/RespoEvent
+                                    Fn *dispatch-op (-> Unit) (:features :io :state)
+                                    -> Unit
+                                  let
+                                      event-info $ read-dom-prompt-event e
+                                      action $ prompt-key-action event-info $ if
+                                        let
+                                            value $ read-field-or options :multiline? false
+                                          respo-alerts.core/legacy-truthy? value
+                                        , true false
+                                    match action
+                                      (:submit)
+                                        do
+                                          .prevent-default! $ :event e
+                                          check-submit! d!
+                                      (:close)
+                                        do (on-close! d!)
+                                          write-state! cursor ({}) d!
+                                      (:ignore) &unit
+                                    , &unit
+                                , :placeholder $ match (read-field options :placeholder)
+                                  (:some placeholder)
+                                    js-nullish->option $ prompt-placeholder placeholder
+                                  (:none) None
+                          if
+                            let
+                                value $ read-field-or options :multiline? false
+                              respo-alerts.core/legacy-truthy? value
+                            textarea $ struct-with props
+                              :class-name $ Some $ str-spaced schema/input-box-name css/textarea & (read-field-list options :input-class)
+                              :style $ Some $ &merge
+                                assert-type
+                                  {} (:width |100%) (:min-height 120) (:max-height |50vh)
+                                  Map Tag respo-ui.schema/InlineStyleValue
+                                read-style options :input-style
+                            input $ struct-with props
+                              :class-name $ Some $ str-spaced schema/input-box-name css/input & (read-field-list options :input-class)
+                              :style $ Some $ &merge
+                                assert-type
+                                  {} $ :width |100%
+                                  Map Tag respo-ui.schema/InlineStyleValue
+                                read-style options :input-style
+                        space-y 16
+                        div
+                          {} $ :class-name css/row-parted
+                          let
+                              failure $ read-text state :failure |
+                            if
+                              not $ blank? failure
+                              span $ {}
+                                :style $ &merge ui/flex $ {} (:color :red) (:line-height |20px)
+                                :inner-text failure
+                              span $ {}
+                          button
+                            {}
+                              :class-name $ str-spaced css/button & $ read-field-list options :confirm-class
+                              :on-click $ fn (e d!)
+                                hint-fn $ Fn respo.schema/RespoEvent
+                                  Fn *dispatch-op (-> Unit) (:features :io :state)
+                                  -> Unit
+                                check-submit! d!
+                            <> $ read-text options :button-text |Finish
+                      comp-esc-listener show? on-close!
+                    []
+          :examples $ []
+          :schema $ quote $ Fn State Options Bool
+            Fn String
+              Fn *dispatch-op (-> Unit) (:features :io :state)
+              -> R
+            Fn
+              Fn *dispatch-op (-> Unit) (:features :io :state)
+              -> Unit
+            Fn (List respo.schema/CoordKey) (Map Dynamic Dynamic)
+              Fn *dispatch-op (-> Unit) (:features :io :state)
+              -> Unit
+              :features :io :state
+            -> $ List PromptBodyItem
+            :generics State Options R
+            :features :io :js-ffi :state
         'prompt-placeholder $ %{} 'CodeEntry
           :doc "|Validate the optional String placeholder before constructing DOM props."
           :code $ quote $ defn prompt-placeholder (value)
@@ -1733,7 +2032,7 @@
               :generics R
             match self $
               :plugin node cursor state
-              d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? true
+              d! $ :: :states cursor $ modal-updated-state state true
           :examples $ []
           :schema $ quote $ Fn ModalPluginState
             Fn *dispatch-op $ -> R
@@ -1846,7 +2145,9 @@
                   match (read-field state :text)
                     (:some text) (&map:assoc options :text text)
                     (:none) (&map:dissoc options :text)
-                  = true $ read-field-or state :show? false
+                  let
+                      checked-alert-boolean $ read-field-or state :show? false
+                    if (bool? checked-alert-boolean) checked-alert-boolean false
                   , on-read $ fn (d!)
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
               AlertPluginState :plugin node cursor state
@@ -1870,7 +2171,9 @@
                   if
                     blank? $ read-text state :text |
                     , options $ &map:assoc options :text $ read-text state :text |
-                  = true $ read-field-or state :show? false
+                  let
+                      checked-alert-boolean $ read-field-or state :show? false
+                    if (bool? checked-alert-boolean) checked-alert-boolean false
                   dispatch-fn (e d!)
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
                     (take-prompt-task! cursor) .fold
@@ -1902,6 +2205,39 @@
                     .show-with-text confirm-plugin d! "|Confirm with dynamic text?" $ fn () $ println |Confirmed!
                 <> "|Show with text"
           :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> ConfirmPluginState) (:features :io :state)
+        'use-confirm-with $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn use-confirm-with (states options state-op)
+            let
+                options $ as-options-map options
+                cursor $ read-state-cursor states
+                state $ as-state-map $ read-field-or states :data
+                  {} (:show? false) (:text |)
+                node $ comp-confirm-modal
+                  if
+                    blank? $ read-text state :text |
+                    , options $ &map:assoc options :text $ read-text state :text |
+                  let
+                      checked-alert-boolean $ read-field-or state :show? false
+                    if (bool? checked-alert-boolean) checked-alert-boolean false
+                  dispatch-fn (e d!)
+                    d! $ state-op cursor $ &map:assoc (as-state-map state) :show? false
+                    (take-prompt-task! cursor) .fold
+                      fn () &unit
+                      fn (task)
+                        hint-fn $ Fn
+                          Fn String (-> Unit) (:features :io :state)
+                          -> Unit
+                        task |
+                    , &unit
+                  dispatch-fn (d!) (clear-prompt-task! cursor)
+                    d! $ state-op cursor $ &map:assoc (as-state-map state) :show? false
+                    , &unit
+              TypedConfirmPluginState :plugin node cursor state state-op
+          :examples $ []
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic)
+            Fn (List respo.schema/CoordKey) (Map Dynamic Dynamic) (-> *dispatch-op)
+            -> TypedConfirmPluginState
+            :features :io :state
         'use-drawer $ %{} 'CodeEntry
           :doc "||Drawer hook. Shows a panel sliding from the side. Use :render function in options to customize content. Supports :style for width and other styles."
           :code $ quote $ defn use-drawer (states options)
@@ -1910,7 +2246,9 @@
                 state $ as-state-map $ read-field-or states :data
                   {} $ :show? false
                 node $ comp-drawer options
-                  = true $ read-field-or state :show? false
+                  let
+                      checked-alert-boolean $ read-field-or state :show? false
+                    if (bool? checked-alert-boolean) checked-alert-boolean false
                   fn (d!)
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
               DrawerPluginState :plugin node cursor state
@@ -1932,10 +2270,8 @@
                 cursor $ read-state-cursor states
                 state $ as-state-map $ read-field-or states :data
                   {} $ :show? false
-                node $ comp-modal options
-                  = true $ read-field-or state :show? false
-                  fn (d!)
-                    d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
+                node $ modal-node options state $ fn (d!)
+                  d! $ :: :states cursor $ modal-updated-state state false
               ModalPluginState :plugin node cursor state
           :examples $ [] $ quote
             let
@@ -1955,7 +2291,9 @@
                 state $ as-state-map $ read-field-or states :data
                   {} $ :show? false
                 node $ comp-modal-menu options
-                  = true $ read-field-or state :show? false
+                  let
+                      checked-alert-boolean $ read-field-or state :show? false
+                    if (bool? checked-alert-boolean) checked-alert-boolean false
                   dispatch-fn (d!)
                     d! $ :: :states cursor $ &map:assoc (as-state-map state) :show? false
                   dispatch-fn (result d!)
@@ -1974,6 +2312,38 @@
                 {} $ :on-click $ fn (e d!) (.show menu-plugin d!)
                 <> |Menu
           :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> ModalMenuPluginState)
+        'use-modal-menu-with $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn use-modal-menu-with (states options state-op)
+            let
+                cursor $ read-state-cursor states
+                state $ as-state-map $ read-field-or states :data
+                  {} $ :show? false
+                node $ comp-modal-menu options (modal-visible? state)
+                  dispatch-fn (d!)
+                    d! $ state-op cursor $ modal-updated-state state false
+                  dispatch-fn (result d!)
+                    let
+                        on-result $ read-field-or options :on-result false
+                      if (fn? on-result) (on-result result d!) (raise "|modal menu expects :on-result to be a function")
+                    d! $ state-op cursor $ modal-updated-state state false
+              TypedModalMenuState :plugin node cursor state state-op
+          :examples $ []
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic)
+            Fn (List respo.schema/CoordKey) (Map Dynamic Dynamic) (-> *dispatch-op)
+            -> TypedModalMenuState
+        'use-modal-with $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn use-modal-with (states options state-op)
+            let
+                cursor $ read-state-cursor states
+                state $ as-state-map $ read-field-or states :data
+                  {} $ :show? false
+                node $ modal-node options state $ fn (d!)
+                  d! $ state-op cursor $ modal-updated-state state false
+              TypedModalPluginState :plugin node cursor state state-op
+          :examples $ []
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic)
+            Fn (List respo.schema/CoordKey) (Map Dynamic Dynamic) (-> *dispatch-op)
+            -> TypedModalPluginState
         'use-prompt $ %{} 'CodeEntry
           :doc "||Prompt dialog hook. Shows a dialog with text input. Returns a plugin object, call .show with a callback function to receive user input text."
           :code $ quote $ defplugin use-prompt (states options)
@@ -1983,7 +2353,9 @@
                 state $ as-state-map $ read-field-or states :data
                   {} $ :show? false
                 node $ comp-prompt-modal (>> states :modal) options
-                  = true $ read-field-or state :show? false
+                  let
+                      checked-alert-boolean $ read-field-or state :show? false
+                    if (bool? checked-alert-boolean) checked-alert-boolean false
                   fn (text d!)
                     hint-fn $ Fn String
                       Fn *dispatch-op (-> Unit) (:features :io :state)
@@ -2012,6 +2384,40 @@
                   .show prompt-plugin d! $ fn (text) (println |got: text)
                 <> |Input
           :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic) (-> PromptPluginNodeCursorState) (:features :io :state)
+        'use-prompt-with $ %{} 'CodeEntry (:doc |)
+          :code $ quote $ defn use-prompt-with (states options state-op)
+            let
+                options $ as-options-map options
+                cursor $ read-state-cursor states
+                state $ as-state-map $ read-field-or states :data
+                  {} $ :show? false
+                node $ comp-prompt-modal-with (>> states :modal) options (modal-visible? state)
+                  fn (text d!)
+                    hint-fn $ Fn String
+                      Fn *dispatch-op (-> Unit) (:features :io :state)
+                      -> Unit
+                    d! $ state-op cursor $ modal-updated-state state false
+                    (take-prompt-task! cursor) .fold
+                      fn () &unit
+                      fn (task)
+                        hint-fn $ Fn
+                          Fn String (-> Unit) (:features :io :state)
+                          -> Unit
+                        task text
+                  fn (d!)
+                    hint-fn $ Fn
+                      Fn *dispatch-op (-> Unit) (:features :io :state)
+                      -> Unit
+                    clear-prompt-task! cursor
+                    d! $ state-op cursor $ modal-updated-state state false
+                  fn (cursor payload d!)
+                    d! $ state-op cursor payload
+              TypedPromptPluginState :plugin node cursor state state-op
+          :examples $ []
+          :schema $ quote $ Fn (Map Dynamic Dynamic) (Map Dynamic Dynamic)
+            Fn (List respo.schema/CoordKey) (Map Dynamic Dynamic) (-> *dispatch-op)
+            -> TypedPromptPluginState
+            :features :io :state
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns respo-alerts.core
           :require

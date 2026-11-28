@@ -2,11 +2,13 @@
 
 > Respo alert/prompt/confirm/modal helpers for calcit-js.
 
-### 0.14.12 / Calcit 0.45.1 迁移候选
+### 0.14.12 / Calcit 0.46.0 迁移候选
 
-使用者需要同步 Calcit / `@calcit/procs` 0.45.1 及正式 Respo 0.19.18、UI 0.16.5、Reel 0.11.9 和 JS-FFI 0.2.24。弹层接口及旧输入的真假值行为保持：`nil`、`Unit`、`false` 为假，数字 0 与空字符串为真。
+使用者需同步 Calcit / `@calcit/procs` 0.46.0、Respo 0.20.0、UI 0.16.6、Reel 0.11.10 和 JS-FFI 0.2.26。原有插件入口及旧输入的真假值行为保持不变：`nil`、`Unit`、`false` 为假，数字 0 与空字符串为真。
 
-该版本仍是 Draft：QRCode Shelf 消费者的递归状态 union 与插件分发边界仍被严格检查阻塞，见 [Calcit #2936](https://github.com/calcit-lang/calcit/issues/2936)。不能把库自身检查通过当作 Shelf 已验收；不会放宽消费者门禁。
+使用具名应用操作类型的项目可选择 `use-modal-with`、`use-confirm-with`、`use-prompt-with` 或 `use-modal-menu-with`，传入 `(cursor, state) -> app-op` 函数，由调用方决定如何保留开放插件状态；原入口继续可用。不要无条件把整个旧状态解码为不含 `nil` 的封闭 union。
+
+CI 使用固定的 Calcit 0.46 Shelf 候选，严格解析其余正式依赖，再链接当前 Alerts 源码并执行原消费者检查。Alerts 0.14.12 尚未发版，候选与相关兼容性仍需评审。
 
 ### 0.14.11 / 正式依赖对齐
 
@@ -16,7 +18,7 @@
 
 配对 Calcit 0.44.0、Respo 0.19.13、UI 0.15.7 与 JS-FFI 0.2.19；重新安装并生成 JS，弹层接口和行为不变。
 
-CI 的 QRcode Shelf 消费者夹具使用已迁移到 0.44.0 的固定提交及原始锁文件，再链接本地 Alerts 候选。
+0.14.8 当时的 QRcode Shelf 消费者夹具使用 0.44.0 固定提交及原始锁文件。
 
 0.14.9 中 Prompt、Modal Menu 与 Drawer 的 `.show` / `.close` 允许派发器执行 `:state` 和 `:io`，调用方法的函数应声明相应效果。Prompt 保存的文本回调也允许这些效果；Confirm 使用同一任务存储，因此 `use-confirm` 的合同包含 `:io`。旧的无副作用回调仍可使用。
 
