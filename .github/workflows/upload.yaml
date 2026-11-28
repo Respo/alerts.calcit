@@ -85,7 +85,7 @@ jobs:
       with:
         repository: worktools/qrcode-shelf
         # Calcit 0.46 Shelf candidate with typed plugin adapters.
-        ref: 9ebd145ff2bce4a1a46afb904636c307fa84b03d
+        ref: 122bedf73658290e84b606530564470a51c76b26
         path: .calcit/consumer
         persist-credentials: false
 
